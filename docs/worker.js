@@ -4,6 +4,5 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 self.addEventListener("message", function(e) {
-  alert("Message from index.js:" + e.data);
-  postMessage("Hello to you, too!");
+  postMessage("Message from index.js:" + e.data + "/nHello to you, too!");
 });
