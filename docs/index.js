@@ -11,5 +11,5 @@ function sendMessageToWorker(worker, message) {
 sendMessageToWorker(myWorker, "Hello World!");
 
 myWorker.addEventListener("message", function(e) {
-  alert(e.data);
+  alert("Received from worker.js:" + e.data);
 });
