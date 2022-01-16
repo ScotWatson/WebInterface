@@ -13,7 +13,7 @@ function Task(url) {
     if (e.data) {
       if (e.data.requestId) {
         if (e.data.body) {
-          that.sendResponse(myWorker, e.data.requestId, parseRequest(e.data.body));
+          that.sendResponse(e.data.requestId, parseRequest(e.data.body));
         } else {
           console.warn("Request message from worker without body: " + JSON.stringify(e.data));
         }
