@@ -42,4 +42,4 @@ const objSystem = (function () {
     let request = sendRequest(objMsg);
   }
 })();
-objSystem.freeze();
+Object.freeze(objSystem);
