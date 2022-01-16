@@ -101,6 +101,6 @@ function add_UI_element(args) {
 }
 
 function unrecognized_command(command, args) {
-  console.warn("Unrecognized command");
+  console.warn("Unrecognized command: " + command + ", " + JSON.stringify(args));
   return 
 }
