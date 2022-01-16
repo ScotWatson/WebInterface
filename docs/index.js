@@ -6,10 +6,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 let myWorker = new Worker("https://scotwatson.github.io/TestWorker/worker.js");
 
 myWorker.addEventListener("message", function(e) {
-  if (e.data.requestId) {
-    sendResponse(myWorker, parseRequest(e.data.body));
+  if (e.data) {
+    if (e.data.requestId) {
+      sendResponse(myWorker, parseRequest(e.data.body));
+    } else {
+      console.log("Non-request message from worker: " + JSON.stringify(e.data));
+    }
   } else {
-    console.log("Non-request message from worker: " + JSON.stringify(e.data));
+    console.log("Null message from worker");
   }
 });
 
@@ -24,7 +28,10 @@ function parseRequest(request) {
         return addButton();
       default:
         console.log("Unrecognized command");
+        return "Unrecognized command";
     }
+  } else {
+    return "Unrecognized request";
   }
 }
 
