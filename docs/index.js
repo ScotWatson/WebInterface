@@ -9,8 +9,10 @@ myWorker.addEventListener("message", function(e) {
   if (e.data) {
     if (e.data.requestId) {
       sendResponse(myWorker, e.data.requestId, parseRequest(e.data.body));
+    } else if (e.data.responseId) {
+      console.log("Response message from worker: " + JSON.stringify(e.data));
     } else {
-      console.log("Non-request message from worker: " + JSON.stringify(e.data));
+      console.log("Non-request/response message from worker: " + JSON.stringify(e.data));
     }
   } else {
     console.log("Null message from worker");
