@@ -4,6 +4,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 function Task(url) {
+  const that = this;
   let mapMessage = new Map();
   let myWorker = new Worker(url);
   myWorker.addEventListener("message", message_handler);
@@ -12,7 +13,7 @@ function Task(url) {
     if (e.data) {
       if (e.data.requestId) {
         if (e.data.body) {
-          this.sendResponse(myWorker, e.data.requestId, parseRequest(e.data.body));
+          that.sendResponse(myWorker, e.data.requestId, parseRequest(e.data.body));
         } else {
           console.warn("Request message from worker without body: " + JSON.stringify(e.data));
         }
