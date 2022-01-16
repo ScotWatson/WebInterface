@@ -8,7 +8,7 @@ let myWorker = new Worker("https://scotwatson.github.io/TestWorker/worker.js");
 myWorker.addEventListener("message", function(e) {
   if (e.data) {
     if (e.data.requestId) {
-      sendResponse(myWorker, parseRequest(e.data.body));
+      sendResponse(myWorker, e.data.requestId, parseRequest(e.data.body));
     } else {
       console.log("Non-request message from worker: " + JSON.stringify(e.data));
     }
@@ -17,7 +17,10 @@ myWorker.addEventListener("message", function(e) {
   }
 });
 
-function sendResponse(worker, message) {
+function sendResponse(worker, responseId, message) {
+  let objMessage = {};
+  objMessage.responseId = responseId;
+  objMessage.body = message;
   worker.postMessage(message);
 }
 
