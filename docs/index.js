@@ -58,7 +58,7 @@ function Task(url) {
 }
 
 let myTask = new Task("https://scotwatson.github.io/TestWorker/worker.js")
-let UI_element_IDs = new Set();
+let UI_elements = new Map();
 let commands = new Map();
 commands.set("add_UI_element", add_UI_element);
 
@@ -66,12 +66,14 @@ function parseRequest(request) {
   if (request.command) {
     const command_function = commands.get(request.command);
     if (command_function) {
-      return command_function();
+      return command_function(request.args);
     } else {
       return unrecognized_command(request.command, request.args);
     }
   } else {
-    return "Unrecognized request";
+    return {
+      error: "Unrecognized Request",
+    };
   }
 }
 
@@ -95,12 +97,18 @@ function add_UI_element(args) {
   btn.style.width = 100 + "px";
   btn.style.height = 100 + "px";
   btn.style.backgroundColor = "blue";
-  btn.innerHTML = "Button";
+  btn.innerHTML = args.text;
   document.body.appendChild(btn);
-  return "Button created";
+  const id = get_UI_element_Id();
+  UI_elements.set(id, btn);
+  return {
+    id: id,
+  };
 }
 
 function unrecognized_command(command, args) {
   console.warn("Unrecognized command: " + command + ", " + JSON.stringify(args));
-  return 
+  return {
+    error: "Unrecognized command",
+  };
 }
