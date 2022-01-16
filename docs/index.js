@@ -24,7 +24,7 @@ function Task(url) {
     } else {
       console.warn("Null message from worker");
     }
-  });
+  }
   function message_error_handler(e) {
     console.error(e);
   }
