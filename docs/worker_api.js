@@ -7,7 +7,8 @@ const objSystem = (function () {
   let me = {};
   let mapMessage = new Map();
   self.addEventListener("message", function(e) {
-    if (e.data.id) {
+    console.log(e);
+    if (e.data.requestId) {
       let resolve = mapMessage.get(e.data.requestId);
       if (resolve) {
         resolve(e.data.body);
