@@ -21,7 +21,7 @@ const objSystem = (function () {
       for (let i = 0; i < 8; ++i) {
         objMessage.requestId += (Math.random() * 0x100).toString(16).padStart(2, "0");
       }
-    } while (mapMessage.has(id));
+    } while (mapMessage.has(objMessage.requestId));
     objMessage.body = message;
     self.postMessage(objMessage);
     return new Promise(function (resolve, reject) {
