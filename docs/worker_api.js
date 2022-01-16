@@ -19,7 +19,7 @@ const objSystem = (function () {
     do {
       objMessage.requestId = "";
       for (let i = 0; i < 8; ++i) {
-        objMessage.requestId += (Math.random() * 0x100).toString(16).padStart(2, "0");
+        objMessage.requestId += Math.floor(Math.random() * 0x100).toString(16).padStart(2, "0");
       }
     } while (mapMessage.has(objMessage.requestId));
     objMessage.body = message;
