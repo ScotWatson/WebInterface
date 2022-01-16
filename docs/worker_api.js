@@ -8,12 +8,19 @@ const objSystem = (function () {
   let mapMessage = new Map();
   self.addEventListener("message", function(e) {
     console.log(e);
-    if (e.data.requestId) {
-      let resolve = mapMessage.get(e.data.requestId);
-      mapMessage.delete(e.data.requestId);
-      if (resolve) {
-        resolve(e.data.body);
+    if (e.data) {
+      if (e.data.requestId) {
+      } else if (e.data.responseId) {
+        let resolve = mapMessage.get(e.data.responseId);
+        mapMessage.delete(e.data.responseId);
+        if (resolve) {
+          resolve(e.data.body);
+        }
+      } else {
+        // Non-request/response message from main script
       }
+    } else {
+      // Null message from main script
     }
   });
   me.sendRequest = function (message) {
