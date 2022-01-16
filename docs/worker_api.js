@@ -7,7 +7,6 @@ const objSystem = (function () {
   let me = {};
   let mapMessage = new Map();
   self.addEventListener("message", function(e) {
-    console.log(e);
     if (e.data) {
       if (e.data.requestId) {
       } else if (e.data.responseId) {
@@ -42,7 +41,10 @@ const objSystem = (function () {
       setTimeout(timeout, 5000);
     });
   }
-  me.sendResponse = function (workerTarget, requestId) {
+  me.sendResponse = function (workerTarget, requestId, message) {
+    let objMessage = {};
+    objMessage.responseId = requestId;
+    objMessage.body = message;
     workerTarget.postMessage(objMessage);
   }
   me.addButton = function () {
