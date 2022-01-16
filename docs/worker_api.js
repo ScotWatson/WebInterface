@@ -41,5 +41,6 @@ const objSystem = (function () {
     objMsg.command = "addButton";
     let request = sendRequest(objMsg);
   }
+  return me;
 })();
 Object.freeze(objSystem);
