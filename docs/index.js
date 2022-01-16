@@ -4,12 +4,35 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 let myWorker = new Worker("https://scotwatson.github.io/TestWorker/worker.js");
-function sendMessageToWorker(worker, message) {
-  worker.postMessage(message);
-}
 
 sendMessageToWorker(myWorker, "Hello World!");
 
 myWorker.addEventListener("message", function(e) {
-  alert(e.data);
+  if (e.data.requestId) {
+    sendResponse(myWorker, parseRequest(e.data.body));
+  } else {
+    console.log("Non-request message from worker: ");
+  }
 });
+
+function sendResponse(worker, message) {
+  worker.postMessage(message);
+}
+
+function parseRequest() {
+  if (request.command) {
+    switch (request.command) {
+      case "addButton":
+        return addButton();
+      default:
+        console.log("Unrecognized command");
+    }
+  }
+}
+
+function addButton() {
+  let btn = document.createElement("div");
+  btn.innerHTML = "Button";
+  document.body.appendChild(btn);
+  return "Button created";
+}
