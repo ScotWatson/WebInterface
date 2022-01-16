@@ -49,6 +49,7 @@ function Task(url) {
     });
   }
   this.sendResponse = function (requestId, message) {
+    console.log(message);
     myWorker.postMessage({
       responseId: requestId,
       body: message,
