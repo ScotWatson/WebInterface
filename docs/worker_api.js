@@ -10,6 +10,7 @@ const objSystem = (function () {
     console.log(e);
     if (e.data.requestId) {
       let resolve = mapMessage.get(e.data.requestId);
+      mapMessage.delete(e.data.requestId);
       if (resolve) {
         resolve(e.data.body);
       }
@@ -28,7 +29,7 @@ const objSystem = (function () {
     return new Promise(function (resolve, reject) {
       function timeout() {
         mapMessage.delete(objMessage.requestId);
-        reject(new Error("Message Timeout: " + objMessage.requestId));
+        reject(new Error("Message Timeout: " + JSON.stringify(objMessage)));
       }
       mapMessage.set(objMessage.requestId, resolve);
       setTimeout(timeout, 5000);
