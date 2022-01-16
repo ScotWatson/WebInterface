@@ -49,7 +49,10 @@ const objSystem = (function () {
   }
   me.addButton = function () {
     let objMsg = {};
-    objMsg.command = "addButton";
+    objMsg.command = "add_UI_element";
+    objMsg.args = {
+      type: "button",
+    };
     return me.sendRequest(objMsg);
   }
   return me;
