@@ -17,7 +17,7 @@ function sendResponse(worker, message) {
   worker.postMessage(message);
 }
 
-function parseRequest() {
+function parseRequest(request) {
   if (request.command) {
     switch (request.command) {
       case "addButton":
