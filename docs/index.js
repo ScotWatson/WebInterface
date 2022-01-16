@@ -5,8 +5,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 let myWorker = new Worker("https://scotwatson.github.io/TestWorker/worker.js");
 
-sendMessageToWorker(myWorker, "Hello World!");
-
 myWorker.addEventListener("message", function(e) {
   if (e.data.requestId) {
     sendResponse(myWorker, parseRequest(e.data.body));
