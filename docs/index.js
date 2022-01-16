@@ -84,7 +84,7 @@ function get_UI_element_Id() {
     for (let i = 0; i < 8; ++i) {
       UI_element_Id += Math.floor(Math.random() * 0x100).toString(16).padStart(2, "0");
     }
-  } while (UI_element_IDs.has(UI_element_Id));
+  } while (UI_elements.has(UI_element_Id));
   return UI_element_Id;
 }
 
