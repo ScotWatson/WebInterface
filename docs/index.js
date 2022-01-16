@@ -21,7 +21,7 @@ function sendResponse(worker, responseId, message) {
   let objMessage = {};
   objMessage.responseId = responseId;
   objMessage.body = message;
-  worker.postMessage(message);
+  worker.postMessage(objMessage);
 }
 
 function parseRequest(request) {
