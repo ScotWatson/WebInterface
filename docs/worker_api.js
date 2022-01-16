@@ -40,7 +40,7 @@ const objSystem = (function () {
   me.addButton = function () {
     let objMsg = {};
     objMsg.command = "addButton";
-    let request = me.sendRequest(objMsg);
+    return me.sendRequest(objMsg);
   }
   return me;
 })();
