@@ -9,6 +9,7 @@ const objSystem = (function () {
   self.addEventListener("message", function(e) {
     if (e.data) {
       if (e.data.requestId) {
+        console.warn("This worker is unable to handle requests");
       } else if (e.data.responseId) {
         let resolve = mapMessage.get(e.data.responseId);
         mapMessage.delete(e.data.responseId);
@@ -16,10 +17,10 @@ const objSystem = (function () {
           resolve(e.data.body);
         }
       } else {
-        // Non-request/response message from main script
+        console.warn("Non-request/response message from main script");
       }
     } else {
-      // Null message from main script
+      console.warn("Null message from main script");
     }
   });
   me.sendRequest = function (message) {
@@ -32,12 +33,12 @@ const objSystem = (function () {
     } while (mapMessage.has(objMessage.requestId));
     objMessage.body = message;
     self.postMessage(objMessage);
+    mapMessage.set(objMessage.requestId, resolve);
     return new Promise(function (resolve, reject) {
       function timeout() {
         mapMessage.delete(objMessage.requestId);
         reject(new Error("Message Timeout: " + JSON.stringify(objMessage)));
       }
-      mapMessage.set(objMessage.requestId, resolve);
       setTimeout(timeout, 5000);
     });
   }
