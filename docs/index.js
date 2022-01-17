@@ -49,7 +49,6 @@ function Task(url) {
     });
   }
   this.sendResponse = function (requestId, message) {
-    console.log(message);
     myWorker.postMessage({
       responseId: requestId,
       body: message,
@@ -70,6 +69,10 @@ function parseRequest(request) {
     } else {
       return unrecognized_command(request.command, request.args);
     }
+  } else if (request.log) {
+    console.log(request.log);
+    return {
+    };
   } else {
     return {
       error: "Unrecognized Request",
