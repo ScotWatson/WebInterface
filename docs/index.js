@@ -5,18 +5,36 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 let divScreenWidth;
 let divScreenHeight;
+let divScreenAvailWidth;
+let divScreenAvailHeight;
 let divClientWidth;
 let divClientHeight;
+let divInnerWidth;
+let divInnerHeight;
+let divScrollWidth;
+let divScrollHeight;
 
 window.addEventListener("load", function () {
   divScreenWidth = document.createElement("div");
   document.body.appendChild(divScreenWidth);
   divScreenHeight = document.createElement("div");
   document.body.appendChild(divScreenHeight);
+  divScreenAvailWidth = document.createElement("div");
+  document.body.appendChild(divScreenAvailWidth);
+  divScreenAvailHeight = document.createElement("div");
+  document.body.appendChild(divScreenAvailHeight);
   divClientWidth = document.createElement("div");
   document.body.appendChild(divClientWidth);
   divClientHeight = document.createElement("div");
   document.body.appendChild(divClientHeight);
+  divInnerWidth = document.createElement("div");
+  document.body.appendChild(divInnerWidth);
+  divInnerHeight = document.createElement("div");
+  document.body.appendChild(divInnerHeight);
+  divScrollWidth = document.createElement("div");
+  document.body.appendChild(divScrollWidth);
+  divScrollHeight = document.createElement("div");
+  document.body.appendChild(divScrollHeight);
   resize();
 });
 
@@ -25,8 +43,14 @@ window.addEventListener("resize", resize);
 function resize() {
   divScreenWidth.innerHTML = "screen.width = " + screen.width;
   divScreenHeight.innerHTML = "screen.height = " + screen.height;
+  divScreenAvailWidth.innerHTML = "screen.availWidth = " + screen.availWidth;
+  divScreenAvailHeight.innerHTML = "screen.availHeight = " + screen.availHeight;
   divClientWidth.innerHTML = "document.documentElement.clientWidth = " + document.documentElement.clientWidth;
   divClientHeight.innerHTML = "document.documentElement.clientHeight = " + document.documentElement.clientHeight;
+  divInnerWidth.innerHTML = "window.innerWidth = " + window.innerWidth;
+  divInnerHeight.innerHTML = "window.innerHeight = " + window.innerHeight;
+  divScrollWidth.innerHTML = "document.body.scrollWidth = " + document.body.scrollWidth;
+  divScrollHeight.innerHTML = "document.body.scrollHeight = " + document.body.scrollHeight;
 }
 
 function Task(url) {
