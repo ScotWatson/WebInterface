@@ -3,6 +3,24 @@
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+let divScreenWidth = document.createElement("div");
+document.body.appendChild(divScreenWidth);
+let divScreenHeight = document.createElement("div");
+document.body.appendChild(divScreenHeight);
+let divClientWidth = document.createElement("div");
+document.body.appendChild(divClientWidth);
+let divClientHeight = document.createElement("div");
+document.body.appendChild(divClientHeight);
+
+window.addEventListener("resize", resize);
+
+function resize() {
+  divScreenWidth.innerHTML = "screen.width = " + screen.width;
+  divScreenHeight.innerHTML = "screen.height = " + screen.height;
+  divClientWidth.innerHTML = "document.documentElement.clientWidth = " + document.documentElement.clientWidth;
+  divClientHeight.innerHTML = "document.documentElement.clientHeight = " + document.documentElement.clientHeight;
+}
+
 function Task(url) {
   const that = this;
   let mapMessage = new Map();
