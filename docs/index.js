@@ -20,9 +20,8 @@ ArrayBuffer.prototype.equal = function (other) {
 // Check once every 10 seconds
 setInterval(checkIndexJS, 10000);
 function checkIndexJS() {
-  checkForUpdate("index.js").then();
+  checkForUpdate("index.js").then(prompt);
   function prompt(result) {
-    console.log(result);
     if (result) {
       prompt_for_reload();
     }
