@@ -5,6 +5,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 let mapFileHashes = new Map();
 
+ArrayBuffer.prototype.equal = function (other) {
+  if (this.byteLength !== other.byteLength) {
+    return false;
+  }
+  for (let i = 0; i < this.byteLength; ++i) {
+    if (this[i] !== other[i]) {
+      return false;
+    }
+  }
+  return true;
+}
 
 // Check once every 10 seconds
 setInterval(checkIndexJS, 10000);
@@ -73,7 +84,7 @@ function checkForUpdate(url) {
     console.log(hash, oldHash);
     mapFileHashes.set(url, hash);
     if (oldHash) {
-      return (oldHash !== hash);
+      return (!(oldHash.equal(hash)));
     } else {
       return false;
     }
