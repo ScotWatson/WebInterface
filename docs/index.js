@@ -76,6 +76,7 @@ function prompt_for_reload() {
   divBtnNo.addEventListener("click", function () {
     divWindow.remove();
   });
+  document.body.appendChild(divWindow);
 }
 function checkForUpdate(url) {
   return fetch(url, {cache: "reload"}).then(getHash).then(compareHash);
