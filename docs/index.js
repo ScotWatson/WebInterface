@@ -80,8 +80,9 @@ function prompt_for_reload() {
 }
 function clickFactory(thisValue) {
   return function () {
-    let a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob( [ thisValue ] ));
+    const a = document.createElement("a");
+    const thisBlob = new Blob( [ thisValue ] );
+    a.href = URL.createObjectURL(thisBlob);
     a.download = "index.txt";
     document.body.appendChild(a);
     a.click();
@@ -94,8 +95,8 @@ function checkForUpdate(url) {
   function getHash(response) {
     return response.body.getReader().read().then(hashValue);
     function hashValue(input) {
-      thisValue = input;
-      return crypto.subtle.digest("SHA-256", input.value);
+      thisValue = input.value;
+      return crypto.subtle.digest("SHA-256", thisValue);
     }
   }
   function compareHash(hash) {
