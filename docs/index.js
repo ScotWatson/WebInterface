@@ -9,8 +9,10 @@ ArrayBuffer.prototype.equal = function (other) {
   if (this.byteLength !== other.byteLength) {
     return false;
   }
-  for (let i = 0; i < this.byteLength; ++i) {
-    if (this[i] !== other[i]) {
+  const thisArray = new Uint8Array(this);
+  const otherArray = new Uint8Array(other);
+  for (let i = 0; i < thisArray.byteLength; ++i) {
+    if (thisArray[i] !== otherArray[i]) {
       return false;
     }
   }
