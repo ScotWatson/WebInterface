@@ -93,6 +93,7 @@ function checkForUpdate(url) {
   let thisValue;
   return fetch(url, {cache: "reload"}).then(getHash).then(compareHash);
   function getHash(response) {
+    console.log(response);
     return response.body.getReader().read().then(hashValue);
     function hashValue(input) {
       thisValue = input.value;
