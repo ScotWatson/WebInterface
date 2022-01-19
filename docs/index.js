@@ -81,7 +81,7 @@ function prompt_for_reload() {
 function clickFactory(thisValue) {
   return function () {
     let a = document.createElement("a");
-    a.href = new Blob( [ thisValue ] );
+    a.href = URL.createObjectURL(new Blob( [ thisValue ] ));
     a.download = "index.txt";
     a.click();
     a.remove();
