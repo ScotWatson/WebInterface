@@ -114,7 +114,7 @@ function checkForUpdate(url) {
     }
     */
     function hashValue(input) {
-      thisValue = input.value;
+      thisValue = input /*.value*/;
       return crypto.subtle.digest("SHA-256", thisValue);
     }
   }
