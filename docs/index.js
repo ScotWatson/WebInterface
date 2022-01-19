@@ -91,8 +91,7 @@ function checkForUpdate(url) {
   }
 }
 
-let divScreenWidth;
-let divScreenHeight;
+let divScreenSize;
 let divScreenAvailWidth;
 let divScreenAvailHeight;
 let divClientWidth;
@@ -103,10 +102,8 @@ let divScrollWidth;
 let divScrollHeight;
 
 window.addEventListener("load", function () {
-  divScreenWidth = document.createElement("div");
-  document.body.appendChild(divScreenWidth);
-  divScreenHeight = document.createElement("div");
-  document.body.appendChild(divScreenHeight);
+  divScreenSize = document.createElement("div");
+  document.body.appendChild(divScreenSize);
   divScreenAvailWidth = document.createElement("div");
   document.body.appendChild(divScreenAvailWidth);
   divScreenAvailHeight = document.createElement("div");
@@ -129,8 +126,7 @@ window.addEventListener("load", function () {
 window.addEventListener("resize", resize);
 
 function resize() {
-  divScreenWidth.innerHTML = "screen.width = " + screen.width;
-  divScreenHeight.innerHTML = "screen.height = " + screen.height;
+  divScreenSize.innerHTML = "screen size = " + screen.width + " x " + screen.height;
   divScreenAvailWidth.innerHTML = "screen.availWidth = " + screen.availWidth;
   divScreenAvailHeight.innerHTML = "screen.availHeight = " + screen.availHeight;
   divClientWidth.innerHTML = "document.documentElement.clientWidth = " + document.documentElement.clientWidth;
