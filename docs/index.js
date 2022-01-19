@@ -36,7 +36,7 @@ function prompt_for_reload() {
   divBtnYes.style.display = "block";
   divBtnYes.style.position = "absolute";
   divBtnYes.style.left = 25 + "px";
-  divBtnYes.style.top = 0 + "px";
+  divBtnYes.style.top = 100 + "px";
   divBtnYes.style.width = 50 + "px";
   divBtnYes.style.height = 50 + "px";
   divBtnYes.style.backgroundColor = "#C0C0C0";
@@ -46,7 +46,7 @@ function prompt_for_reload() {
   divBtnNo.style.display = "block";
   divBtnNo.style.position = "absolute";
   divBtnNo.style.left = 125 + "px";
-  divBtnNo.style.top = 0 + "px";
+  divBtnNo.style.top = 100 + "px";
   divBtnNo.style.width = 50 + "px";
   divBtnNo.style.height = 50 + "px";
   divBtnNo.style.backgroundColor = "#C0C0C0";
