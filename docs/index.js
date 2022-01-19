@@ -22,6 +22,7 @@ setInterval(checkIndexJS, 10000);
 function checkIndexJS() {
   checkForUpdate("index.js").then();
   function prompt(result) {
+    console.log(result);
     if (result) {
       prompt_for_reload();
     }
