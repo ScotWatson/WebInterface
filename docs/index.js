@@ -64,8 +64,8 @@ function checkForUpdate(url) {
   return fetch(url, {cache: "reload"}).then(getHash).then(compareHash);
   function getHash(response) {
     return response.body.getReader().read().then(hashValue);
-    function hashValue(in) {
-      return crypto.subtle.digest("SHA-256", in.value);
+    function hashValue(input) {
+      return crypto.subtle.digest("SHA-256", input.value);
     }
   }
   function compareHash(hash) {
