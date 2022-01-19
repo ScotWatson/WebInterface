@@ -3,6 +3,15 @@
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+// Register service worker to control making site work offline
+if ("serviceWorker" in navigator) {
+  console.log("index.js: Start Registering");
+  navigator.serviceWorker
+    .register("sw.js")
+    .then(() => { console.log("Service Worker Registered"); });
+  console.log("index.js: End Registering");
+}
+
 let mapFileHashes = new Map();
 
 ArrayBuffer.prototype.equal = function (other) {
