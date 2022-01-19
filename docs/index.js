@@ -95,8 +95,9 @@ function checkForUpdate(url) {
   function getHash(response) {
     let fullBody = [];
     console.log(response);
-    return response.body.arrayBuffer().then(hashValue);
-    /* let reader = response.body.getReader();
+    return response.arrayBuffer().then(hashValue);
+    /*
+    let reader = response.body.getReader();
     return readAll(reader).then(hashValue);
     function readAll(reader) {
       let thisPart = reader.read();
