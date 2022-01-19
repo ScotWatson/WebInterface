@@ -78,6 +78,27 @@ function prompt_for_reload() {
   });
   document.body.appendChild(divWindow);
 }
+
+function arrayBufferFromStream(reader) {
+  return readAll(reader).then(collect);
+  function readAll(reader) {
+    function processChunk(thisChunk) {
+      function addChunk(arrBody) {
+        arrBody.unshift(thisChunk.value);
+      }
+      if (thisChunk.done) {
+        return [];
+      } else {
+        return readAll(reader).then(addChunk);
+      }
+    }
+    return reader.read().then(processChunk);
+  }
+  function collect(arrBody) {
+    return (new Blob(arrBody)).arrayBuffer();
+  }
+}
+
 function clickFactory(thisValue) {
   return function () {
     const a = document.createElement("a");
@@ -93,28 +114,15 @@ function checkForUpdate(url) {
   let thisValue;
   return fetch(url, {cache: "reload"}).then(getHash).then(compareHash);
   function getHash(response) {
-    let fullBody = [];
+    function getArrayBuffer() {
+      return response.arrayBuffer();
+//      let reader = response.body.getReader();
+//      return arrayBufferFromStream(reader);
+    }
     console.log(response);
-    return response.arrayBuffer().then(hashValue);
-    /*
-    let reader = response.body.getReader();
-    return readAll(reader).then(hashValue);
-    function readAll(reader) {
-      let thisPart = reader.read();
-      if (thisPart.done) {
-        return [];
-      } else {
-        return readAll(reader).then(function (arrBody) {
-          fullBody.unshift(thisPart.value);
-        });
-      }
-    }
-    function collect(arrBody) {
-      return (new Blob(arrBody)).arrayBuffer();
-    }
-    */
+    return getArrayBuffer().then(hashValue);
     function hashValue(input) {
-      thisValue = input /*.value*/;
+      thisValue = input;
       return crypto.subtle.digest("SHA-256", thisValue);
     }
   }
