@@ -83,6 +83,19 @@ function checkForUpdate(url) {
   function getHash(response) {
     return response.body.getReader().read().then(hashValue);
     function hashValue(input) {
+      let btnSave = document.createElement("button");
+      btnSave.innerHTML = "Save";
+      document.body.appendChild(btnSave);
+      btnSave.addEventListener("click", clickFactory(input.value));
+      function clickFactory(thisValue) {
+        return function () {
+          let a = document.createElement("a");
+          a.href = new Blob( [ thisValue ] );
+          a.download = "index.txt";
+          a.click();
+          a.remove();
+        }
+      }
       return crypto.subtle.digest("SHA-256", input.value);
     }
   }
