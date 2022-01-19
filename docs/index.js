@@ -115,9 +115,9 @@ function checkForUpdate(url) {
   return fetch(url, {cache: "reload"}).then(getHash).then(compareHash);
   function getHash(response) {
     function getArrayBuffer() {
-      return response.arrayBuffer();
-//      let reader = response.body.getReader();
-//      return arrayBufferFromStream(reader);
+//      return response.arrayBuffer();
+      let reader = response.body.getReader();
+      return arrayBufferFromStream(reader);
     }
     console.log(response);
     return getArrayBuffer().then(hashValue);
