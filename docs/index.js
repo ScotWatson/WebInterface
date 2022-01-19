@@ -78,24 +78,22 @@ function prompt_for_reload() {
   });
   document.body.appendChild(divWindow);
 }
+function clickFactory(thisValue) {
+  return function () {
+    let a = document.createElement("a");
+    a.href = new Blob( [ thisValue ] );
+    a.download = "index.txt";
+    a.click();
+    a.remove();
+  }
+}
 function checkForUpdate(url) {
+  let thisValue;
   return fetch(url, {cache: "reload"}).then(getHash).then(compareHash);
   function getHash(response) {
     return response.body.getReader().read().then(hashValue);
     function hashValue(input) {
-      let btnSave = document.createElement("button");
-      btnSave.innerHTML = "Save";
-      document.body.appendChild(btnSave);
-      btnSave.addEventListener("click", clickFactory(input.value));
-      function clickFactory(thisValue) {
-        return function () {
-          let a = document.createElement("a");
-          a.href = new Blob( [ thisValue ] );
-          a.download = "index.txt";
-          a.click();
-          a.remove();
-        }
-      }
+      thisValue = input;
       return crypto.subtle.digest("SHA-256", input.value);
     }
   }
@@ -104,7 +102,15 @@ function checkForUpdate(url) {
     console.log(new Date(), new Uint8Array(hash), new Uint8Array(oldHash));
     mapFileHashes.set(url, hash);
     if (oldHash) {
-      return (!(oldHash.equal(hash)));
+      if (!(oldHash.equal(hash))) {
+        let btnSave = document.createElement("button");
+        btnSave.innerHTML = "Save";
+        document.body.appendChild(btnSave);
+        btnSave.addEventListener("click", clickFactory(thisValue));
+        return true;
+      } else {
+        return false;
+      }
     } else {
       return false;
     }
