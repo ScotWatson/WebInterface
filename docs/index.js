@@ -83,6 +83,7 @@ function clickFactory(thisValue) {
     let a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob( [ thisValue ] ));
     a.download = "index.txt";
+    document.body.appendChild(a);
     a.click();
     a.remove();
   }
