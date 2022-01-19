@@ -95,7 +95,8 @@ function checkForUpdate(url) {
   function getHash(response) {
     let fullBody = [];
     console.log(response);
-    let reader = response.body.getReader();
+    return response.body.arrayBuffer().then(hashValue);
+    /* let reader = response.body.getReader();
     return readAll(reader).then(hashValue);
     function readAll(reader) {
       let thisPart = reader.read();
@@ -110,6 +111,7 @@ function checkForUpdate(url) {
     function collect(arrBody) {
       return (new Blob(arrBody)).arrayBuffer();
     }
+    */
     function hashValue(input) {
       thisValue = input.value;
       return crypto.subtle.digest("SHA-256", thisValue);
