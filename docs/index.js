@@ -19,6 +19,31 @@ ArrayBuffer.prototype.equal = function (other) {
   return true;
 }
 
+// let reader = response.body.getReader();
+// return arrayBufferFromStream(reader);
+
+
+function arrayBufferFromStream(reader) {
+  return readAll(reader).then(collect);
+  function readAll(reader) {
+    function processChunk(thisChunk) {
+      function addChunk(arrBody) {
+        arrBody.unshift(thisChunk.value);
+        return arrBody;
+      }
+      if (thisChunk.done) {
+        return [];
+      } else {
+        return readAll(reader).then(addChunk);
+      }
+    }
+    return reader.read().then(processChunk);
+  }
+  function collect(arrBody) {
+    return (new Blob(arrBody)).arrayBuffer();
+  }
+}
+
 // Check once every 10 seconds
 setInterval(checkIndexJS, 10000);
 function checkIndexJS() {
@@ -78,28 +103,6 @@ function prompt_for_reload() {
   });
   document.body.appendChild(divWindow);
 }
-
-function arrayBufferFromStream(reader) {
-  return readAll(reader).then(collect);
-  function readAll(reader) {
-    function processChunk(thisChunk) {
-      function addChunk(arrBody) {
-        arrBody.unshift(thisChunk.value);
-        return arrBody;
-      }
-      if (thisChunk.done) {
-        return [];
-      } else {
-        return readAll(reader).then(addChunk);
-      }
-    }
-    return reader.read().then(processChunk);
-  }
-  function collect(arrBody) {
-    return (new Blob(arrBody)).arrayBuffer();
-  }
-}
-
 function clickFactory(thisValue) {
   return function () {
     const a = document.createElement("a");
@@ -116,9 +119,7 @@ function checkForUpdate(url) {
   return fetch(url, {cache: "reload"}).then(getHash).then(compareHash);
   function getHash(response) {
     function getArrayBuffer() {
-//      return response.arrayBuffer();
-      let reader = response.body.getReader();
-      return arrayBufferFromStream(reader);
+      return response.arrayBuffer();
     }
     console.log(response);
     return getArrayBuffer().then(hashValue);
