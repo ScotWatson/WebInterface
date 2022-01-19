@@ -85,6 +85,7 @@ function arrayBufferFromStream(reader) {
     function processChunk(thisChunk) {
       function addChunk(arrBody) {
         arrBody.unshift(thisChunk.value);
+        return arrBody;
       }
       if (thisChunk.done) {
         return [];
