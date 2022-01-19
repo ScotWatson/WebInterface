@@ -93,8 +93,22 @@ function checkForUpdate(url) {
   let thisValue;
   return fetch(url, {cache: "reload"}).then(getHash).then(compareHash);
   function getHash(response) {
+    let fullBody = [];
     console.log(response);
-    return response.body.getReader().read().then(hashValue);
+    return response.body.getReader().then(readAll).then(hashValue);
+    function readAll(reader) {
+      let thisPart = reader.read();
+      if (thisPart.done) {
+        return [];
+      } else {
+        return readAll(reader).then(function (arrBody) {
+          fullBody.unshift(thisPart.value);
+        });
+      }
+    }
+    function collect(arrBody) {
+      return (new Blob(arrBody)).arrayBuffer();
+    }
     function hashValue(input) {
       thisValue = input.value;
       return crypto.subtle.digest("SHA-256", thisValue);
