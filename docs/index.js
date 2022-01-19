@@ -73,7 +73,7 @@ function checkForUpdate(url) {
     console.log(hash, oldHash);
     mapFileHashes.set(url, hash);
     if (oldHash) {
-      return (oldhash === hash);
+      return (oldHash === hash);
     } else {
       return true;
     }
