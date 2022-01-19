@@ -84,7 +84,7 @@ function checkForUpdate(url) {
   }
   function compareHash(hash) {
     let oldHash = mapFileHashes.get(url)
-    console.log(hash, oldHash);
+    console.log(new Uint8Array(hash), new Uint8Array(oldHash));
     mapFileHashes.set(url, hash);
     if (oldHash) {
       return (!(oldHash.equal(hash)));
