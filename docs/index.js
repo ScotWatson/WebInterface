@@ -3,6 +3,83 @@
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+let mapFileHashes = new Map();
+
+
+// Check once every 10 seconds
+setInterval(checkIndexJS, 10000);
+function checkIndexJS() {
+  if (checkForUpdate("index.js")) {
+    prompt_for_reload();
+  }
+}
+
+function prompt_for_reload() {
+  let divWindow = document.createElement("div");
+  divWindow.style.display = "block";
+  divWindow.style.position = "absolute";
+  divWindow.style.left = 50 + "px";
+  divWindow.style.top = 50 + "px";
+  divWindow.style.width = 200 + "px";
+  divWindow.style.height = 200 + "px";
+  divWindow.style.backgroundColor = "#808080";
+  let divPrompt = document.createElement("div");
+  divPrompt.style.display = "block";
+  divPrompt.style.position = "absolute";
+  divPrompt.style.left = 0 + "px";
+  divPrompt.style.top = 0 + "px";
+  divPrompt.style.width = 200 + "px";
+  divPrompt.style.height = 50 + "px";
+  divPrompt.appendChild(document.createTextNode("index.js has changed.  Do you want to reload the page?"));
+  divWindow.appendChild(divPrompt);
+  let divBtnYes = document.createElement("div");
+  divBtnYes.style.display = "block";
+  divBtnYes.style.position = "absolute";
+  divBtnYes.style.left = 25 + "px";
+  divBtnYes.style.top = 0 + "px";
+  divBtnYes.style.width = 50 + "px";
+  divBtnYes.style.height = 50 + "px";
+  divBtnYes.style.backgroundColor = "#C0C0C0";
+  divBtnYes.appendChild(document.createTextNode("Yes"));
+  divWindow.appendChild(divBtnYes);
+  let divBtnNo = document.createElement("div");
+  divBtnNo.style.display = "block";
+  divBtnNo.style.position = "absolute";
+  divBtnNo.style.left = 125 + "px";
+  divBtnNo.style.top = 0 + "px";
+  divBtnNo.style.width = 50 + "px";
+  divBtnNo.style.height = 50 + "px";
+  divBtnNo.style.backgroundColor = "#C0C0C0";
+  divBtnNo.appendChild(document.createTextNode("No"));
+  divWindow.appendChild(divBtnNo);
+  divBtnYes.addEventListener("click", function () {
+    window.location.reload();
+    return false;
+  });
+  divBtnNo.addEventListener("click", function () {
+    divWindow.remove();
+  });
+}
+function checkForUpdate(url) {
+  return fetch(url, {cache: "reload"}).then(getHash).then(compareHash);
+  function getHash(response) {
+    return response.body.getReader().read().then(hashValue);
+    function hashValue(in) {
+      return crypto.subtle.digest("SHA-256", in.value);
+    }
+  }
+  function compareHash(hash) {
+    let oldHash = mapFileHashes.get(url)
+    console.log(hash, oldHash);
+    mapFileHashes.set(url, hash);
+    if (oldHash) {
+      return (oldhash === hash);
+    } else {
+      return true;
+    }
+  }
+}
+
 let divScreenWidth;
 let divScreenHeight;
 let divScreenAvailWidth;
