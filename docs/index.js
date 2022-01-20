@@ -12,7 +12,7 @@ if ("serviceWorker" in navigator) {
   console.log("index.js: End Registering");
 }
 // Create button to start sending notifications
-if ("Notification" in navigator) {
+if ("Notification" in window) {
   let btnStartNotifications = document.createElement("button");
   btnStartNotifications.innerHTML = "Start Notifications";
   btnStartNotifications.addEventListener("click", function () {
