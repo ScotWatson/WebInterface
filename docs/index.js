@@ -65,6 +65,7 @@ function checkIndexJS() {
 }
 
 function prompt_for_reload() {
+  // check for notification permission
   if (Notification.permission === "granted") {
     let myNotification = new Notification("New Version", {
       dir: "auto",
