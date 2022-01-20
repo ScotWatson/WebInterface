@@ -11,6 +11,16 @@ if ("serviceWorker" in navigator) {
     .then(() => { console.log("Service Worker Registered"); });
   console.log("index.js: End Registering");
 }
+// Create button to start sending notifications
+if ("Notification" in navigator) {
+  let btnStartNotifications = document.createElement("button");
+  btnStartNotifications.innerHTML = "Start Notifications";
+  btnStartNotifications.addEventListener("click", function () {
+    Notification.requestPermission().then(function(result) {
+      console.log(result);
+    });
+  });
+}
 
 let mapFileHashes = new Map();
 
