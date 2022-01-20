@@ -4,11 +4,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 // Register service worker to control making site work offline
+let myServiceWorkerRegistration;
 if ("serviceWorker" in navigator) {
   console.log("index.js: Start Registering");
-  navigator.serviceWorker
-    .register("sw.js")
-    .then(() => { console.log("Service Worker Registered"); });
+  navigator.serviceWorker.register("sw.js").then((registration) => {
+    myServiceWorkerRegistration = registration;
+    console.log("Service Worker Registered");
+  });
   console.log("index.js: End Registering");
 }
 let mapFileHashes = new Map();
@@ -67,7 +69,7 @@ function checkIndexJS() {
 function prompt_for_reload() {
   // check for notification permission
   if (Notification.permission === "granted") {
-    let myNotification = new Notification("New Version", {
+    let myNotification = myServiceWorkerRegistration.showNotification("New Version", {
       dir: "auto",
       lang: "en-US",
       badge: "/WebInterface/icon.png",
@@ -79,7 +81,6 @@ function prompt_for_reload() {
       vibrate: [200, 100, 100],
       renotify: false,
       requireInteraction: false,
-      /*
       actions: [
         {
           action: "Reload",
@@ -92,9 +93,24 @@ function prompt_for_reload() {
           icon: "/WebInterface/icon.png",
         },
       ],
-      */
       silent: false,
     });
+    /*
+    let myNotification = new Notification("New Version", {
+      dir: "auto",
+      lang: "en-US",
+      badge: "/WebInterface/icon.png",
+      body: "index.js has changed.  Do you want to reload the page?",
+      tag: "New index.js Version",
+      icon: "/WebInterface/icon.png",
+      image: "/WebInterface/icon.png",
+      data: "",
+      vibrate: [200, 100, 100],
+      renotify: false,
+      requireInteraction: false,
+      silent: false,
+    });
+    */
     myNotification.addEventListener("click", function (evt) {
       switch (evt.action) {
         case "Reload":
