@@ -222,6 +222,14 @@ window.addEventListener("load", function () {
     document.body.appendChild(btnStartNotifications);
   }
 
+  let btnTriggerPrompt = document.createElement("button");
+  btnTriggerPrompt.innerHTML = "Trigger Prompt";
+  btnTriggerPrompt.addEventListener("click", function () {
+    prompt_for_reload();
+  });
+  document.body.appendChild(btnTriggerPrompt);
+
+
   divScreenSize = document.createElement("div");
   document.body.appendChild(divScreenSize);
   divScreenAvailWidth = document.createElement("div");
