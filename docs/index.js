@@ -11,18 +11,6 @@ if ("serviceWorker" in navigator) {
     .then(() => { console.log("Service Worker Registered"); });
   console.log("index.js: End Registering");
 }
-// Create button to start sending notifications
-if ("Notification" in window) {
-  let btnStartNotifications = document.createElement("button");
-  btnStartNotifications.innerHTML = "Start Notifications";
-  btnStartNotifications.addEventListener("click", function () {
-    Notification.requestPermission().then(function(result) {
-      console.log(result);
-    });
-  });
-  document.body.appendChild(btnStartNotifications);
-}
-
 let mapFileHashes = new Map();
 
 ArrayBuffer.prototype.equal = function (other) {
@@ -179,6 +167,18 @@ let divScrollWidth;
 let divScrollHeight;
 
 window.addEventListener("load", function () {
+  // Create button to start sending notifications
+  if ("Notification" in window) {
+    let btnStartNotifications = document.createElement("button");
+    btnStartNotifications.innerHTML = "Start Notifications";
+    btnStartNotifications.addEventListener("click", function () {
+      Notification.requestPermission().then(function(result) {
+        console.log(result);
+      });
+    });
+    document.body.appendChild(btnStartNotifications);
+  }
+
   divScreenSize = document.createElement("div");
   document.body.appendChild(divScreenSize);
   divScreenAvailWidth = document.createElement("div");
