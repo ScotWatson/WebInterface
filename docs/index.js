@@ -20,6 +20,7 @@ if ("Notification" in navigator) {
       console.log(result);
     });
   });
+  document.body.appendChild(btnStartNotifications);
 }
 
 let mapFileHashes = new Map();
