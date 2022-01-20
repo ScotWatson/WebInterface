@@ -79,6 +79,7 @@ function prompt_for_reload() {
       vibrate: [200, 100, 100],
       renotify: false,
       requireInteraction: false,
+      /*
       actions: [
         {
           action: "Reload",
@@ -91,6 +92,7 @@ function prompt_for_reload() {
           icon: "/WebInterface/icon.png",
         },
       ],
+      */
       silent: false,
     });
     myNotification.addEventListener("click", function (evt) {
