@@ -65,51 +65,93 @@ function checkIndexJS() {
 }
 
 function prompt_for_reload() {
-  let divWindow = document.createElement("div");
-  divWindow.style.display = "block";
-  divWindow.style.position = "absolute";
-  divWindow.style.left = 50 + "px";
-  divWindow.style.top = 50 + "px";
-  divWindow.style.width = 200 + "px";
-  divWindow.style.height = 200 + "px";
-  divWindow.style.backgroundColor = "#808080";
-  let divPrompt = document.createElement("div");
-  divPrompt.style.display = "block";
-  divPrompt.style.position = "absolute";
-  divPrompt.style.left = 0 + "px";
-  divPrompt.style.top = 0 + "px";
-  divPrompt.style.width = 200 + "px";
-  divPrompt.style.height = 50 + "px";
-  divPrompt.appendChild(document.createTextNode("index.js has changed.  Do you want to reload the page?"));
-  divWindow.appendChild(divPrompt);
-  let divBtnYes = document.createElement("div");
-  divBtnYes.style.display = "block";
-  divBtnYes.style.position = "absolute";
-  divBtnYes.style.left = 25 + "px";
-  divBtnYes.style.top = 100 + "px";
-  divBtnYes.style.width = 50 + "px";
-  divBtnYes.style.height = 50 + "px";
-  divBtnYes.style.backgroundColor = "#C0C0C0";
-  divBtnYes.appendChild(document.createTextNode("Yes"));
-  divWindow.appendChild(divBtnYes);
-  let divBtnNo = document.createElement("div");
-  divBtnNo.style.display = "block";
-  divBtnNo.style.position = "absolute";
-  divBtnNo.style.left = 125 + "px";
-  divBtnNo.style.top = 100 + "px";
-  divBtnNo.style.width = 50 + "px";
-  divBtnNo.style.height = 50 + "px";
-  divBtnNo.style.backgroundColor = "#C0C0C0";
-  divBtnNo.appendChild(document.createTextNode("No"));
-  divWindow.appendChild(divBtnNo);
-  divBtnYes.addEventListener("click", function () {
-    window.location.reload();
-    return false;
-  });
-  divBtnNo.addEventListener("click", function () {
-    divWindow.remove();
-  });
-  document.body.appendChild(divWindow);
+  if (Notification.permission === "granted") {
+    let myNotification = new Notification("New Version", {
+      dir: "auto",
+      lang: "en-US",
+      badge: "/WebInterface/icon.png",
+      body: "index.js has changed.  Do you want to reload the page?",
+      tag: "New index.js Version",
+      icon: "/WebInterface/icon.png",
+      image: "/WebInterface/icon.png",
+      data: "",
+      vibrate: [200, 100, 100],
+      renotify: false,
+      requireInteraction: false,
+      actions: [
+        {
+          action: "Reload",
+          title: "Yes",
+          icon: "/WebInterface/icon.png",
+        },
+        {
+          action: "Dismiss",
+          title: "No",
+          icon: "/WebInterface/icon.png",
+        },
+      ],
+      silent: false,
+    });
+    myNotification.addEventListener("click", function (evt) {
+      switch (evt.action) {
+        case "Reload":
+          window.location.reload();
+          return false;
+        case "Dismiss":
+          evt.target.close();
+          break;
+        default:
+          alert("unknown action");
+          break;
+      }
+    });
+  } else {
+    let divWindow = document.createElement("div");
+    divWindow.style.display = "block";
+    divWindow.style.position = "absolute";
+    divWindow.style.left = 50 + "px";
+    divWindow.style.top = 50 + "px";
+    divWindow.style.width = 200 + "px";
+    divWindow.style.height = 200 + "px";
+    divWindow.style.backgroundColor = "#808080";
+    let divPrompt = document.createElement("div");
+    divPrompt.style.display = "block";
+    divPrompt.style.position = "absolute";
+    divPrompt.style.left = 0 + "px";
+    divPrompt.style.top = 0 + "px";
+    divPrompt.style.width = 200 + "px";
+    divPrompt.style.height = 50 + "px";
+    divPrompt.appendChild(document.createTextNode("index.js has changed.  Do you want to reload the page?"));
+    divWindow.appendChild(divPrompt);
+    let divBtnYes = document.createElement("div");
+    divBtnYes.style.display = "block";
+    divBtnYes.style.position = "absolute";
+    divBtnYes.style.left = 25 + "px";
+    divBtnYes.style.top = 100 + "px";
+    divBtnYes.style.width = 50 + "px";
+    divBtnYes.style.height = 50 + "px";
+    divBtnYes.style.backgroundColor = "#C0C0C0";
+    divBtnYes.appendChild(document.createTextNode("Yes"));
+    divWindow.appendChild(divBtnYes);
+    let divBtnNo = document.createElement("div");
+    divBtnNo.style.display = "block";
+    divBtnNo.style.position = "absolute";
+    divBtnNo.style.left = 125 + "px";
+    divBtnNo.style.top = 100 + "px";
+    divBtnNo.style.width = 50 + "px";
+    divBtnNo.style.height = 50 + "px";
+    divBtnNo.style.backgroundColor = "#C0C0C0";
+    divBtnNo.appendChild(document.createTextNode("No"));
+    divWindow.appendChild(divBtnNo);
+    divBtnYes.addEventListener("click", function () {
+      window.location.reload();
+      return false;
+    });
+    divBtnNo.addEventListener("click", function () {
+      divWindow.remove();
+    });
+    document.body.appendChild(divWindow);
+  }
 }
 function clickFactory(thisValue) {
   return function () {
