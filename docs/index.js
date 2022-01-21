@@ -75,7 +75,7 @@ function prompt_for_reload() {
       badge: "/WebInterface/icon.png",
       body: "index.js has changed.  Do you want to reload the page?",
       tag: "New index.js Version",
-      icon: "/WebInterface/icon.png",
+      icon: "/WebInterface/reload.png",
       image: "/WebInterface/icon.png",
       data: "",
       vibrate: [200, 100, 100],
@@ -85,7 +85,7 @@ function prompt_for_reload() {
         {
           action: "Reload",
           title: "Yes",
-          icon: "/WebInterface/icon.png",
+          icon: "/WebInterface/reload.png",
         },
         {
           action: "Dismiss",
