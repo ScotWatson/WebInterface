@@ -283,6 +283,10 @@ function resize() {
   divScrollHeight.innerHTML = "document.body.scrollHeight = " + document.body.scrollHeight;
 }
 
+window.addEventListener("message", function (e) {
+  console.log(e);
+});
+
 function Task(url) {
   const that = this;
   let mapMessage = new Map();
