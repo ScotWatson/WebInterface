@@ -6,12 +6,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 // Register service worker to control making site work offline
 let myServiceWorkerRegistration;
 if ("serviceWorker" in navigator) {
-  console.log("index.js: Start Registering");
   navigator.serviceWorker.register("sw.js").then((registration) => {
     myServiceWorkerRegistration = registration;
-    console.log("Service Worker Registered");
   });
-  console.log("index.js: End Registering");
 }
 let mapFileHashes = new Map();
 
@@ -59,7 +56,6 @@ setInterval(checkIndexJS, 10000);
 function checkIndexJS() {
   checkForUpdate("index.js").then(prompt);
   function prompt(result) {
-    console.log(result);
     if (result) {
       prompt_for_reload();
     }
@@ -190,7 +186,6 @@ function checkForUpdate(url) {
     function getArrayBuffer() {
       return response.arrayBuffer();
     }
-    console.log(response);
     return getArrayBuffer().then(hashValue);
     function hashValue(input) {
       thisValue = input;
@@ -199,7 +194,6 @@ function checkForUpdate(url) {
   }
   function compareHash(hash) {
     let oldHash = mapFileHashes.get(url)
-    console.log(new Date(), new Uint8Array(hash), new Uint8Array(oldHash));
     mapFileHashes.set(url, hash);
     if (oldHash) {
       if (!(oldHash.equal(hash))) {
