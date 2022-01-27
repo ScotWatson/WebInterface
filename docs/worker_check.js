@@ -20,6 +20,6 @@ function check_object(obj) {
 let arrNonVettedSelfMembers = check_object(self);
 self.postMessage(arrNonVettedSelfMembers);
 
-let bufRandom = new Uint8Array(32);
-self.crypto.getRandomValues(bufRandom);
-self.postMessage(bufRandom, [ bufRandom ] );
+let viewRandom = new Uint8Array(32);
+self.crypto.getRandomValues(viewRandom);
+self.postMessage(null, [ viewRandom.buffer ] );
