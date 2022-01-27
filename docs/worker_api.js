@@ -15,7 +15,9 @@ function delete_member(obj, member) {
   }
 }
 // self.indexedDB.databases gives access to all databases on the current domain.  This is a security risk.
-delete_member(self.indexedDB, "databases");
+if (!(delete_member(self.indexedDB, "databases"))) {
+  self.terminate();
+}
 const objSystem = (function () {
   let me = {};
   let mapMessage = new Map();
