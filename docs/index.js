@@ -12,6 +12,11 @@ if ("serviceWorker" in navigator) {
 }
 let mapFileHashes = new Map();
 
+let myCheck = new Worker("worker_check.js");
+myCheck.addEventListener("message", function (e) {
+  console.log(e.data);
+});
+
 ArrayBuffer.prototype.equal = function (other) {
   if (this.byteLength !== other.byteLength) {
     return false;
