@@ -19,3 +19,8 @@ function check_object(obj) {
 
 let arrNonVettedSelfMembers = check_object(self);
 self.postMessage(arrNonVettedSelfMembers);
+
+let myCrypto = new self.Crypto();
+let bufRandom = new Uint8Array(32);
+myCrypto.getRandomValues(bufRandom);
+self.postMessage(null, bufRandom);
