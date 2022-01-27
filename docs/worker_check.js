@@ -22,4 +22,4 @@ self.postMessage(arrNonVettedSelfMembers);
 
 let bufRandom = new Uint8Array(32);
 self.crypto.getRandomValues(bufRandom);
-self.postMessage(null, [ bufRandom ] );
+self.postMessage(bufRandom, [ bufRandom ] );
