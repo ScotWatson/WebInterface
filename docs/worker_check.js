@@ -14,7 +14,7 @@ function check_object(obj, arrVettedMembers) {
   }
   let prototype = Object.getPrototypeOf(self);
   if (prototype !== null) {
-    checkObject(prototype, arrVettedMembers);
+    check_object(prototype, arrVettedMembers);
   }
   return arrNonVettedMembers;
 }
