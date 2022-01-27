@@ -10,10 +10,10 @@ function check_object(obj) {
   let obj_members = Object.getOwnPropertyNames(obj);
   let prototype = Object.getPrototypeOf(obj);
   if (prototype === null) {
-    return { obj: obj_members };
+    return { name: obj.constructor.name, obj: obj_members };
   } else {
     let prototype_members = check_object(prototype);
-    return { obj: obj_members, prototype_obj: prototype_members };
+    return { name: obj.constructor.name, obj: obj_members, prototype_obj: prototype_members };
   }
 }
 
