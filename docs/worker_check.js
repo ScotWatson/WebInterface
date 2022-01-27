@@ -12,7 +12,7 @@ function check_object(obj, arrVettedMembers) {
       arrNonVettedMembers.push(member);
     }
   }
-  let prototype = Object.getPrototypeOf(self);
+  let prototype = Object.getPrototypeOf(obj);
   if (prototype !== null) {
     check_object(prototype, arrVettedMembers);
   }
