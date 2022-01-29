@@ -14,7 +14,7 @@ let mapFileHashes = new Map();
 
 let myCheck = new Worker("worker_check.js");
 myCheck.addEventListener("message", function (e) {
-  console.log(e.data);
+  console.log(e);
 });
 
 ArrayBuffer.prototype.equal = function (other) {
