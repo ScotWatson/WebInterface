@@ -88,21 +88,21 @@ function startCalibrationX() {
     switch (units) {
       case "SI":
         numTarget = Math.floor((clientHeight_CSS_mm * 0.80) / 10) * 10;
-        strTarget = target + "mm";
+        strTarget = numTarget + "mm";
         break;
       case "IP":
         numTarget = Math.floor(clientHeight_CSS_in * 0.80);
-        strTarget = target + "in";
+        strTarget = numTarget + "in";
         break;
       default:
         units = "IP";
         numTarget = Math.floor(clientHeight_CSS_in * 0.80);
-        strTarget = target + "in";
+        strTarget = numTarget + "in";
         break;
     }
     divTarget.innerHTML = "";
     divTarget.appendChild(document.createTextNode(strTarget));
-    if (target === 0) {
+    if (numTarget === 0) {
       divCalibration.style.backgroundColor = "#808080";
       divCalLine.style.display = "none";
     } else {
