@@ -156,6 +156,7 @@ function startCalibrationX() {
         curr_dist_CSS_px = undefined;
         break;
     }
+    console.log(init_dist_CSS_px, curr_dist_CSS_px, init_calX_CSS_px, curr_calX_CSS_px);
     divCalLine.style.width = curr_calX_CSS_px + "px";
     return false;
   }
