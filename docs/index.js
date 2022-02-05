@@ -143,6 +143,7 @@ function startCalibrationX() {
     evt.preventDefault();
     switch (evt.touches.length) {
       case 2:
+        console.log(evt.touches[1].clientX, evt.touches[0].clientX);
         if (curr_dist_CSS_px) {
           curr_dist_CSS_px = Math.abs(evt.touches[1].clientX - evt.touches[0].clientX);
         } else {
