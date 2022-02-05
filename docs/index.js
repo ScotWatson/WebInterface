@@ -44,11 +44,13 @@ function startCalibrationX() {
   let init_dist_CSS_px;
   let curr_calX_CSS_px = clientWidth_CSS_px * 0.80;
   let init_calX_CSS_px = curr_calX_CSS_px;
+  const divCalibration = document.createElement("div");
+  const divCalLine = document.createElement("div");
+  const divTarget = document.createElement("div");
 
   resizeClient();
   
   // calibration interface
-  const divCalibration = document.createElement("div");
   divCalibration.style.display = "block";
   divCalibration.style.position = "absolute";
   divCalibration.style.left = "0px";
@@ -60,8 +62,6 @@ function startCalibrationX() {
     updateTarget();
     redrawChildren(divCalibration, width, height);
   };
-  divCalibration.redraw();
-  const divCalLine = document.createElement("div");
   divCalLine.style.display = "block";
   divCalLine.style.position = "absolute";
   divCalLine.style.left = (clientWidth_CSS_px * 0.10) + "px";
@@ -69,7 +69,6 @@ function startCalibrationX() {
   divCalLine.style.width = curr_calX_CSS_px + "px";
   divCalLine.style.height = 4 + "px";
   divCalibration.appendChild(divCalLine);
-  const divTarget = document.createElement("div");
   divTarget.style.display = "block";
   divTarget.style.position = "absolute";
   divTarget.style.left = (clientWidth_CSS_px * 0.50) + "px";
@@ -80,24 +79,24 @@ function startCalibrationX() {
   divCalibration.addEventListener("touchstart", handleTouch);
   divCalibration.addEventListener("touchmove", handleTouch);
   divCalibration.addEventListener("touchend", handleTouch);
-
   document.body.appendChild(divCalibration);
+  divCalibration.redraw();
   
   function updateTarget() {
     let numTarget;
     let strTarget;
     switch (units) {
       case "SI":
-        target = Math.floor((clientHeight_CSS_mm * 0.80) / 10) * 10;
+        numTarget = Math.floor((clientHeight_CSS_mm * 0.80) / 10) * 10;
         strTarget = target + "mm";
         break;
       case "IP":
-        target = Math.floor(clientHeight_CSS_in * 0.80);
+        numTarget = Math.floor(clientHeight_CSS_in * 0.80);
         strTarget = target + "in";
         break;
       default:
         units = "IP";
-        target = Math.floor(clientHeight_CSS_in * 0.80);
+        numTarget = Math.floor(clientHeight_CSS_in * 0.80);
         strTarget = target + "in";
         break;
     }
