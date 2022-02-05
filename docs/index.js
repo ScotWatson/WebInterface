@@ -147,7 +147,9 @@ function startCalibrationX() {
         console.log("calX_dist_ratio: " + calX_dist_ratio);
         if (!calX_dist_ratio) {
           console.log("Change Ratio");
+          console.log(curr_calX_CSS_px, curr_dist_CSS_px);
           calX_dist_ratio = curr_calX_CSS_px / curr_dist_CSS_px;
+          console.log("new calX_dist_ratio: " + calX_dist_ratio);
         }
         curr_calX_CSS_px = curr_dist_CSS_px * calX_dist_ratio;
         break;
