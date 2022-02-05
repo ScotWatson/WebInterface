@@ -47,6 +47,8 @@ function startCalibrationX() {
   const divCalibration = document.createElement("div");
   const divCalLine = document.createElement("div");
   const divTarget = document.createElement("div");
+  const divCancel = document.createElement("div");
+  const divSelect = document.createElement("div");
 
   resizeClient();
   
@@ -66,7 +68,6 @@ function startCalibrationX() {
   divCalLine.style.position = "absolute";
   divCalLine.style.left = (clientWidth_CSS_px * 0.10) + "px";
   divCalLine.style.top = (clientHeight_CSS_px * 0.10) + "px";
-  divCalLine.style.width = curr_calX_CSS_px + "px";
   divCalLine.style.height = 4 + "px";
   divCalibration.appendChild(divCalLine);
   divTarget.style.display = "block";
@@ -76,9 +77,9 @@ function startCalibrationX() {
   divTarget.style.width = (clientWidth_CSS_px * 0.25) + "px";
   divTarget.style.height = (clientHeight_CSS_px * 0.25) + "px";
   divCalibration.appendChild(divTarget);
-  const divCancel = document.createElement("div");
   divCancel.style.display = "block";
   divCancel.style.position = "absolute";
+  divCancel.appendChild(document.createTextNode("Cancel"));
   divCancel.redraw = function (width, height) {
     divCancel.style.left = 0 + "px";
     divCancel.style.top = 0 + "px";
@@ -89,7 +90,6 @@ function startCalibrationX() {
     divCalibration.remove();
   });
   divCalibration.appendChild(divCancel);
-  const divSelect = document.createElement("div");
   divSelect.style.display = "block";
   divSelect.style.position = "absolute";
   divSelect.appendChild(document.createTextNode("Select"));
@@ -136,6 +136,7 @@ function startCalibrationX() {
       divCalibration.style.backgroundColor = "#FFFFFF";
       divCalLine.style.display = "block";
     }
+    divCalLine.style.width = curr_calX_CSS_px + "px";
   }
 
   function handleTouch(evt) {
@@ -154,6 +155,7 @@ function startCalibrationX() {
         curr_dist_CSS_px = undefined;
         break;
     }
+    divCalLine.style.width = curr_calX_CSS_px + "px";
   }
 }
 
