@@ -76,6 +76,33 @@ function startCalibrationX() {
   divTarget.style.width = (clientWidth_CSS_px * 0.25) + "px";
   divTarget.style.height = (clientHeight_CSS_px * 0.25) + "px";
   divCalibration.appendChild(divTarget);
+  const divCancel = document.createElement("div");
+  divCancel.style.display = "block";
+  divCancel.style.position = "absolute";
+  divCancel.redraw = function (width, height) {
+    divCancel.style.left = 0 + "px";
+    divCancel.style.top = 0 + "px";
+    divCancel.style.width = (width / 2) + "px";
+    divCancel.style.height = (height * 0.1) + "px";
+  }
+  divCancel.addEventListener("click", function () {
+    divCalibration.remove();
+  });
+  divCalibration.appendChild(divCancel);
+  const divSelect = document.createElement("div");
+  divSelect.style.display = "block";
+  divSelect.style.position = "absolute";
+  divSelect.appendChild(document.createTextNode("Select"));
+  divSelect.redraw = function (width, height) {
+    divSelect.style.left = (width / 2) + "px";
+    divSelect.style.top = 0 + "px";
+    divSelect.style.width = (width / 2) + "px";
+    divSelect.style.height = (height * 0.1) + "px";
+  };
+  divSelect.addEventListener("click", function () {
+  });
+  divCalibration.appendChild(divSelect);
+
   divCalibration.addEventListener("touchstart", handleTouch);
   divCalibration.addEventListener("touchmove", handleTouch);
   divCalibration.addEventListener("touchend", handleTouch);
@@ -128,32 +155,6 @@ function startCalibrationX() {
         break;
     }
   }
-  let divCancel = document.createElement("div");
-  divCancel.style.display = "block";
-  divCancel.style.position = "absolute";
-  divCancel.redraw = function (width, height) {
-    divCancel.style.left = 0 + "px";
-    divCancel.style.top = 0 + "px";
-    divCancel.style.width = (width / 2) + "px";
-    divCancel.style.height = (height * 0.1) + "px";
-  }
-  divCalibration.appendChild(divCancel);
-  divCancel.addEventListener("click", function () {
-    divCalibration.remove();
-  });
-  let divSelect = document.createElement("div");
-  divSelect.style.display = "block";
-  divSelect.style.position = "absolute";
-  divSelect.appendChild(document.createTextNode("Select"));
-  divSelect.redraw = function (height, width) {
-    divSelect.style.left = (width / 2) + "px";
-    divSelect.style.top = 0 + "px";
-    divSelect.style.width = (width / 2) + "px";
-    divSelect.style.height = (height * 0.1) + "px";
-  };
-  divSelect.addEventListener("click", function () {
-  });
-  divCalibration.appendChild(divSelect);
 }
 
 // Register service worker to control making site work offline
