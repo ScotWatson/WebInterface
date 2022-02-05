@@ -40,10 +40,7 @@ function redrawChildren(parent, width, height) {
 }
 
 function startCalibrationX() {
-  let curr_dist_CSS_px;
-  let init_dist_CSS_px;
   let curr_calX_CSS_px = clientWidth_CSS_px * 0.80;
-  let init_calX_CSS_px = curr_calX_CSS_px;
   const divCalibration = document.createElement("div");
   const divCalLine = document.createElement("div");
   const divTarget = document.createElement("div");
@@ -138,26 +135,24 @@ function startCalibrationX() {
     }
     divCalLine.style.width = curr_calX_CSS_px + "px";
   }
+  
+  let calX_dist_ratio;
 
   function handleTouch(evt) {
     evt.preventDefault();
     switch (evt.touches.length) {
       case 2:
-        console.log(evt.touches[1].clientX, evt.touches[0].clientX);
-        if (curr_dist_CSS_px) {
-          curr_dist_CSS_px = Math.abs(evt.touches[1].clientX - evt.touches[0].clientX);
-        } else {
-          curr_dist_CSS_px = Math.abs(evt.touches[1].clientX - evt.touches[0].clientX);
-          init_dist_CSS_px = curr_dist_CSS_px;
-          init_calX_CSS_px = curr_calX_CSS_px;
+        curr_dist_CSS_px = Math.abs(evt.touches[1].clientX - evt.touches[0].clientX);
+        if (!calX_dist_ratio) {
+          calX_dist_ratio = curr_calX_CSS_px / curr_dist_CSS_px;
         }
-        curr_calX_CSS_px = init_calX_CSS_px * (curr_dist_CSS_px / init_dist_CSS_px);
+        curr_calX_CSS_px = curr_dist_CSS_px * calX_dist_ratio;
         break;
       default:
-        curr_dist_CSS_px = undefined;
+        calX_dist_ratio = undefined;
         break;
     }
-    console.log(init_dist_CSS_px, curr_dist_CSS_px, init_calX_CSS_px, curr_calX_CSS_px);
+    console.log(curr_dist_CSS_px, curr_calX_CSS_px, calX_dist_ratio);
     divCalLine.style.width = curr_calX_CSS_px + "px";
     return false;
   }
