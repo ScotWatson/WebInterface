@@ -16,6 +16,7 @@ let CSS_multiplier = 1;
 
 window.addEventListener("load", function (evt) {
   document.body.style.overflow = "none";
+  resizeClient();
   startCalibrationX();
 });
 
