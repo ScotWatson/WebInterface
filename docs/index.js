@@ -67,6 +67,7 @@ function startCalibrationX() {
   divCalLine.style.left = (clientWidth_CSS_px * 0.10) + "px";
   divCalLine.style.top = (clientHeight_CSS_px * 0.10) + "px";
   divCalLine.style.height = 4 + "px";
+  divCalLine.style.backgroundColor = "black";
   divCalibration.appendChild(divCalLine);
   divTarget.style.display = "block";
   divTarget.style.position = "absolute";
