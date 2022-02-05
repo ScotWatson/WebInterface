@@ -140,6 +140,7 @@ function startCalibrationX() {
   }
 
   function handleTouch(evt) {
+    evt.preventDefault();
     switch (evt.touches.length) {
       case 2:
         if (curr_dist_CSS_px) {
@@ -156,9 +157,10 @@ function startCalibrationX() {
         break;
     }
     divCalLine.style.width = curr_calX_CSS_px + "px";
+    return false;
   }
 }
-
+/*
 // Register service worker to control making site work offline
 let myServiceWorkerRegistration;
 if ("serviceWorker" in navigator) {
@@ -166,7 +168,7 @@ if ("serviceWorker" in navigator) {
     myServiceWorkerRegistration = registration;
   });
 }
-
+*/
 function remainder() {
   let mapFileHashes = new Map();
 
