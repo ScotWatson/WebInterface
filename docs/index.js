@@ -139,11 +139,14 @@ function startCalibrationX() {
   let calX_dist_ratio;
 
   function handleTouch(evt) {
+    let curr_dist_CSS_px;
     evt.preventDefault();
     switch (evt.touches.length) {
       case 2:
         curr_dist_CSS_px = Math.abs(evt.touches[1].clientX - evt.touches[0].clientX);
+        console.log("calX_dist_ratio: " + calX_dist_ratio);
         if (!calX_dist_ratio) {
+          console.log("Change Ratio");
           calX_dist_ratio = curr_calX_CSS_px / curr_dist_CSS_px;
         }
         curr_calX_CSS_px = curr_dist_CSS_px * calX_dist_ratio;
