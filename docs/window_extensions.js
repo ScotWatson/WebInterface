@@ -4,3 +4,62 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 // Provides useful non-standard extensions to the browser "window" api (main thread)
+
+class wifRawStringEncoder {
+  constructor() {
+  }
+  encode(text) {
+    if (typeof text !== "string") {
+      throw new Error("Invalid argument, must be string");
+    }
+    let retView = new UInt8Array(text.length);
+    for (let i = 0; i < text.length; ++i) {
+      retView[i] = String.charCodeAt(i);
+    }
+    return retView.buffer;
+  }
+}
+class wifRawStringDecoder {
+  constructor() {
+  }
+  decode(buffer) {
+    if (!(buffer is ArrayBuffer)) {
+      throw new Error("Invalid argument, must be ArrayBuffer");
+    }
+    let ret = "";
+    for (let byte of buffer) {
+      ret += String.fromCharCode(byte);
+    }
+    return ret;
+  }
+}
+class wifBase64Encoder {
+  constructor() {
+  }
+  encode(text) {
+    if (typeof text !== "string") {
+      throw new Error("Invalid argument, must be string");
+    }
+    const encoder = new wifRawStringEncoder();
+    try {
+      return encoder.encode(atob(text));
+    } catch (err) {
+      throw new Error("Invalid input");
+    }
+  }
+}
+class wifBase64Decoder {
+  constructor() {
+  }
+  decode(buffer) {
+    if (!(buffer is ArrayBuffer)) {
+      throw new Error("Invalid argument, must be ArrayBuffer");
+    }
+    const decoder = new wifRawStringDecoder();
+    try {
+      return btoa(decoder.decode(buffer));
+    } catch (err) {
+      throw new Error("Invalid input");
+    }
+  }
+}
