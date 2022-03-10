@@ -10,6 +10,68 @@ let clientHeight_CSS_in;
 let clientWidth_CSS_mm;
 let clientHeight_CSS_mm;
 
+class wifUser {
+  constructor(objParams) {
+    if (typeof objParams.username !== "string") {
+      throw new Error("Invalid Username");
+    }
+    this.stored = {};
+    this.stored.username = objParams.username;
+    if ((typeof objParams.authentication !== "object") || (objParams.authentication === null)) {
+      throw new Error("Invalid Authentication");
+    }
+    if (typeof objParams.authentication.type !== "string") {
+      throw new Error("Invalid Authentication Type");
+    }
+    switch (objParams.authentication.type) {
+      case "password":
+        if (!(objParams.authentication.hash is ArrayBuffer)) {
+          throw new Error("Invalid Hash");
+        }
+        if (objParams.authentication.hash.byteLength != 32) {
+          throw new Error("Invalid Hash");
+        }
+      default:
+        throw new Error("Invalid Authentication Type");
+    }
+  }
+  login() {
+  }
+  logout () {
+  }
+}
+
+let wifMapUsers = new Map();
+
+function wifAddUser(objParams) {
+  if (typeof objParams.username !== "string") {
+    throw new Error("Invalid Username");
+  }
+  wifMapUsers.set(objParams.username, new wifUser(objParams));
+}
+function wifRemoveUser(username) {
+  if (typeof username !== "string") {
+    throw new Error("Invalid Username");
+  }
+  wifMapUsers.delete(username);
+}
+
+function wifCreateFullClientDiv() {
+  let div = document.createElement();
+  div.style.display = "block";
+  div.style.position = "absolute";
+  div.style.left = "0px";
+  div.style.top = "0px";
+  div.style.width = clientWidth_CSS_px + "px";
+  div.style.height = clientHeight_CSS_px + "px";
+  divCalibration.redraw = function (width, height) {
+    redrawChildren(divCalibration, width, height);
+  };
+  document.body.appendChild(div);
+  return div;
+}
+
+
 let units = "IP";
 
 let CSS_multiplier = 1;
@@ -20,48 +82,38 @@ window.addEventListener("load", function (evt) {
   startCalibrationX();
 });
 
-window.addEventListener("resize", resizeClient);
+window.addEventListener("resize", wifResizeClient);
 
-function resizeClient() {
+function wifResizeClient() {
   clientWidth_CSS_px = window.innerWidth;
   clientHeight_CSS_px = window.innerHeight;
   clientWidth_CSS_in = clientWidth_CSS_px / 96;
   clientHeight_CSS_in = clientHeight_CSS_px / 96;
   clientWidth_CSS_mm = clientWidth_CSS_in * 25.4;
   clientHeight_CSS_mm = clientHeight_CSS_in * 25.4;
-  redrawChildren(document.body, clientWidth_CSS_px, clientHeight_CSS_px);
+  wifRedrawChildren(document.body, clientWidth_CSS_px, clientHeight_CSS_px);
 }
 
-function redrawChildren(parent, width, height) {
+function wifRedrawChildren(parent, width, height) {
   for (let child of parent.children) {
     if (child.redraw) {
-      child.redraw(clientWidth_CSS_px, clientHeight_CSS_px);
+      child.redraw(width, height);
     }
   }
 }
 
 function startCalibrationX() {
   let curr_calX_CSS_px = clientWidth_CSS_px * 0.80;
-  const divCalibration = document.createElement("div");
-  const divCalLine = document.createElement("div");
-  const divTarget = document.createElement("div");
-  const divCancel = document.createElement("div");
-  const divSelect = document.createElement("div");
-
-  resizeClient();
-  
+  const divCalibration = wifCreateFullClientDiv();
+  const divCalLine = wifCreateDiv(divCalibration);
+  const divTarget = wifCreateDiv(divCalibration);
+  const divCancel = wifCreateDiv(divCalibration);
+  const divSelect = wifCreateDiv(divCalibration);
+  wifResizeClient();
+  window.addEventListener("resize", updateTarget);
   // calibration interface
-  divCalibration.style.display = "block";
-  divCalibration.style.position = "absolute";
-  divCalibration.style.left = "0px";
-  divCalibration.style.top = "0px";
-  divCalibration.style.width = clientWidth_CSS_px + "px";
-  divCalibration.style.height = clientHeight_CSS_px + "px";
   divCalibration.style.backgroundColor = "#FFFFFF";
-  divCalibration.redraw = function (width, height) {
-    updateTarget();
-    redrawChildren(divCalibration, width, height);
-  };
+
   divCalLine.style.display = "block";
   divCalLine.style.position = "absolute";
   divCalLine.style.left = (clientWidth_CSS_px * 0.10) + "px";
