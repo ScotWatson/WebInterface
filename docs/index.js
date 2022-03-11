@@ -25,7 +25,7 @@ class wifUser {
     }
     switch (objParams.authentication.type) {
       case "password":
-        if (!(objParams.authentication.hash is ArrayBuffer)) {
+        if (!(objParams.authentication.hash instanceof ArrayBuffer)) {
           throw new Error("Invalid Hash");
         }
         if (objParams.authentication.hash.byteLength != 32) {
@@ -71,16 +71,53 @@ function wifCreateFullClientDiv() {
   return div;
 }
 
-
 let units = "IP";
 
 let CSS_multiplier = 1;
 
 window.addEventListener("load", function (evt) {
   document.body.style.overflow = "none";
-  resizeClient();
+  wifResizeClient();
   startCalibrationX();
 });
+
+class wifSelectorList extends HTMLElement {
+  constructor(objParams) {
+    if (!(objParams.options instanceof Array)) {
+      throw new Error('Invalid options');
+    }
+    super();
+    const thisShadow = this.attachShadow({mode: 'open'});
+    const style = document.createElement('style');
+    const divTop = document.createElement('div');
+    divTop.style.display = 'block';
+    divTop.style.position = 'absolute';
+    divTop.style.left = 0 + 'px';
+    divTop.style.top = 0 + 'px';
+    divTop.style.width = 0 + 'px';
+    divTop.style.height = 0 + 'px';
+    divTop.style.overflowX = 'hidden';
+    divTop.style.overflowY = 'scroll';
+    const divList = document.createElement('div');
+    let divItem;
+    for (let option of objParams.options) {
+      divItem = document.createElement('div');
+      divItem.style.display = 'block';
+      divItem.style.position = 'absolute';
+      divItem.style.left = 0 + 'px';
+      divItem.style.top = 0 + 'px';
+      divItem.style.width = 0 + 'px';
+      divItem.style.height = 0 + 'px';
+    }
+  }
+}
+
+customElements.define('wif-SelectorList', wifSelectorList);
+
+function wifShowUsers() {
+  const divMain = wifCreateFullClientDiv();
+  
+}
 
 window.addEventListener("resize", wifResizeClient);
 
