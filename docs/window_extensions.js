@@ -13,8 +13,10 @@ class wifRawStringEncoder {
       throw new Error("Invalid argument, must be string");
     }
     let retView = new UInt8Array(text.length);
-    for (let i = 0; i < text.length; ++i) {
-      retView[i] = String.charCodeAt(i);
+    let i = 0;
+    for (let char of text) {
+      retView[i] = char.charCodeAt(0);
+      ++i;
     }
     return retView.buffer;
   }
@@ -23,7 +25,7 @@ class wifRawStringDecoder {
   constructor() {
   }
   decode(buffer) {
-    if (!(buffer is ArrayBuffer)) {
+    if (!(buffer instanceof ArrayBuffer)) {
       throw new Error("Invalid argument, must be ArrayBuffer");
     }
     let ret = "";
@@ -52,7 +54,7 @@ class wifBase64Decoder {
   constructor() {
   }
   decode(buffer) {
-    if (!(buffer is ArrayBuffer)) {
+    if (!(buffer instanceof ArrayBuffer)) {
       throw new Error("Invalid argument, must be ArrayBuffer");
     }
     const decoder = new wifRawStringDecoder();
