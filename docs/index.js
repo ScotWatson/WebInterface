@@ -15,13 +15,9 @@ class wifUser {
     if (typeof objParams.username !== "string") {
       throw new Error("Invalid Username");
     }
-    this.stored = {};
-    this.stored.username = objParams.username;
+    this.username = objParams.username;
     if ((typeof objParams.authentication !== "object") || (objParams.authentication === null)) {
       throw new Error("Invalid Authentication");
-    }
-    if (typeof objParams.authentication.type !== "string") {
-      throw new Error("Invalid Authentication Type");
     }
     switch (objParams.authentication.type) {
       case "password":
@@ -34,6 +30,10 @@ class wifUser {
       default:
         throw new Error("Invalid Authentication Type");
     }
+  }
+  save() {
+    let ret = {};
+    ret.username = this.username;
   }
   login() {
   }
