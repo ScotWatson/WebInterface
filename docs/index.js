@@ -3,6 +3,164 @@
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+// Print Events
+window.addEventListener("beforeprint", function (evt) {
+  // fires when the associated document is about to be printed or previewed for printing
+});
+window.addEventListener("afterprint", function (evt) {
+  // fires after the associated document has started printing or the print preview has been closed
+});
+
+// PWA Events
+window.addEventListener("beforeinstallprompt", function (evt) {
+  // fires on devices when a user is about to be prompted to "install" a web application
+});
+
+// Focus Events
+window.addEventListener("blur", function (evt) {
+  // fires when an element has lost focus
+});
+window.addEventListener("focus", function (evt) {
+  // fires when an element has received focus
+});
+
+// Clipboard Events
+window.addEventListener("copy", function (evt) {
+  // fires when the user initiates a copy action through the browser's user interface
+});
+window.addEventListener("cut", function (evt) {
+  // fired when the user has initiated a "cut" action through the browser's user interface
+});
+window.addEventListener("paste", function (evt) {
+  // fires when the user has initiated a "paste" action through the browser's user interface
+});
+document.addEventListener("copy", function (evt) {
+  // fires when the user initiates a copy action through the browser's user interface
+});
+document.addEventListener("cut", function (evt) {
+  // fires when the user initiates a cut action through the browser's user interface
+});
+document.addEventListener("paste", function (evt) {
+  // fires when the user initiates a paste action through the browser's user interface
+});
+
+// Device Orientation Events
+window.addEventListener("deviceorientationabsolute", function (evt) {
+  // fires when absolute device orientation changes
+});
+
+window.addEventListener("error", function (evt) {
+  // fires on a Window object when a resource failed to load or couldn't be used — for example if a script has an execution error
+});
+window.addEventListener("gamepadconnected", function (evt) {
+  // fires when the browser detects that a gamepad has been connected or the first time a button/axis of the gamepad is used
+});
+window.addEventListener("hashchange", function (evt) {
+  // fires when the fragment identifier of the URL has changed (the part of the URL beginning with and following the # symbol)
+});
+window.addEventListener("languagechange", function (evt) {
+  // fires at the global scope object when the user's preferred language changes
+});
+
+// Message Events
+window.addEventListener("message", function (evt) {
+  // fires on a Window object when the window receives a message, for example from a call to Window.postMessage() from another browsing context
+});
+window.addEventListener("messageerror", function (evt) {
+  // fires on a Window object when it receives a message that can't be deserialized.
+});
+
+// Network Access Events
+window.addEventListener("offline", function (evt) {
+  // fires when the browser has lost access to the network and the value of Navigator.onLine switches to false
+});
+window.addEventListener("online", function (evt) {
+  // fires when the browser has gained access to the network and the value of Navigator.onLine switches to true
+});
+
+window.addEventListener("pagehide", function (evt) {
+  // fires when the browser hides the current page in the process of presenting a different page from the session's history
+});
+window.addEventListener("pageshow", function (evt) {
+  // fires when the browser displays the window's document due to navigation
+});
+
+window.addEventListener("popstate", function (evt) {
+  // fires when the active history entry changes while the user navigates the session history
+});
+window.addEventListener("storage", function (evt) {
+  // fires when a storage area (localStorage) has been modified in the context of another document
+});
+
+// Debugging Events
+window.addEventListener("rejectionhandled", function (evt) {
+  // fires when a JavaScript Promise is rejected but after the promise rejection has been handled
+});
+window.addEventListener("unhandledrejection", function (evt) {
+  // fires when a JavaScript Promise that has no rejection handler is rejected
+});
+
+// Page Loading Events
+window.addEventListener("DOMContentLoaded", function (evt) {
+  // fires when the HTML document has been completely parsed, and all deferred scripts (<script defer src="…"> and <script type="module">) have downloaded and executed
+});
+document.addEventListener("DOMContentLoaded", function (evt) {
+  // fires when the initial HTML document has been completely loaded and parsed, without waiting for stylesheets, images, and subframes to finish loading
+});
+window.addEventListener("load", function (evt) {
+  // fires when the whole page has loaded, including all dependent resources such as stylesheets and images
+});
+window.addEventListener("beforeunload", function (evt) {
+  // fires when the window, the document and its resources are about to be unloaded
+});
+window.addEventListener("unload", function (evt) {
+  // fires when the document or a child resource is being unloaded
+  // It is fired after:
+  //  - beforeunload (cancelable event)
+  //  - pagehide
+  // Use visibilitychange instead
+});
+
+document.addEventListener("fullscreenchange", function (evt) {
+  // fires immediately after the browser switches into or out of fullscreen mode
+});
+document.addEventListener("fullscreenerror", function (evt) {
+  // fires when the browser cannot switch to fullscreen mode
+});
+
+document.addEventListener("lostpointercapture", function (evt) {
+  // fires when a captured pointer is released
+});
+document.addEventListener("pointerlockchange", function (evt) {
+  // fires when the pointer is locked/unlocked
+});
+document.addEventListener("pointerlockerror", function (evt) {
+  // fires when locking the pointer failed (for technical reasons or because the permission was denied)
+});
+
+document.addEventListener("readystatechange", function (evt) {
+  // fires when the readyState attribute of a document has changed
+});
+document.addEventListener("scroll", function (evt) {
+  // fires when the document view has been scrolled
+});
+document.addEventListener("selectionchange", function (evt) {
+  // fires when the current Selection of a Document is changed
+});
+document.addEventListener("selectstart", function (evt) {
+  // fires when a user starts a new selection
+});
+document.addEventListener("visibilitychange", function (evt) {
+  // fires at the document when the contents of its tab have become visible or have been hidden
+});
+
+/*
+afterscriptexecute
+beforescriptexecute
+mssitemodejumplistitemremoved
+msthumbnailclick
+*/
+
 let clientWidth_CSS_px;
 let clientHeight_CSS_px;
 let clientWidth_CSS_in;
