@@ -3,6 +3,28 @@
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+const initPageTime = performance.now();
+
+const loadErrorHandlingModule = import("https://scotwatson.github.io/ErrorHandling/ErrorHandling.mjs");
+loadErrorHandlingModule.then(function (module) {
+  console.log(Object.getOwnPropertyNames(module));
+}, fail);
+
+const loadWindow = new Promise(function (resolve, reject) {
+  window.addEventListener("load", function (evt) {
+    resolve(evt);
+  });
+});
+
+Promise.all( [ loadWindow, loadErrorHandlingModule ] ).then(start, fail).catch(fail);
+
+let params = (new URL(window.location)).searchParams;
+let mode = params.get("mode");
+if (mode === undefined) {
+  mode = "";
+}
+
+
 // Print Events
 window.addEventListener("beforeprint", function (evt) {
   // fires when the associated document is about to be printed or previewed for printing
@@ -160,6 +182,42 @@ beforescriptexecute
 mssitemodejumplistitemremoved
 msthumbnailclick
 */
+
+let user;
+
+function start( [ evtWindow, moduleErrorHandling ] ) {
+  switch (mode) {
+    case "":
+      user = "";
+      loginScreen();
+      break;
+    case "standalone":
+      user = "Anonymous";
+      
+      break;
+    default:
+      user = "";
+      break;
+  }
+  const inp = document.createElement("input");
+  document.body.appendChild(inp);
+}
+
+function loginScreen() {
+  const inpUsername = document.createElement("input");
+  const inpPassword = document.createElement("input");
+  const btnLogin = document.createElement("div");
+  btnLogin.innerHTML = "Login";
+  btnLogin.addEventListener("click", function (evt) {
+    
+  });
+  const btnLoginAnonymous = document.createElement("div");
+  btnLoginAnonymous.innerHTML = "Login as Anonymous";
+  btnLoginAnonymous.addEventListener("click", function (evt) {
+    
+  });
+}
+
 
 let clientWidth_CSS_px;
 let clientHeight_CSS_px;
