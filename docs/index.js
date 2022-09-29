@@ -188,7 +188,18 @@ msthumbnailclick
 
 let user;
 
+let divScreenSize;
+let divScreenAvailWidth;
+let divScreenAvailHeight;
+let divClientWidth;
+let divClientHeight;
+let divInnerWidth;
+let divInnerHeight;
+let divScrollWidth;
+let divScrollHeight;
+
 function start( [ evtWindow, moduleErrorHandling ] ) {
+  window.addEventListener("resize", resize);
   switch (mode) {
     case "":
       user = "";
@@ -204,6 +215,37 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   }
   const inp = document.createElement("input");
   document.body.appendChild(inp);
+  divScreenSize = document.createElement("div");
+  document.body.appendChild(divScreenSize);
+  divScreenAvailWidth = document.createElement("div");
+  document.body.appendChild(divScreenAvailWidth);
+  divScreenAvailHeight = document.createElement("div");
+  document.body.appendChild(divScreenAvailHeight);
+  divClientWidth = document.createElement("div");
+  document.body.appendChild(divClientWidth);
+  divClientHeight = document.createElement("div");
+  document.body.appendChild(divClientHeight);
+  divInnerWidth = document.createElement("div");
+  document.body.appendChild(divInnerWidth);
+  divInnerHeight = document.createElement("div");
+  document.body.appendChild(divInnerHeight);
+  divScrollWidth = document.createElement("div");
+  document.body.appendChild(divScrollWidth);
+  divScrollHeight = document.createElement("div");
+  document.body.appendChild(divScrollHeight);
+  resize();
+}
+
+function resize() {
+  divScreenSize.innerHTML = "screen size = " + screen.width + " x " + screen.height;
+  divScreenAvailWidth.innerHTML = "screen.availWidth = " + screen.availWidth;
+  divScreenAvailHeight.innerHTML = "screen.availHeight = " + screen.availHeight;
+  divClientWidth.innerHTML = "document.documentElement.clientWidth = " + document.documentElement.clientWidth;
+  divClientHeight.innerHTML = "document.documentElement.clientHeight = " + document.documentElement.clientHeight;
+  divInnerWidth.innerHTML = "window.innerWidth = " + window.innerWidth;
+  divInnerHeight.innerHTML = "window.innerHeight = " + window.innerHeight;
+  divScrollWidth.innerHTML = "document.body.scrollWidth = " + document.body.scrollWidth;
+  divScrollHeight.innerHTML = "document.body.scrollHeight = " + document.body.scrollHeight;
 }
 
 function loginScreen() {
@@ -337,9 +379,9 @@ function wifShowUsers() {
   const divMain = wifCreateFullClientDiv();
   
 }
-
+/*
 window.addEventListener("resize", wifResizeClient);
-
+*/
 function wifResizeClient() {
   clientWidth_CSS_px = window.innerWidth;
   clientHeight_CSS_px = window.innerHeight;
@@ -688,15 +730,6 @@ function remainder() {
     }
   }
 
-  let divScreenSize;
-  let divScreenAvailWidth;
-  let divScreenAvailHeight;
-  let divClientWidth;
-  let divClientHeight;
-  let divInnerWidth;
-  let divInnerHeight;
-  let divScrollWidth;
-  let divScrollHeight;
 
   function windowLoad() {
     // Create button to start sending notifications
@@ -742,17 +775,6 @@ function remainder() {
 /*
   window.addEventListener("resize", resize);
 */
-  function resize() {
-    divScreenSize.innerHTML = "screen size = " + screen.width + " x " + screen.height;
-    divScreenAvailWidth.innerHTML = "screen.availWidth = " + screen.availWidth;
-    divScreenAvailHeight.innerHTML = "screen.availHeight = " + screen.availHeight;
-    divClientWidth.innerHTML = "document.documentElement.clientWidth = " + document.documentElement.clientWidth;
-    divClientHeight.innerHTML = "document.documentElement.clientHeight = " + document.documentElement.clientHeight;
-    divInnerWidth.innerHTML = "window.innerWidth = " + window.innerWidth;
-    divInnerHeight.innerHTML = "window.innerHeight = " + window.innerHeight;
-    divScrollWidth.innerHTML = "document.body.scrollWidth = " + document.body.scrollWidth;
-    divScrollHeight.innerHTML = "document.body.scrollHeight = " + document.body.scrollHeight;
-  }
 
   window.addEventListener("message", function (e) {
     console.log(e);
