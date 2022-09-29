@@ -290,13 +290,13 @@ function wifCreateFullClientDiv() {
 let units = "IP";
 
 let CSS_multiplier = 1;
-
+/*
 window.addEventListener("load", function (evt) {
   document.body.style.overflow = "none";
   wifResizeClient();
   startCalibrationX();
 });
-
+*/
 class wifSelectorList extends HTMLElement {
   constructor(objParams) {
     if (!(objParams.options instanceof Array)) {
@@ -695,7 +695,7 @@ function remainder() {
   let divScrollWidth;
   let divScrollHeight;
 
-  window.addEventListener("load", function () {
+  function windowLoad() {
     // Create button to start sending notifications
     if ("Notification" in window) {
       let btnStartNotifications = document.createElement("button");
@@ -735,10 +735,10 @@ function remainder() {
     divScrollHeight = document.createElement("div");
     document.body.appendChild(divScrollHeight);
     resize();
-  });
-
+  }
+/*
   window.addEventListener("resize", resize);
-
+*/
   function resize() {
     divScreenSize.innerHTML = "screen size = " + screen.width + " x " + screen.height;
     divScreenAvailWidth.innerHTML = "screen.availWidth = " + screen.availWidth;
