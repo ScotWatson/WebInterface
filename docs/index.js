@@ -24,6 +24,9 @@ if (mode === undefined) {
   mode = "";
 }
 
+function fail(err) {
+  console.log(err);
+}
 
 // Print Events
 window.addEventListener("beforeprint", function (evt) {
