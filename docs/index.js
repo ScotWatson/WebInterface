@@ -222,8 +222,10 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   divScreenAvailHeight = document.createElement("div");
   document.body.appendChild(divScreenAvailHeight);
   divClientWidth = document.createElement("div");
+  divClientWidth.style.backgroundColor = "#0000FF";
   document.body.appendChild(divClientWidth);
   divClientHeight = document.createElement("div");
+  divClientHeight.style.backgroundColor = "#0000FF";
   document.body.appendChild(divClientHeight);
   divInnerWidth = document.createElement("div");
   document.body.appendChild(divInnerWidth);
@@ -233,6 +235,18 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   document.body.appendChild(divScrollWidth);
   divScrollHeight = document.createElement("div");
   document.body.appendChild(divScrollHeight);
+  const divResize = document.createElement("div");
+  divResize.style.backgroundColor = "#808080";
+  divResize.style.width = "50px";
+  divResize.style.height = "100px";
+  divResize.addEventListener("click", function (evt) {
+    if (divResize.style.height === "1000px") {
+      divResize.style.height = "100px";
+    } else {
+      divResize.style.height = "1000px";
+    }
+  });
+  document.body.appendChild(divResize);
   resize();
 }
 
