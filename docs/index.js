@@ -239,6 +239,16 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   btnResize.addEventListener("click", resize);
   btnResize.innerHTML = "Resize";
   document.body.appendChild(btnResize);
+  const btnFullscreen = document.createElement("button");
+  btnFullscreen.addEventListener("click", function (evt) {
+    if (document.fullscreenElement === null) {
+      document.body.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  });
+  btnFullscreen.innerHTML = "Fullscreen";
+  document.body.appendChild(btnFullscreen);
   const divResize = document.createElement("div");
   divResize.style.backgroundColor = "#808080";
   divResize.style.width = "50px";
