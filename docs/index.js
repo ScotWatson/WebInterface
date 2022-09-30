@@ -285,6 +285,10 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     }
   });
   document.body.appendChild(divResize);
+  const divWindowSize = document.createElement("div");
+  divWindowSize.style.opacity = 0.25;
+  divWindowSize.style.backgroundColor = "blue";
+  document.body.appendChild(divWindowSize);
   resize();
 }
 
@@ -298,6 +302,8 @@ function resize() {
   divInnerHeight.innerHTML = "window.innerHeight = " + window.innerHeight;
   divScrollWidth.innerHTML = "document.body.scrollWidth = " + document.body.scrollWidth;
   divScrollHeight.innerHTML = "document.body.scrollHeight = " + document.body.scrollHeight;
+  divWindowSize.style.width = window.innerWidth + "px";
+  divWindowSize.style.height = window.innerHeight + "px";
 }
 
 function loginScreen() {
