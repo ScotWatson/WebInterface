@@ -292,6 +292,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   divWindowSize.style.top = "0px";
   divWindowSize.style.opacity = 0.25;
   divWindowSize.style.backgroundColor = "blue";
+  divWindowSize.style.zIndex = "-1";
   document.body.appendChild(divWindowSize);
   resize();
 }
