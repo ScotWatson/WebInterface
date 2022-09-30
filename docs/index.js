@@ -237,6 +237,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   document.body.appendChild(divScrollHeight);
   const btnResize = document.createElement("button");
   btnResize.addEventListener("click", resize);
+  btnResize.innerHTML = "Resize";
   document.body.appendChild(btnResize);
   const divResize = document.createElement("div");
   divResize.style.backgroundColor = "#808080";
