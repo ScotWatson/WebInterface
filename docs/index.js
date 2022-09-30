@@ -238,24 +238,26 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   document.body.appendChild(divScrollHeight);
   document.body.style.backgroundColor = "#FFFFFF";
   
+  document.body.appendChild(document.createElement("br"));
   const btnOverflowAuto = document.createElement("button");
   btnOverflowAuto.addEventListener("click", function (evt) {
     document.body.style.overflow = "auto";
   });
-  btnOverflowAuto.innerHTML = "Resize";
+  btnOverflowAuto.innerHTML = "Auto";
   document.body.appendChild(btnOverflowAuto);
   const btnOverflowHidden = document.createElement("button");
   btnOverflowHidden.addEventListener("click", function (evt) {
     document.body.style.overflow = "hidden";
   });
-  btnOverflowHidden.innerHTML = "Resize";
+  btnOverflowHidden.innerHTML = "Hidden";
   document.body.appendChild(btnOverflowHidden);
   const btnOverflowNone = document.createElement("button");
   btnOverflowNone.addEventListener("click", function (evt) {
     document.body.style.overflow = "none";
   });
-  btnOverflowNone.innerHTML = "Resize";
+  btnOverflowNone.innerHTML = "None";
   document.body.appendChild(btnOverflowNone);
+  document.body.appendChild(document.createElement("br"));
   document.body.appendChild(document.createElement("br"));
   const btnResize = document.createElement("button");
   btnResize.addEventListener("click", resize);
