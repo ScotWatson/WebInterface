@@ -213,6 +213,8 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
       user = "";
       break;
   }
+  document.body.style.margin = "0";
+  document.body.style.overflow = "none";
   const inp = document.createElement("input");
   document.body.appendChild(inp);
   divScreenSize = document.createElement("div");
