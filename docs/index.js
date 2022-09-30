@@ -197,6 +197,7 @@ let divInnerWidth;
 let divInnerHeight;
 let divScrollWidth;
 let divScrollHeight;
+let divWindowSize;
 
 function start( [ evtWindow, moduleErrorHandling ] ) {
   window.addEventListener("resize", resize);
@@ -285,7 +286,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     }
   });
   document.body.appendChild(divResize);
-  const divWindowSize = document.createElement("div");
+  divWindowSize = document.createElement("div");
   divWindowSize.style.opacity = 0.25;
   divWindowSize.style.backgroundColor = "blue";
   document.body.appendChild(divWindowSize);
