@@ -287,6 +287,9 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   });
   document.body.appendChild(divResize);
   divWindowSize = document.createElement("div");
+  divWindowSize.style.position = "absolute";
+  divWindowSize.style.left = "0px";
+  divWindowSize.style.top = "0px";
   divWindowSize.style.opacity = 0.25;
   divWindowSize.style.backgroundColor = "blue";
   document.body.appendChild(divWindowSize);
