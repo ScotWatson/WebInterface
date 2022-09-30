@@ -243,7 +243,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   const btnFullscreen = document.createElement("button");
   btnFullscreen.addEventListener("click", function (evt) {
     if (document.fullscreenElement === null) {
-      document.body.requestFullscreen();
+      document.documentElement.requestFullscreen();
     } else {
       document.exitFullscreen();
     }
