@@ -214,7 +214,6 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
       break;
   }
   document.body.style.margin = "0";
-  document.body.style.overflow = "none";
   const inp = document.createElement("input");
   document.body.appendChild(inp);
   divScreenSize = document.createElement("div");
@@ -238,6 +237,26 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   divScrollHeight = document.createElement("div");
   document.body.appendChild(divScrollHeight);
   document.body.style.backgroundColor = "#FFFFFF";
+  
+  const btnOverflowAuto = document.createElement("button");
+  btnOverflowAuto.addEventListener("click", function (evt) {
+    document.body.style.overflow = "auto";
+  });
+  btnOverflowAuto.innerHTML = "Resize";
+  document.body.appendChild(btnOverflowAuto);
+  const btnOverflowHidden = document.createElement("button");
+  btnOverflowHidden.addEventListener("click", function (evt) {
+    document.body.style.overflow = "hidden";
+  });
+  btnOverflowHidden.innerHTML = "Resize";
+  document.body.appendChild(btnOverflowHidden);
+  const btnOverflowNone = document.createElement("button");
+  btnOverflowNone.addEventListener("click", function (evt) {
+    document.body.style.overflow = "none";
+  });
+  btnOverflowNone.innerHTML = "Resize";
+  document.body.appendChild(btnOverflowNone);
+  document.body.appendChild(document.createElement("br"));
   const btnResize = document.createElement("button");
   btnResize.addEventListener("click", resize);
   btnResize.innerHTML = "Resize";
