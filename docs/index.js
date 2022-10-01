@@ -229,6 +229,9 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   inp.style.top = "50px";
   inp.style.width = "100%";
   inp.style.height = "50px";
+  inp.style.padding = "0px";
+  inp.style.border = "5px solid black";
+  inp.style.margin = "0px";
   inp.setAttribute("placeholder", "Username");
   document.body.appendChild(inp);
   const users = [ "vnfkjl iove", "oipfe jwna", "pkojij onj", "bjbh bfty", "uiunjwb nsw", "oknwn dips" ];
