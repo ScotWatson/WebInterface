@@ -246,8 +246,8 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     const divUser = document.createElement("div");
     divUser.innerHTML = thisUser;
     divUser.style.display = "block";
-    divUser.style.width = "25%";
-    divUser.style.height = "25%";
+    divUser.style.width = "100px";
+    divUser.style.height = "100px";
     divUser.style.backgroundColor = "#E0E0E0";
     divUsers.appendChild(divUser);
   }
