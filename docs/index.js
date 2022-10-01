@@ -215,6 +215,20 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   inp.style.height = "50px";
   inp.setAttribute("placeholder", "Username");
   document.body.appendChild(inp);
+  const users = [ "vnfkjl iove", "oipfe jwna", "pkojij onj", "bjbh bfty", "uiunjwb nsw", "oknwn dips" ];
+  const divUsers = document.createElement("div");
+  divUsers.style.display = "flex";
+  divUsers.style.flexFlow = "row wrap";
+  divUsers.style.justifyContent = "space-around";
+  document.body.appendChild(divUsers);
+  for (const thisUser of users) {
+    const divUser = document.createElement("div");
+    divUser.innerHTML = thisUser;
+    divUser.style.display = "block";
+    divUser.style.width = "25%";
+    divUser.style.width = "25%";
+    divUsers.appendChild(divUser);
+  }
   resize();
 }
 
