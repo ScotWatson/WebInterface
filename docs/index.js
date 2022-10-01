@@ -206,11 +206,27 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   document.body.style.margin = "0";
   document.body.style.overflow = "hidden";
   document.body.style.backgroundColor = "#808080";
+  const btnFullscreen = document.createElement("div");
+  btnFullscreen.style.display = "block";
+  btnFullscreen.style.position = "absolute";
+  btnFullscreen.style.top = "0px";
+  btnFullscreen.style.right = "0px";
+  btnFullscreen.style.width = "50px";
+  btnFullscreen.style.height = "50px";
+  btnFullscreen.style.backgroundColor = "red";
+  btnFullscreen.addEventListener("click", function (evt) {
+    if (document.fullscreenElement === null) {
+      document.documentElement.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  });
+  document.body.appendChild(btnFullscreen);
   const inp = document.createElement("input");
   inp.style.display = "block";
   inp.style.position = "absolute";
   inp.style.left = "0px";
-  inp.style.top = "0px";
+  inp.style.top = "50px";
   inp.style.width = "100%";
   inp.style.height = "50px";
   inp.setAttribute("placeholder", "Username");
