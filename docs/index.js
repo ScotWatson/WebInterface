@@ -234,6 +234,11 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   const users = [ "vnfkjl iove", "oipfe jwna", "pkojij onj", "bjbh bfty", "uiunjwb nsw", "oknwn dips" ];
   const divUsers = document.createElement("div");
   divUsers.style.display = "flex";
+  divUsers.style.position = "absolute";
+  divUsers.style.left = "0px";
+  divUsers.style.top = "100px";
+  divUsers.style.width = "100%";
+  divUsers.style.height = "100%";
   divUsers.style.flexFlow = "row wrap";
   divUsers.style.justifyContent = "space-around";
   document.body.appendChild(divUsers);
@@ -242,7 +247,8 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     divUser.innerHTML = thisUser;
     divUser.style.display = "block";
     divUser.style.width = "25%";
-    divUser.style.width = "25%";
+    divUser.style.height = "25%";
+    divUser.style.backgroundColor = "#E0E0E0";
     divUsers.appendChild(divUser);
   }
   resize();
