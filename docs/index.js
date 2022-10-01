@@ -232,6 +232,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   inp.style.padding = "0px";
   inp.style.border = "5px solid black";
   inp.style.margin = "0px";
+  inp.style.boxSizing = "border-box";
   inp.setAttribute("placeholder", "Username");
   document.body.appendChild(inp);
   const users = [ "vnfkjl iove", "oipfe jwna", "pkojij onj", "bjbh bfty", "uiunjwb nsw", "oknwn dips" ];
@@ -244,6 +245,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   divUsers.style.height = "100%";
   divUsers.style.flexFlow = "row wrap";
   divUsers.style.justifyContent = "space-around";
+  divUsers.style.boxSizing = "border-box";
   document.body.appendChild(divUsers);
   for (const thisUser of users) {
     const divUser = document.createElement("div");
@@ -252,6 +254,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     divUser.style.width = "100px";
     divUser.style.height = "100px";
     divUser.style.backgroundColor = "#E0E0E0";
+    divUser.style.boxSizing = "border-box";
     divUsers.appendChild(divUser);
   }
   resize();
