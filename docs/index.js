@@ -310,24 +310,31 @@ function resize() {
 
 function mainHamburgerMenu() {
   const divMenu = document.createElement("div");
-  divMenu.style.display = "flex";
-  divMenu.style.flexFlow = "column wrap";
-  divMenu.style.justifyContent = "space-around";
+  divMenu.style.display = "block";
   divMenu.style.position = "absolute";
   divMenu.style.left = "0";
   divMenu.style.top = "0";
   divMenu.style.width = "100%";
   divMenu.style.height = "100%";
   divMenu.style.boxSizing = "border-box";
-  divMenu.style.backgroundColor = "#E0E000";
-  divMenu.style.margin = "0";
-  divMenu.style.border = "0";
-  divMenu.style.paddingLeft = "0";
-  divMenu.style.paddingRight = "10%";
-  divMenu.style.paddingTop = "0";
-  divMenu.style.paddingBottom = "0";
-  divMenu.style.overflow = "hidden auto";
   document.body.appendChild(divMenu);
+  const divScroll = document.createElement("div");
+  divScroll.style.display = "flex";
+  divScroll.style.flexFlow = "column wrap";
+  divScroll.style.justifyContent = "space-around";
+  divScroll.style.top = "10%";
+  divScroll.style.width = "100%";
+  divScroll.style.height = "90%";
+  divScroll.style.boxSizing = "border-box";
+  divScroll.style.backgroundColor = "#E0E000";
+  divScroll.style.margin = "0";
+  divScroll.style.border = "0";
+  divScroll.style.paddingLeft = "0";
+  divScroll.style.paddingRight = "10%";
+  divScroll.style.paddingTop = "0";
+  divScroll.style.paddingBottom = "0";
+  divScroll.style.overflow = "hidden auto";
+  divMenu.appendChild(divScroll);
   const items = [
     {
       caption: "Toggle Full Screen",
@@ -339,18 +346,30 @@ function mainHamburgerMenu() {
     },
   ];
   const btnCancel = document.createElement("div");
-  btnCancel.style.width = "100%";
-  btnCancel.style.height = "50px";
+  btnCancel.style.display = "block";
+  btnCancel.style.position = "absolute";
+  btnCancel.style.top = "0";
+  btnCancel.style.right = "0";
+  btnCancel.style.width = (px_per_inch * min_touch_inch) + "px";
+  btnCancel.style.height = (px_per_inch * min_touch_inch) + "px";
   btnCancel.style.boxSizing = "border-box";
   btnCancel.style.backgroundColor = "#00E0E0";
   btnCancel.style.margin = "0";
   btnCancel.style.border = "0";
-  btnCancel.style.padding = "5%";
-  btnCancel.appendChild(document.createTextNode(item.caption));
+  btnCancel.style.padding = "0";
   btnCancel.addEventListener("click", function (evt) {
     divMenu.remove();
   });
-  divMenu.appendChild(btnItem);
+  divMenu.appendChild(btnCancel);
+  const imgCancel = document.createElement("img");
+  imgCancel.src = "LeftArrowIcon.png"
+  imgCancel.style.width = "100%";
+  imgCancel.style.height = "100%";
+  imgCancel.style.boxSizing = "border-box";
+  imgCancel.style.margin = "0";
+  imgCancel.style.border = "0";
+  imgCancel.style.padding = "0";
+  btnCancel.appendChild(imgCancel);
   for (const item of items) {
     const btnItem = document.createElement("div");
     btnItem.style.width = "100%";
@@ -365,7 +384,7 @@ function mainHamburgerMenu() {
       divMenu.remove();
       item.action();
     });
-    divMenu.appendChild(btnItem);
+    divScroll.appendChild(btnItem);
   }
   function toggleFullscreen() {
     if (document.fullscreenElement === null) {
