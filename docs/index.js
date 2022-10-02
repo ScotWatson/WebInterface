@@ -3,6 +3,12 @@
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+const min_touch_inch = 0.5; // minimum size of touch object (in inches)
+const min_text_ratio = 0.007; // ratio of text height to viewing distance (unitless)
+
+const px_per_inch = 96;
+const view_dist_inch = 24;
+
 const initPageTime = performance.now();
 
 const loadErrorHandlingModule = import("https://scotwatson.github.io/ErrorHandling/ErrorHandling.mjs");
@@ -211,8 +217,8 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   btnHamburgerMenu.style.position = "absolute";
   btnHamburgerMenu.style.top = "0px";
   btnHamburgerMenu.style.right = "0px";
-  btnHamburgerMenu.style.width = "50px";
-  btnHamburgerMenu.style.height = "50px";
+  btnHamburgerMenu.style.width = (px_per_inch * min_touch_inch) + "px";
+  btnHamburgerMenu.style.height = (px_per_inch * min_touch_inch) + "px";
   btnHamburgerMenu.style.backgroundColor = "white";
   btnHamburgerMenu.style.boxSizing = "border-box";
   btnHamburgerMenu.style.margin = "0px";
@@ -232,41 +238,54 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   imgHamburgerMenu.style.height = "100%";
   imgHamburgerMenu.style.backgroundColor = "white";
   btnHamburgerMenu.appendChild(imgHamburgerMenu);
-  
-  const inp = document.createElement("input");
-  inp.style.display = "block";
-  inp.style.position = "absolute";
-  inp.style.left = "0px";
-  inp.style.top = "50px";
-  inp.style.width = "100%";
-  inp.style.height = "50px";
-  inp.style.padding = "0px";
-  inp.style.border = "5px solid black";
-  inp.style.margin = "0px";
-  inp.style.boxSizing = "border-box";
-  inp.setAttribute("placeholder", "Username");
+  const inpUsername = document.createElement("input");
+  inpUsername.style.display = "block";
+  inpUsername.style.position = "absolute";
+  inpUsername.style.left = "0px";
+  inpUsername.style.top = (px_per_inch * min_touch_inch) + "px";
+  inpUsername.style.width = "100%";
+  inpUsername.style.height = (px_per_inch * min_touch_inch) + "px";
+  inpUsername.style.padding = "0px";
+  inpUsername.style.border = "5px solid black";
+  inpUsername.style.margin = "0px";
+  inpUsername.style.boxSizing = "border-box";
+  inpUsername.style.fontSize = (px_per_inch * min_text_ratio * view_dist_inch) + "px";
+  inpUsername.setAttribute("placeholder", "Username");
   document.body.appendChild(inp);
   const users = [ "vnfkjl iove", "oipfe jwna", "pkojij onj", "bjbh bfty", "uiunjwb nsw", "oknwn dips" ];
   const divUsers = document.createElement("div");
   divUsers.style.display = "flex";
-  divUsers.style.position = "absolute";
-  divUsers.style.left = "0px";
-  divUsers.style.top = "100px";
-  divUsers.style.width = "100%";
-  divUsers.style.height = "100%";
   divUsers.style.flexFlow = "row wrap";
   divUsers.style.justifyContent = "space-around";
   divUsers.style.boxSizing = "border-box";
+  divUsers.style.position = "absolute";
+  divUsers.style.left = "0px";
+  divUsers.style.top = 2 * (px_per_inch * min_touch_inch) + "px";
+  divUsers.style.width = "100%";
+  divUsers.style.height = "100%";
   document.body.appendChild(divUsers);
   for (const thisUser of users) {
     const divUser = document.createElement("div");
-    divUser.innerHTML = thisUser;
-    divUser.style.display = "block";
-    divUser.style.width = "100px";
-    divUser.style.height = "100px";
-    divUser.style.backgroundColor = "#E0E0E0";
+    divUser.style.display = "flex";
+    divUsers.style.flexFlow = "column wrap";
+    divUsers.style.justifyContent = "space-around";
     divUser.style.boxSizing = "border-box";
-    divUser.style.userSelect = "none";
+    divUser.style.width = 2 * (px_per_inch * min_touch_inch) + "px";
+    divUser.style.height = 2 * (px_per_inch * min_touch_inch) + "px";
+    const imgUser = document.createElement("img");
+    imgUser.src = "Anonymous.webp";
+    imgUser.style.width = "80%";
+    imgUser.style.height = "80%";
+    const divUsername = document.createElement("div");
+    divUsername.innerHTML = thisUser;
+    divUsername.style.display = "block";
+    divUsername.style.boxSizing = "border-box";
+    divUsername.style.backgroundColor = "#E0E080";
+    divUsername.style.fontSize = (px_per_inch * min_text_ratio * view_dist_inch) + "px";
+    divUsername.style.userSelect = "none";
+    divUsername.style.textAlign = "center";
+    divUser.appendChild(imgUser);
+    divUser.appendChild(divUsername);
     divUsers.appendChild(divUser);
   }
   resize();
@@ -279,7 +298,7 @@ function resize() {
 function mainHamburgerMenu() {
   const divMenu = document.createElement("div");
   divMenu.style.display = "flex";
-  divMenu.style.flexFlow = "row wrap";
+  divMenu.style.flexFlow = "column wrap";
   divMenu.style.justifyContent = "space-around";
   divMenu.style.position = "absolute";
   divMenu.style.left = "0";
@@ -294,6 +313,7 @@ function mainHamburgerMenu() {
   divMenu.style.paddingRight = "10%";
   divMenu.style.paddingTop = "0";
   divMenu.style.paddingBottom = "0";
+  divMenu.style.overflow = "hidden auto";
   document.body.appendChild(divMenu);
   const items = [
     {
@@ -305,6 +325,19 @@ function mainHamburgerMenu() {
       action: addUser,
     },
   ];
+  const btnCancel = document.createElement("div");
+  btnCancel.style.width = "100%";
+  btnCancel.style.height = "50px";
+  btnCancel.style.boxSizing = "border-box";
+  btnCancel.style.backgroundColor = "#00E0E0";
+  btnCancel.style.margin = "0";
+  btnCancel.style.border = "0";
+  btnCancel.style.padding = "5%";
+  btnCancel.appendChild(document.createTextNode(item.caption));
+  btnCancel.addEventListener("click", function (evt) {
+    divMenu.remove();
+  });
+  divMenu.appendChild(btnItem);
   for (const item of items) {
     const btnItem = document.createElement("div");
     btnItem.style.width = "100%";
