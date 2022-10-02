@@ -321,22 +321,30 @@ function mainHamburgerMenu() {
   divMenu.style.boxSizing = "border-box";
   document.body.appendChild(divMenu);
   const divScroll = document.createElement("div");
-  divScroll.style.display = "flex";
-  divScroll.style.flexFlow = "column wrap";
-  divScroll.style.justifyContent = "space-around";
+  divScroll.style.display = "block";
+  divScroll.style.position = "absolute";
   divScroll.style.top = "10%";
   divScroll.style.width = "100%";
   divScroll.style.height = "90%";
   divScroll.style.boxSizing = "border-box";
-  divScroll.style.backgroundColor = "#E0E000";
+  divScroll.style.backgroundColor = "#E08000";
   divScroll.style.margin = "0";
   divScroll.style.border = "0";
-  divScroll.style.paddingLeft = (px_per_inch * min_touch_inch) + "px";
-  divScroll.style.paddingRight = "0";
-  divScroll.style.paddingTop = "0";
-  divScroll.style.paddingBottom = "0";
+  divScroll.style.padding = "0";
   divScroll.style.overflow = "hidden auto";
-  divMenu.appendChild(divScroll);
+  const divList = document.createElement("div");
+  divList.style.display = "flex";
+  divList.style.flexFlow = "column wrap";
+  divList.style.justifyContent = "space-around";
+  divList.style.boxSizing = "border-box";
+  divList.style.backgroundColor = "#E0E000";
+  divList.style.margin = "0";
+  divList.style.border = "0";
+  divList.style.paddingLeft = (px_per_inch * min_touch_inch) + "px";
+  divList.style.paddingRight = "0";
+  divList.style.paddingTop = "0";
+  divList.style.paddingBottom = "0";
+  divScroll.appendChild(divList);
   const items = [
     {
       caption: "Toggle Full Screen",
