@@ -240,6 +240,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   btnHamburgerMenu.appendChild(imgHamburgerMenu);
   const inpUsername = document.createElement("input");
   inpUsername.style.display = "block";
+  inpUsername.style.boxSizing = "border-box";
   inpUsername.style.position = "absolute";
   inpUsername.style.left = "0px";
   inpUsername.style.top = (px_per_inch * min_touch_inch) + "px";
@@ -248,7 +249,6 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   inpUsername.style.padding = "0px";
   inpUsername.style.border = "5px solid black";
   inpUsername.style.margin = "0px";
-  inpUsername.style.boxSizing = "border-box";
   inpUsername.style.fontSize = (px_per_inch * min_text_ratio * view_dist_inch) + "px";
   inpUsername.setAttribute("placeholder", "Username");
   document.body.appendChild(inpUsername);
@@ -261,6 +261,12 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   divUsers.style.position = "absolute";
   divUsers.style.left = "0px";
   divUsers.style.top = 2 * (px_per_inch * min_touch_inch) + "px";
+  inpUsername.style.paddingLeft = (px_per_inch * min_touch_inch) + "px";
+  inpUsername.style.paddingRight = 0 + "px";
+  inpUsername.style.paddingTop = 0 + "px";
+  inpUsername.style.paddingBottom = 0 + "px";
+  inpUsername.style.border = "0px";
+  inpUsername.style.margin = "0px";
   divUsers.style.width = "100%";
   divUsers.style.height = "100%";
   document.body.appendChild(divUsers);
