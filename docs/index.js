@@ -251,7 +251,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   inpUsername.style.boxSizing = "border-box";
   inpUsername.style.fontSize = (px_per_inch * min_text_ratio * view_dist_inch) + "px";
   inpUsername.setAttribute("placeholder", "Username");
-  document.body.appendChild(inp);
+  document.body.appendChild(inpUsername);
   const users = [ "vnfkjl iove", "oipfe jwna", "pkojij onj", "bjbh bfty", "uiunjwb nsw", "oknwn dips" ];
   const divUsers = document.createElement("div");
   divUsers.style.display = "flex";
