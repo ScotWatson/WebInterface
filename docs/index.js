@@ -5,11 +5,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 "use strict";
 
-const min_touch_inch = 0.5; // minimum size of touch object (in inches)
-const min_text_ratio = 0.007; // ratio of text height to viewing distance (unitless)
+let min_touch_inch = 0.5; // minimum size of touch object (in inches)
+let min_text_ratio = 0.007; // ratio of text height to viewing distance (unitless)
 
-const px_per_inch = 96;
-const view_dist_inch = 24;
+let px_per_inch = 96;
+let view_dist_inch = 24;
 
 const initPageTime = performance.now();
 
@@ -329,8 +329,8 @@ function mainHamburgerMenu() {
   divScroll.style.backgroundColor = "#E0E000";
   divScroll.style.margin = "0";
   divScroll.style.border = "0";
-  divScroll.style.paddingLeft = "0";
-  divScroll.style.paddingRight = "10%";
+  divScroll.style.paddingLeft = (px_per_inch * min_touch_inch) + "px";
+  divScroll.style.paddingRight = "0";
   divScroll.style.paddingTop = "0";
   divScroll.style.paddingBottom = "0";
   divScroll.style.overflow = "hidden auto";
