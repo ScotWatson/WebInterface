@@ -223,7 +223,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   });
   document.body.appendChild(btnHamburgerMenu);
   const imgHamburgerMenu = document.createElement("img");
-  img.src = "Hamburger_icon.svg";
+  imgHamburgerMenu.src = "Hamburger_icon.svg";
   imgHamburgerMenu.style.display = "block";
   imgHamburgerMenu.style.position = "absolute";
   imgHamburgerMenu.style.top = "0px";
