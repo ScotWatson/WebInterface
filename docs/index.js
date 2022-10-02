@@ -332,6 +332,7 @@ function mainHamburgerMenu() {
   divScroll.style.border = "0";
   divScroll.style.padding = "0";
   divScroll.style.overflow = "hidden auto";
+  divMenu.appendChild(divScroll);
   const divList = document.createElement("div");
   divList.style.display = "flex";
   divList.style.flexFlow = "column wrap";
