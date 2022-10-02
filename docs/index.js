@@ -227,23 +227,12 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   imgHamburgerMenu.style.display = "block";
   imgHamburgerMenu.style.position = "absolute";
   imgHamburgerMenu.style.top = "0px";
-  imgHamburgerMenu.style.left = "0px";
+  imgHamburgerMenu.style.right = "0px";
   imgHamburgerMenu.style.width = "100%";
   imgHamburgerMenu.style.height = "100%";
   imgHamburgerMenu.style.backgroundColor = "white";
   btnHamburgerMenu.appendChild(imgHamburgerMenu);
   
-  const btnFullscreen = document.createElement("div");
-  btnFullscreen.style.display = "block";
-  btnFullscreen.style.position = "absolute";
-  btnFullscreen.style.top = "0px";
-  btnFullscreen.style.right = "0px";
-  btnFullscreen.style.width = "50px";
-  btnFullscreen.style.height = "50px";
-  btnFullscreen.style.backgroundColor = "red";
-  btnFullscreen.addEventListener("click", function (evt) {
-  });
-  document.body.appendChild(btnFullscreen);
   const inp = document.createElement("input");
   inp.style.display = "block";
   inp.style.position = "absolute";
@@ -277,6 +266,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     divUser.style.height = "100px";
     divUser.style.backgroundColor = "#E0E0E0";
     divUser.style.boxSizing = "border-box";
+    divUser.style.userSelect = "none";
     divUsers.appendChild(divUser);
   }
   resize();
@@ -289,6 +279,8 @@ function resize() {
 function mainHamburgerMenu() {
   const divMenu = document.createElement("div");
   divMenu.style.display = "flex";
+  divMenu.style.flexFlow = "row wrap";
+  divMenu.style.justifyContent = "space-around";
   divMenu.style.position = "absolute";
   divMenu.style.left = "0";
   divMenu.style.top = "0";
