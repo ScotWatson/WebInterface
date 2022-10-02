@@ -277,6 +277,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     divUser.style.display = "flex";
     divUser.style.flexFlow = "column nowrap";
     divUser.style.justifyContent = "space-around";
+    divUser.style.alignItems = "center";
     divUser.style.boxSizing = "border-box";
     divUser.style.width = 2 * (px_per_inch * min_touch_inch) + "px";
     divUser.style.height = 2 * (px_per_inch * min_touch_inch) + "px";
@@ -297,6 +298,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     divUsername.style.height = "20%";
     divUsername.style.userSelect = "none";
     divUsername.style.textAlign = "center";
+    divUsername.style.textOverflow = "ellipsis";
     divUser.appendChild(imgUser);
     divUser.appendChild(divUsername);
     divUsers.appendChild(divUser);
@@ -342,6 +344,54 @@ function mainHamburgerMenu() {
     },
     {
       caption: "Add User",
+      action: addUser,
+    },
+    {
+      caption: "Calibrate Screen",
+      action: addUser,
+    },
+    {
+      caption: "Set Viewing Distance",
+      action: addUser,
+    },
+    {
+      caption: "Set Minimum Text Size",
+      action: addUser,
+    },
+    {
+      caption: "Set Minimum Touch Size",
+      action: addUser,
+    },
+    {
+      caption: "other",
+      action: addUser,
+    },
+    {
+      caption: "other",
+      action: addUser,
+    },
+    {
+      caption: "other",
+      action: addUser,
+    },
+    {
+      caption: "other",
+      action: addUser,
+    },
+    {
+      caption: "other",
+      action: addUser,
+    },
+    {
+      caption: "other",
+      action: addUser,
+    },
+    {
+      caption: "other",
+      action: addUser,
+    },
+    {
+      caption: "other",
       action: addUser,
     },
   ];
