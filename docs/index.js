@@ -206,6 +206,33 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   document.body.style.margin = "0";
   document.body.style.overflow = "hidden";
   document.body.style.backgroundColor = "#808080";
+  const btnHamburgerMenu = document.createElement("div");
+  btnHamburgerMenu.style.display = "block";
+  btnHamburgerMenu.style.position = "absolute";
+  btnHamburgerMenu.style.top = "0px";
+  btnHamburgerMenu.style.left = "0px";
+  btnHamburgerMenu.style.width = "50px";
+  btnHamburgerMenu.style.height = "50px";
+  btnHamburgerMenu.style.backgroundColor = "white";
+  btnHamburgerMenu.style.boxSizing = "border-box";
+  btnHamburgerMenu.style.margin = "0px";
+  btnHamburgerMenu.style.border = "1px solid black";
+  btnHamburgerMenu.style.padding = "0px";
+  btnHamburgerMenu.addEventListener("click", function () {
+    mainHamburgerMenu();
+  });
+  document.body.appendChild(btnHamburgerMenu);
+  const imgHamburgerMenu = document.createElement("img");
+  img.src = "Hamburger_icon.svg";
+  imgHamburgerMenu.style.display = "block";
+  imgHamburgerMenu.style.position = "absolute";
+  imgHamburgerMenu.style.top = "0px";
+  imgHamburgerMenu.style.left = "0px";
+  imgHamburgerMenu.style.width = "100%";
+  imgHamburgerMenu.style.height = "100%";
+  imgHamburgerMenu.style.backgroundColor = "white";
+  btnHamburgerMenu.appendChild(imgHamburgerMenu);
+  
   const btnFullscreen = document.createElement("div");
   btnFullscreen.style.display = "block";
   btnFullscreen.style.position = "absolute";
@@ -215,11 +242,6 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   btnFullscreen.style.height = "50px";
   btnFullscreen.style.backgroundColor = "red";
   btnFullscreen.addEventListener("click", function (evt) {
-    if (document.fullscreenElement === null) {
-      document.documentElement.requestFullscreen();
-    } else {
-      document.exitFullscreen();
-    }
   });
   document.body.appendChild(btnFullscreen);
   const inp = document.createElement("input");
@@ -264,6 +286,60 @@ function resize() {
 //  window.innerWidth + window.innerHeight;
 }
 
+function mainHamburgerMenu() {
+  const divMenu = document.createElement("div");
+  divMenu.style.display = "flex";
+  divMenu.style.position = "absolute";
+  divMenu.style.left = "0";
+  divMenu.style.top = "0";
+  divMenu.style.width = "100%";
+  divMenu.style.height = "100%";
+  divMenu.style.boxSizing = "border-box";
+  divMenu.style.backgroundColor = "#E0E000";
+  divMenu.style.margin = "0";
+  divMenu.style.border = "0";
+  divMenu.style.paddingLeft = "0";
+  divMenu.style.paddingRight = "10%";
+  divMenu.style.paddingTop = "0";
+  divMenu.style.paddingBottom = "0";
+  document.body.appendChild(divMenu);
+  const items = [
+    {
+      caption: "Toggle Full Screen",
+      action: toggleFullscreen,
+    },
+    {
+      caption: "Add User",
+      action: addUser,
+    },
+  ];
+  for (const item of items) {
+    const btnItem = document.createElement("div");
+    btnItem.style.width = "100%";
+    btnItem.style.height = "50px";
+    btnItem.style.boxSizing = "border-box";
+    btnItem.style.backgroundColor = "#00E0E0";
+    btnItem.style.margin = "0";
+    btnItem.style.border = "0";
+    btnItem.style.padding = "5%";
+    btnItem.appendChild(document.createTextNode(item.caption));
+    btnItem.addEventListener("click", function (evt) {
+      divMenu.remove();
+      item.action();
+    });
+    divMenu.appendChild(btnItem);
+  }
+  function toggleFullscreen() {
+    if (document.fullscreenElement === null) {
+      document.documentElement.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  }
+  function addUser() {
+  }
+}
+
 function loginScreen() {
   const inpUsername = document.createElement("input");
   const inpPassword = document.createElement("input");
@@ -287,7 +363,7 @@ let clientHeight_CSS_in;
 let clientWidth_CSS_mm;
 let clientHeight_CSS_mm;
 
-class wifUser {
+class User {
   constructor(objParams) {
     if (typeof objParams.username !== "string") {
       throw new Error("Invalid Username");
@@ -318,15 +394,15 @@ class wifUser {
   }
 }
 
-let wifMapUsers = new Map();
+let MapUsers = new Map();
 
-function wifAddUser(objParams) {
+function AddUser(objParams) {
   if (typeof objParams.username !== "string") {
     throw new Error("Invalid Username");
   }
   wifMapUsers.set(objParams.username, new wifUser(objParams));
 }
-function wifRemoveUser(username) {
+function RemoveUser(username) {
   if (typeof username !== "string") {
     throw new Error("Invalid Username");
   }
