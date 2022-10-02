@@ -210,7 +210,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   btnHamburgerMenu.style.display = "block";
   btnHamburgerMenu.style.position = "absolute";
   btnHamburgerMenu.style.top = "0px";
-  btnHamburgerMenu.style.left = "0px";
+  btnHamburgerMenu.style.right = "0px";
   btnHamburgerMenu.style.width = "50px";
   btnHamburgerMenu.style.height = "50px";
   btnHamburgerMenu.style.backgroundColor = "white";
@@ -227,7 +227,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   imgHamburgerMenu.style.display = "block";
   imgHamburgerMenu.style.position = "absolute";
   imgHamburgerMenu.style.top = "0px";
-  imgHamburgerMenu.style.right = "0px";
+  imgHamburgerMenu.style.left = "0px";
   imgHamburgerMenu.style.width = "100%";
   imgHamburgerMenu.style.height = "100%";
   imgHamburgerMenu.style.backgroundColor = "white";
