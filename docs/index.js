@@ -3,6 +3,8 @@
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+"use strict";
+
 const min_touch_inch = 0.5; // minimum size of touch object (in inches)
 const min_text_ratio = 0.007; // ratio of text height to viewing distance (unitless)
 
@@ -278,7 +280,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     divUser.style.boxSizing = "border-box";
     divUser.style.width = 2 * (px_per_inch * min_touch_inch) + "px";
     divUser.style.height = 2 * (px_per_inch * min_touch_inch) + "px";
-    divUsername.style.textAlign = "center";
+    divUser.style.textAlign = "center";
     const imgUser = document.createElement("img");
     imgUser.src = "Anonymous.webp";
     imgUser.style.display = "inline-block";
