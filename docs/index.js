@@ -273,13 +273,15 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   for (const thisUser of users) {
     const divUser = document.createElement("div");
     divUser.style.display = "flex";
-    divUsers.style.flexFlow = "column wrap";
-    divUsers.style.justifyContent = "space-around";
+    divUser.style.flexFlow = "column nowrap";
+    divUser.style.justifyContent = "space-around";
     divUser.style.boxSizing = "border-box";
     divUser.style.width = 2 * (px_per_inch * min_touch_inch) + "px";
     divUser.style.height = 2 * (px_per_inch * min_touch_inch) + "px";
     const imgUser = document.createElement("img");
     imgUser.src = "Anonymous.webp";
+    imgUser.style.display = "block";
+    imgUser.style.boxSizing = "border-box";
     imgUser.style.width = "80%";
     imgUser.style.height = "80%";
     const divUsername = document.createElement("div");
@@ -288,6 +290,8 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     divUsername.style.boxSizing = "border-box";
     divUsername.style.backgroundColor = "#E0E080";
     divUsername.style.fontSize = (px_per_inch * min_text_ratio * view_dist_inch) + "px";
+    divUsername.style.width = "100%";
+    divUsername.style.height = "20%";
     divUsername.style.userSelect = "none";
     divUsername.style.textAlign = "center";
     divUser.appendChild(imgUser);
