@@ -1,7 +1,7 @@
 @charset "UTF-8";
 /* Basic Latin */
 @font-face {
-  font-display: "standard";
+  font-family: "standard";
   src: "Latin.ttf";
   unicode-range: U+0000-007F;
 }
