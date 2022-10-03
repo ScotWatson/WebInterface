@@ -261,6 +261,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   divUserScroll.style.position = "absolute";
   divUserScroll.style.left = "0px";
   divUserScroll.style.top = 2 * (px_per_inch * min_touch_inch) + "px";
+  divUserScroll.style.backgroundColor = "#C0C0C0";
   divUserScroll.style.padding = 0 + "px";
   divUserScroll.style.border = "0px";
   divUserScroll.style.margin = "0px";
@@ -274,6 +275,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   divUsers.style.justifyContent = "space-around";
   divUsers.style.boxSizing = "border-box";
   divUsers.style.width = "100%";
+  divUsers.style.backgroundColor = "#A0A0A0";
   divUsers.style.paddingLeft = (px_per_inch * min_touch_inch) + "px";
   divUsers.style.paddingRight = 0 + "px";
   divUsers.style.paddingTop = 0 + "px";
@@ -283,6 +285,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   divUsers.style.backgroundImage = "url(ScrollGutter.svg)";
   divUsers.style.backgroundSize = (px_per_inch * min_touch_inch) + "px " + (px_per_inch * min_touch_inch) + "px";
   divUsers.style.backgroundPosition = "left top";
+  divUsers.style.backgroundRepeat = "repeat-y";
   divUserScroll.appendChild(divUsers);
   for (const thisUser of users) {
     const divUser = document.createElement("div");
@@ -294,6 +297,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     divUser.style.width = 2 * (px_per_inch * min_touch_inch) + "px";
     divUser.style.height = 2 * (px_per_inch * min_touch_inch) + "px";
     divUser.style.textAlign = "center";
+    divUser.style.backgroundColor = "#808080";
     const imgUser = document.createElement("img");
     imgUser.src = "Anonymous.webp";
     imgUser.style.display = "inline-block";
@@ -332,7 +336,7 @@ function mainHamburgerMenu() {
   divMenu.style.width = "100%";
   divMenu.style.height = "100%";
   divMenu.style.boxSizing = "border-box";
-  divMenu.style.backgroundColor = "#80E000";
+  divMenu.style.backgroundColor = "#E0E0E0";
   document.body.appendChild(divMenu);
   const divScroll = document.createElement("div");
   divScroll.style.display = "block";
@@ -341,7 +345,7 @@ function mainHamburgerMenu() {
   divScroll.style.width = "100%";
   divScroll.style.height = "90%";
   divScroll.style.boxSizing = "border-box";
-  divScroll.style.backgroundColor = "#E08000";
+  divScroll.style.backgroundColor = "#C0C0C0";
   divScroll.style.margin = "0";
   divScroll.style.border = "0";
   divScroll.style.padding = "0";
@@ -353,7 +357,7 @@ function mainHamburgerMenu() {
   divList.style.flexFlow = "column wrap";
   divList.style.justifyContent = "space-around";
   divList.style.boxSizing = "border-box";
-  divList.style.backgroundColor = "#E0E000";
+  divList.style.backgroundColor = "#A0A0A0";
   divList.style.margin = "0";
   divList.style.border = "0";
   divList.style.paddingLeft = (px_per_inch * min_touch_inch) + "px";
@@ -363,6 +367,7 @@ function mainHamburgerMenu() {
   divList.style.backgroundImage = "url(ScrollGutter.svg)";
   divList.style.backgroundSize = (px_per_inch * min_touch_inch) + "px " + (px_per_inch * min_touch_inch) + "px";
   divList.style.backgroundPosition = "left top";
+  divList.style.backgroundRepeat = "repeat-y";
   divScroll.appendChild(divList);
   const items = [
     {
@@ -452,7 +457,7 @@ function mainHamburgerMenu() {
     btnItem.style.width = "100%";
     btnItem.style.height = "50px";
     btnItem.style.boxSizing = "border-box";
-    btnItem.style.backgroundColor = "#00E0E0";
+    btnItem.style.backgroundColor = "#808080";
     btnItem.style.margin = "0";
     btnItem.style.border = "0";
     btnItem.style.padding = "5%";
