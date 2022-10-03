@@ -1,3 +1,11 @@
+@charset "UTF-8";
+/* Basic Latin */
+@font-face {
+  font-display: "standard";
+  src: "Latin.ttf";
+  unicode-range: 0000..007F;
+}
+
 .invisible-scrollbar {
   scrollbar-width: none;
 }
