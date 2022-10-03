@@ -299,6 +299,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     divUsername.style.userSelect = "none";
     divUsername.style.textAlign = "center";
     divUsername.style.textOverflow = "ellipsis";
+    divUsername.style.whiteSpace = "nowrap";
     divUser.appendChild(imgUser);
     divUser.appendChild(divUsername);
     divUsers.appendChild(divUser);
