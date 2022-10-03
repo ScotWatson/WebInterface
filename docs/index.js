@@ -217,6 +217,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   document.body.style.padding = "0";
   document.body.style.overflow = "hidden";
   document.body.style.backgroundColor = "#808080";
+  document.body.style.fontFamily = "standard";
   const btnHamburgerMenu = document.createElement("div");
   btnHamburgerMenu.style.display = "block";
   btnHamburgerMenu.style.position = "absolute";
