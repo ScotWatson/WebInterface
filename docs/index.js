@@ -346,7 +346,7 @@ function mainHamburgerMenu() {
   divScroll.style.position = "absolute";
   divScroll.style.top = (px_per_inch * min_touch_inch) + "px";
   divScroll.style.width = "100%";
-  divScroll.style.height = "(100% - " + (px_per_inch * min_touch_inch) + "px)";
+  divScroll.style.height = "calc(100% - " + (px_per_inch * min_touch_inch) + "px)";
   divScroll.style.boxSizing = "border-box";
   divScroll.style.backgroundColor = "#C0C0C0";
   divScroll.style.margin = "0";
