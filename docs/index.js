@@ -280,6 +280,9 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   divUsers.style.paddingBottom = 0 + "px";
   divUsers.style.border = "0px";
   divUsers.style.margin = "0px";
+  divUsers.style.backgroundImage = "url(ScrollGutter.svg)";
+  divUsers.style.backgroundSize = (px_per_inch * min_touch_inch) + "px " + (px_per_inch * min_touch_inch) + "px";
+  divUsers.style.backgroundPosition = "left top";
   divUserScroll.appendChild(divUsers);
   for (const thisUser of users) {
     const divUser = document.createElement("div");
@@ -357,9 +360,9 @@ function mainHamburgerMenu() {
   divList.style.paddingRight = "0";
   divList.style.paddingTop = "0";
   divList.style.paddingBottom = "0";
-  divList.style.backgroundImage = "ScrollGutter.svg";
+  divList.style.backgroundImage = "url(ScrollGutter.svg)";
   divList.style.backgroundSize = (px_per_inch * min_touch_inch) + "px " + (px_per_inch * min_touch_inch) + "px";
-  divList.style.backgroundPosition = "left";
+  divList.style.backgroundPosition = "left top";
   divScroll.appendChild(divList);
   const items = [
     {
