@@ -211,7 +211,10 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
       user = "";
       break;
   }
+  document.body.style.boxSizing = "border-box";
   document.body.style.margin = "0";
+  document.body.style.border = "0";
+  document.body.style.padding = "0";
   document.body.style.overflow = "hidden";
   document.body.style.backgroundColor = "#808080";
   const btnHamburgerMenu = document.createElement("div");
@@ -341,9 +344,9 @@ function mainHamburgerMenu() {
   const divScroll = document.createElement("div");
   divScroll.style.display = "block";
   divScroll.style.position = "absolute";
-  divScroll.style.top = "10%";
+  divScroll.style.top = (px_per_inch * min_touch_inch) + "px";
   divScroll.style.width = "100%";
-  divScroll.style.height = "90%";
+  divScroll.style.height = "(100% - " + (px_per_inch * min_touch_inch) + "px)";
   divScroll.style.boxSizing = "border-box";
   divScroll.style.backgroundColor = "#C0C0C0";
   divScroll.style.margin = "0";
