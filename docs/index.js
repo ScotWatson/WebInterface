@@ -445,7 +445,7 @@ function mainHamburgerMenu() {
       divMenu.remove();
       item.action();
     });
-    divScroll.appendChild(btnItem);
+    divList.appendChild(btnItem);
   }
   function toggleFullscreen() {
     if (document.fullscreenElement === null) {
