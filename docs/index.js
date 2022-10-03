@@ -319,6 +319,7 @@ function mainHamburgerMenu() {
   divMenu.style.width = "100%";
   divMenu.style.height = "100%";
   divMenu.style.boxSizing = "border-box";
+  divMenu.style.backgroundColor = "#80E000";
   document.body.appendChild(divMenu);
   const divScroll = document.createElement("div");
   divScroll.style.display = "block";
@@ -332,6 +333,7 @@ function mainHamburgerMenu() {
   divScroll.style.border = "0";
   divScroll.style.padding = "0";
   divScroll.style.overflow = "hidden auto";
+  divScroll.style.scrollWidth = "none";
   divMenu.appendChild(divScroll);
   const divList = document.createElement("div");
   divList.style.display = "flex";
