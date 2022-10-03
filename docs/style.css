@@ -2,7 +2,7 @@
 /* Basic Latin */
 @font-face {
   font-family: "standard";
-  src: "Latin.ttf";
+  src: url("Latin.ttf");
   unicode-range: U+0000-007F;
 }
 
