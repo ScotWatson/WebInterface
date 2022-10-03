@@ -1,1 +1,8 @@
+.invisible-scrollbar {
+  scrollbar-width: none;
+}
 
+// This non-standard prefixed version will eventually not be required.
+.invisible-scrollbar::-webkit-scrollbar {
+  display: none;
+}
