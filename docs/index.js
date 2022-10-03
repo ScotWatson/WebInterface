@@ -255,23 +255,32 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   inpUsername.setAttribute("placeholder", "Username");
   document.body.appendChild(inpUsername);
   const users = [ "vnfkjl iove", "oipfe jwna", "pkojij onj", "bjbh bfty", "uiunjwb nsw", "oknwn dips" ];
+  const divUserScroll = document.createElement("div");
+  divUserScroll.style.display = "block";
+  divUserScroll.style.boxSizing = "border-box";
+  divUserScroll.style.position = "absolute";
+  divUserScroll.style.left = "0px";
+  divUserScroll.style.top = 2 * (px_per_inch * min_touch_inch) + "px";
+  divUserScroll.style.padding = 0 + "px";
+  divUserScroll.style.border = "0px";
+  divUserScroll.style.margin = "0px";
+  divUserScroll.style.width = "100%";
+  divUserScroll.style.height = "100%";
+  divUserScroll.style.overflow = "hidden auto";
+  document.body.appendChild(divUserScroll);
   const divUsers = document.createElement("div");
   divUsers.style.display = "flex";
   divUsers.style.flexFlow = "row wrap";
   divUsers.style.justifyContent = "space-around";
   divUsers.style.boxSizing = "border-box";
-  divUsers.style.position = "absolute";
-  divUsers.style.left = "0px";
-  divUsers.style.top = 2 * (px_per_inch * min_touch_inch) + "px";
+  divUsers.style.width = "100%";
   divUsers.style.paddingLeft = (px_per_inch * min_touch_inch) + "px";
   divUsers.style.paddingRight = 0 + "px";
   divUsers.style.paddingTop = 0 + "px";
   divUsers.style.paddingBottom = 0 + "px";
   divUsers.style.border = "0px";
   divUsers.style.margin = "0px";
-  divUsers.style.width = "100%";
-  divUsers.style.height = "100%";
-  document.body.appendChild(divUsers);
+  divUserScroll.appendChild(divUsers);
   for (const thisUser of users) {
     const divUser = document.createElement("div");
     divUser.style.display = "flex";
@@ -348,6 +357,9 @@ function mainHamburgerMenu() {
   divList.style.paddingRight = "0";
   divList.style.paddingTop = "0";
   divList.style.paddingBottom = "0";
+  divList.style.backgroundImage = "ScrollGutter.svg";
+  divList.style.backgroundSize = (px_per_inch * min_touch_inch) + "px " + (px_per_inch * min_touch_inch) + "px";
+  divList.style.backgroundPosition = "left";
   divScroll.appendChild(divList);
   const items = [
     {
