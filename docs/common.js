@@ -1,4 +1,4 @@
-"use script"
+"use strict";
 self.base64Decode = async function base64Decode(str) {
   return await (new self.Blob([ self.atob(str) ])).arrayBuffer();
 }
@@ -56,7 +56,6 @@ self.init = function init({
 }) {
   const selfURL = new URL(window.location);
   const requestedVersion = selfURL.searchParams.get("version");
-  const pathSegments = selfURL.pathname.split("/");
   self._siteURI = siteURL;
   window.siteSessionStorage = new SiteStorage({
     uri: self._siteURI(),
