@@ -23,7 +23,7 @@ const urlSelf = new URL(self.location);
 const urlServiceWorker = new URL("./sw.js", urlSelf);
 const urlServiceWorkerScope = new URL("./", urlSelf);
 // Register the service worker.
-const registration = await window.navigator.serviceWorker.register(urlServiceWorker.href, {
+const registrationPromise = window.navigator.serviceWorker.register(urlServiceWorker.href, {
   scope: urlServiceWorkerScope.href,
 });
 //If there is no controller, wait for one before proceeding
