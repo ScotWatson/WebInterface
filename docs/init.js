@@ -7,7 +7,7 @@ self.init = function init({
 }) {
   const selfURL = new URL(window.location);
   const requestedVersion = selfURL.searchParams.get("version");
-  self._siteURI = siteURL;
+  self._siteURI = siteURI;
   moduleCommon.then(function (Common) {
     window.siteSessionStorage = new Common.SiteStorage({
       uri: self._siteURI(),
