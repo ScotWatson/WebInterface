@@ -32,6 +32,9 @@ self.init = function init({
     self._version = function () {
       return window.siteSessionStorage.getItem("version");
     }
+    const styleElem = document.createElement("style");
+    styleElem.src = "./" + self._version() + "/style.css";
+    document.head.appendChild(styleElem);
     const scriptElem = document.createElement("script");
     scriptElem.src = "./" + self._version() + "/index.js";
     document.head.appendChild(scriptElem);
