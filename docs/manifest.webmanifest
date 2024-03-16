@@ -1,0 +1,15 @@
+{
+  "background_color": "#FF0000",
+  "dir": "auto",
+  "display": "standalone",
+  "icons": [],
+  "id": "https://scotwatson.github.io/WebInterface/index.html",
+  "lang": "en",
+  "name": "Web Interface",
+  "orientation": "any",
+  "scope": "/WebInterface",
+  "short_name": "Web Interface",
+  "shortcuts": [],
+  "start_url": "https://scotwatson.github.io/WebInterface/index.html",
+  "theme_color": "#00FF00",
+}
