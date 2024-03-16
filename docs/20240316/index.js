@@ -28,12 +28,6 @@ loadErrorHandlingModule.then(function () {
   console.log("ErrorLog Success");
 });
 
-const loadWindow = new Promise(function (resolve, reject) {
-  window.addEventListener("load", function (evt) {
-    resolve(evt);
-  });
-});
-
 loadWindow.then(function () {
   console.log("Window Success");
 });
