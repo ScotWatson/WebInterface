@@ -31,21 +31,21 @@ export class SiteStorage {
     if (key === "") {
       throw "empty string is not allowed";
     }
-    const prefix = this.#storage.getItem(uri);
+    const prefix = this.#storage.getItem(this.#uri);
     return this.#storage.getItem(prefix + key);
   }
   setItem(key, item) {
     if (key === "") {
       throw "empty string is not allowed";
     }
-    const prefix = this.#storage.getItem(uri);
+    const prefix = this.#storage.getItem(this.#uri);
     this.#storage.setItem(prefix + key, item);
   }
   removeItem(key) {
     if (key === "") {
       throw "empty string is not allowed";
     }
-    const prefix = this.#storage.getItem(uri);
+    const prefix = this.#storage.getItem(this.#uri);
     this.#storage.removeItem(prefix + key);
   }
 }
