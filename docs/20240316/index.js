@@ -5,6 +5,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 "use strict";
 
+// Start listening for messages from service worker
+window.navigator.serviceWorker.addEventListener("message", function (evt) {
+  console.log(evt.data);
+});
+window.navigator.serviceWorker.startMessages();
+
 let min_touch_inch = 0.5; // minimum size of touch object (in inches)
 let min_text_ratio = 0.007; // ratio of text height to viewing distance (unitless)
 
