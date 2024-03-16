@@ -11,6 +11,9 @@ window.navigator.serviceWorker.addEventListener("message", function (evt) {
 });
 window.navigator.serviceWorker.startMessages();
 */
+
+console.log("index.js started");
+
 let min_touch_inch = 0.5; // minimum size of touch object (in inches)
 let min_text_ratio = 0.007; // ratio of text height to viewing distance (unitless)
 
@@ -203,6 +206,7 @@ msthumbnailclick
 let user;
 
 function start( [ evtWindow, moduleErrorHandling ] ) {
+  console.log("function start begin");
   window.addEventListener("resize", resize);
   switch (mode) {
     case "":
