@@ -33,7 +33,7 @@ self.init = function init({
       return window.siteSessionStorage.getItem("version");
     }
     const scriptElem = document.createElement("script");
-    scriptElem.src = "./" + self._version() + "/editor.js";
+    scriptElem.src = "./" + self._version() + "/index.js";
     document.head.appendChild(scriptElem);
   });
 }
