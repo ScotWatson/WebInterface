@@ -4,8 +4,8 @@
   "display": "standalone",
   "icons": [
     {
-      "src": "icon.png",
-      "sizes": "64x64"
+      "src": "icon144.png",
+      "sizes": "144x144"
     }
   ],
   "id": "https://scotwatson.github.io/WebInterface/index.html",
