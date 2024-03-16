@@ -23,9 +23,10 @@ let view_dist_inch = 24;
 const initPageTime = performance.now();
 
 const loadErrorHandlingModule = import("https://scotwatson.github.io/Debug/20230705/ErrorLog.mjs");
-loadErrorHandlingModule.then(function (module) {
-  console.log(Object.getOwnPropertyNames(module));
-}, fail);
+
+loadErrorHandlingModule.then(function () {
+  console.log("ErrorLog Success");
+});
 
 const loadWindow = new Promise(function (resolve, reject) {
   window.addEventListener("load", function (evt) {
@@ -33,7 +34,11 @@ const loadWindow = new Promise(function (resolve, reject) {
   });
 });
 
-Promise.all( [ loadWindow, loadErrorHandlingModule ] ).then(start, fail).catch(fail);
+loadWindow.then(function () {
+  console.log("Window Success");
+});
+
+Promise.all( [ loadWindow, loadErrorHandlingModule ] ).then(start, fail);
 
 let params = (new URL(window.location)).searchParams;
 let mode = params.get("mode");
