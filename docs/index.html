@@ -18,9 +18,29 @@ init({
     return selfURL.origin + "/" + pathSegments[0] + "/index";
   },
 });
+// Obtain initialization info
+const urlSelf = new URL(self.location);
+const urlServiceWorker = new URL("./sw.js", urlSelf);
+const urlServiceWorkerScope = new URL("./", urlSelf);
+// Register the service worker.
+const registration = await window.navigator.serviceWorker.register(urlServiceWorker.href, {
+  scope: urlServiceWorkerScope.href,
+});
+//If there is no controller, wait for one before proceeding
+const controller = new Promise(function (resolve, reject) {
+  if (navigator.serviceWorker.controller !== null) {
+    resolve();
+    return;
+  }
+  navigator.serviceWorker.addEventListener("controllerchange", function (evt) {
+    resolve();
+    return;
+  });
+});
     </script>
-    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
+    <link rel="icon" href="./favicon.ico" type="image/x-icon">
+    <link rel="manifest" href="./manifest.webmanifest">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
   </head>
