@@ -2,7 +2,12 @@
   "background_color": "#FF0000",
   "dir": "auto",
   "display": "standalone",
-  "icons": [],
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "64x64"
+    }
+  ],
   "id": "https://scotwatson.github.io/WebInterface/index.html",
   "lang": "en",
   "name": "Web Interface",
