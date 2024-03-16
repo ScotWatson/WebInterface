@@ -19,7 +19,7 @@ let view_dist_inch = 24;
 
 const initPageTime = performance.now();
 
-const loadErrorHandlingModule = import("https://scotwatson.github.io/ErrorHandling/ErrorHandling.mjs");
+const loadErrorHandlingModule = import("https://scotwatson.github.io/Debug/20230705/ErrorLog.mjs");
 loadErrorHandlingModule.then(function (module) {
   console.log(Object.getOwnPropertyNames(module));
 }, fail);
@@ -614,7 +614,7 @@ class wifSelectorList extends HTMLElement {
   }
 }
 
-customElements.define('wif-SelectorList', wifSelectorList);
+// customElements.define('wif-SelectorList', wifSelectorList);
 
 function wifShowUsers() {
   const divMain = wifCreateFullClientDiv();
