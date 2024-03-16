@@ -2,7 +2,11 @@ export async function base64Decode(str) {
   return await (new self.Blob([ self.atob(str) ])).arrayBuffer();
 }
 export async function base64Encode(view) {
-  return self.btoa(await (new self.Blob([ view ])).text());
+  let rawString = "";
+  for (const byte of view) {
+    rawString += String.fromCharCode(byte);
+  }
+  return self.btoa(rawString);
 }
 // SiteStorage does not provide security, all variables are still accessible through the underlying storage object
 // If using SiteStorage, do not manipulate keys that start with an underscore or match RFC3986 syntax.
