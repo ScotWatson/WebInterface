@@ -1,5 +1,5 @@
 "use strict";
-const moduleCommon = import("./common.js");
+const moduleCommon = import("./common.mjs");
 
 self.init = function init({
   latestVersion,
