@@ -1,12 +1,12 @@
-self.base64Decode = async function base64Decode(str) {
+export async function base64Decode(str) {
   return await (new self.Blob([ self.atob(str) ])).arrayBuffer();
 }
-self.base64Encode = async function base64Encode(view) {
+export async function base64Encode(view) {
   return self.btoa(await (new self.Blob([ view ])).text());
 }
 // SiteStorage does not provide security, all variables are still accessible through the underlying storage object
 // If using SiteStorage, do not manipulate keys that start with an underscore or match RFC3986 syntax.
-class SiteStorage {
+export class SiteStorage {
   #uri;
   #storage;
   constructor(args) {
@@ -18,7 +18,7 @@ class SiteStorage {
       const view = new Uint8Array(12);
       self.crypto.getRandomValues(view);
       // 17-char prefix
-      prefix = "_" + self.base64Encode(view);
+      prefix = "_" + base64Encode(view);
       // unlikely, but check to make sure
       if (this.#storage.getItem(prefix) !== null) {
         prefix = null;
