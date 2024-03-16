@@ -1,4 +1,11 @@
 "use strict";
+
+const loadWindow = new Promise(function (resolve, reject) {
+  window.addEventListener("load", function (evt) {
+    resolve(evt);
+  });
+});
+
 const moduleCommon = import("./common.mjs");
 
 self.init = function init({
