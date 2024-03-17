@@ -201,9 +201,35 @@ mssitemodejumplistitemremoved
 msthumbnailclick
 */
 
-let user;
+const DEFAULT_SETTINGS = {
+  
+};
 
 function start( [ evtWindow, moduleErrorHandling ] ) {
+  let users = [];
+  function createNewUser() {
+    const newUserId = self.crypto.randomUUID();
+    const newUser = {
+      name: "User",
+      id: newUserId,
+    };
+    users.push(newUser);
+    window.siteLocalStorage.set("Users", JSON.stringify(users));
+    const newUserInfo = {
+      settings: self.structuredClone(DEFAULT_SETTINGS),
+    };
+    window.siteLocalStorage.set("User:" + newUserId, JSON.stringify(newUserInfo));
+  }
+  function createDefaultSettings() {
+    const settings = {}
+    return self.;
+  }
+  const usersJSON = window.siteLocalStorage.get("users");
+  if (usersJSON === null) {
+    users = [];
+  } else {
+    users = JSON.parse(usersJSON);
+  }
   
   window.addEventListener("resize", resize);
   switch (mode) {
@@ -226,6 +252,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   document.body.style.overflow = "hidden";
   document.body.style.backgroundColor = "#808080";
   document.body.style.fontFamily = "standard";
+  document.createElement();
 
   const min_touch_px = px_per_inch * min_touch_inch;
   
