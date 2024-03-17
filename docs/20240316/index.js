@@ -4,15 +4,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 "use strict";
-/*
+
 // Start listening for messages from service worker
 window.navigator.serviceWorker.addEventListener("message", function (evt) {
   console.log(evt.data);
 });
 window.navigator.serviceWorker.startMessages();
-*/
-
-console.log("index.js started");
 
 let min_touch_inch = 0.5; // minimum size of touch object (in inches)
 let min_text_ratio = 0.007; // ratio of text height to viewing distance (unitless)
@@ -154,6 +151,7 @@ window.addEventListener("load", function (evt) {
 window.addEventListener("beforeunload", function (evt) {
   // fires when the window, the document and its resources are about to be unloaded
 });
+/*
 window.addEventListener("unload", function (evt) {
   // fires when the document or a child resource is being unloaded
   // It is fired after:
@@ -161,6 +159,7 @@ window.addEventListener("unload", function (evt) {
   //  - pagehide
   // Use visibilitychange instead
 });
+*/
 
 document.addEventListener("fullscreenchange", function (evt) {
   // fires immediately after the browser switches into or out of fullscreen mode
@@ -205,7 +204,7 @@ msthumbnailclick
 let user;
 
 function start( [ evtWindow, moduleErrorHandling ] ) {
-  console.log("function start begin");
+  
   window.addEventListener("resize", resize);
   switch (mode) {
     case "":
@@ -227,22 +226,43 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   document.body.style.overflow = "hidden";
   document.body.style.backgroundColor = "#808080";
   document.body.style.fontFamily = "standard";
-  const btnHamburgerMenu = document.createElement("div");
-  btnHamburgerMenu.style.display = "block";
-  btnHamburgerMenu.style.position = "absolute";
-  btnHamburgerMenu.style.top = "0px";
-  btnHamburgerMenu.style.right = "0px";
-  btnHamburgerMenu.style.width = (px_per_inch * min_touch_inch) + "px";
-  btnHamburgerMenu.style.height = (px_per_inch * min_touch_inch) + "px";
-  btnHamburgerMenu.style.backgroundColor = "white";
-  btnHamburgerMenu.style.boxSizing = "border-box";
-  btnHamburgerMenu.style.margin = "0px";
+
+  const min_touch_px = px_per_inch * min_touch_inch;
+  
+  function createBlankDiv({
+    top,
+    right,
+    width,
+    height,
+  }) {
+    const { top, right, width, height } = args;
+    const div = document.createElement("div");
+    div.style.display = "block";
+    div.style.position = "absolute";
+    div.style.top = top + "px";
+    div.style.right = right + "px";
+    div.style.width = width + "px";
+    div.style.height = height + "px";
+    div.style.backgroundColor = "white";
+    div.style.boxSizing = "border-box";
+    div.style.margin = "0px";
+    div.style.border = "1px solid black";
+    div.style.padding = "0px";
+    return div;
+  }
+
+  const btnHamburgerMenu = createBlankDiv({
+    top: 0,
+    right: 0,
+    width: min_touch_px,
+    height: min_touch_px,
+  });
   btnHamburgerMenu.style.border = "1px solid black";
-  btnHamburgerMenu.style.padding = "0px";
   btnHamburgerMenu.addEventListener("click", function () {
     mainHamburgerMenu();
   });
   document.body.appendChild(btnHamburgerMenu);
+
   const imgHamburgerMenu = document.createElement("img");
   imgHamburgerMenu.src = "Hamburger_icon.svg";
   imgHamburgerMenu.style.display = "block";
@@ -268,72 +288,95 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   inpUsername.setAttribute("placeholder", "Username");
   document.body.appendChild(inpUsername);
   const users = [ "vnfkjl iove", "oipfe jwna", "pkojij onj", "bjbh bfty", "uiunjwb nsw", "oknwn dips" ];
-  const divUserScroll = document.createElement("div");
-  divUserScroll.style.display = "block";
-  divUserScroll.style.boxSizing = "border-box";
-  divUserScroll.style.position = "absolute";
-  divUserScroll.style.left = "0px";
-  divUserScroll.style.top = 2 * (px_per_inch * min_touch_inch) + "px";
-  divUserScroll.style.backgroundColor = "#C0C0C0";
-  divUserScroll.style.padding = 0 + "px";
-  divUserScroll.style.border = "0px";
-  divUserScroll.style.margin = "0px";
-  divUserScroll.style.width = "100%";
-  divUserScroll.style.height = "100%";
-  divUserScroll.style.overflow = "hidden auto";
+
+  function createScroll() {
+    const div = document.createElement("div");
+    const divShadowDOM = div.attachShadow({ mode: "closed" });
+    div.style.display = "block";
+    div.style.boxSizing = "border-box";
+    div.style.position = "absolute";
+    div.style.left = left + "px";
+    div.style.top = top + "px";
+    div.style.backgroundColor = "#C0C0C0";
+    div.style.padding = 0 + "px";
+    div.style.border = "0px";
+    div.style.margin = "0px";
+    div.style.width = width + "px";
+    div.style.height = height + "px";
+    div.style.overflow = "hidden auto";
+    const divItems = document.createElement("div");
+    divItems.style.display = "flex";
+    divItems.style.flexFlow = "row wrap";
+    divItems.style.justifyContent = "space-around";
+    divItems.style.boxSizing = "border-box";
+    divItems.style.width = "100%";
+    divItems.style.backgroundColor = "#A0A0A0";
+    divItems.style.paddingLeft = min_touch_px + "px";
+    divItems.style.paddingRight = 0 + "px";
+    divItems.style.paddingTop = 0 + "px";
+    divItems.style.paddingBottom = 0 + "px";
+    divItems.style.border = "0px";
+    divItems.style.margin = "0px";
+    divItems.style.backgroundImage = "url(ScrollGutter.svg)";
+    divItems.style.backgroundSize = min_touch_px + "px " + min_touch_px + "px";
+    divItems.style.backgroundPosition = "left top";
+    divItems.style.backgroundRepeat = "repeat-y";
+    div.appendChild(divItems);
+    const control = {};
+    control.addItem = function () {
+      divShadowDOM.appendChild();
+    };
+    control.element = function () {
+      return div;
+    };
+  }
+
+  const divUserScroll = createScroll({
+    left: 0,
+    top: 2 * min_touch_px,
+    width: window.innerWidth,
+    height: window.innerHeight - (2 * min_touch_px),
+  });
   document.body.appendChild(divUserScroll);
-  const divUsers = document.createElement("div");
-  divUsers.style.display = "flex";
-  divUsers.style.flexFlow = "row wrap";
-  divUsers.style.justifyContent = "space-around";
-  divUsers.style.boxSizing = "border-box";
-  divUsers.style.width = "100%";
-  divUsers.style.backgroundColor = "#A0A0A0";
-  divUsers.style.paddingLeft = (px_per_inch * min_touch_inch) + "px";
-  divUsers.style.paddingRight = 0 + "px";
-  divUsers.style.paddingTop = 0 + "px";
-  divUsers.style.paddingBottom = 0 + "px";
-  divUsers.style.border = "0px";
-  divUsers.style.margin = "0px";
-  divUsers.style.backgroundImage = "url(ScrollGutter.svg)";
-  divUsers.style.backgroundSize = (px_per_inch * min_touch_inch) + "px " + (px_per_inch * min_touch_inch) + "px";
-  divUsers.style.backgroundPosition = "left top";
-  divUsers.style.backgroundRepeat = "repeat-y";
-  divUserScroll.appendChild(divUsers);
+  
   for (const thisUser of users) {
-    const divUser = document.createElement("div");
-    divUser.style.display = "flex";
-    divUser.style.flexFlow = "column nowrap";
-    divUser.style.justifyContent = "space-around";
-    divUser.style.alignItems = "center";
-    divUser.style.boxSizing = "border-box";
-    divUser.style.width = 2 * (px_per_inch * min_touch_inch) + "px";
-    divUser.style.height = 2 * (px_per_inch * min_touch_inch) + "px";
-    divUser.style.textAlign = "center";
-    divUser.style.backgroundColor = "#808080";
-    const imgUser = document.createElement("img");
-    imgUser.src = "Anonymous.webp";
-    imgUser.style.display = "inline-block";
-    imgUser.style.boxSizing = "border-box";
-    imgUser.style.width = "80%";
-    imgUser.style.height = "80%";
-    const divUsername = document.createElement("div");
-    divUsername.innerHTML = thisUser;
-    divUsername.style.display = "block";
-    divUsername.style.boxSizing = "border-box";
-    divUsername.style.backgroundColor = "#E0E080";
-    divUsername.style.fontSize = (px_per_inch * min_text_ratio * view_dist_inch) + "px";
-    divUsername.style.width = "100%";
-    divUsername.style.height = "20%";
-    divUsername.style.userSelect = "none";
-    divUsername.style.textAlign = "center";
-    divUsername.style.textOverflow = "ellipsis";
-    divUsername.style.whiteSpace = "nowrap";
-    divUser.appendChild(imgUser);
-    divUser.appendChild(divUsername);
-    divUsers.appendChild(divUser);
   }
   resize();
+
+      imgItem.src = "Anonymous.webp";
+    divItemName.innerHTML = thisUser;
+
+    const divItem = document.createElement("div");
+    divItem.style.display = "flex";
+    divItem.style.flexFlow = "column nowrap";
+    divItem.style.justifyContent = "space-around";
+    divItem.style.alignItems = "center";
+    divItem.style.boxSizing = "border-box";
+    divItem.style.width = (2 * min_touch_px) + "px";
+    divItem.style.height = (2 * min_touch_px) + "px";
+    divItem.style.textAlign = "center";
+    divItem.style.backgroundColor = "#808080";
+    const imgItem = document.createElement("img");
+    imgItem.src = "Anonymous.webp";
+    imgItem.style.display = "inline-block";
+    imgItem.style.boxSizing = "border-box";
+    imgItem.style.width = "80%";
+    imgItem.style.height = "80%";
+    const divItemName = document.createElement("div");
+    divItemName.innerHTML = thisUser;
+    divItemName.style.display = "block";
+    divItemName.style.boxSizing = "border-box";
+    divItemName.style.backgroundColor = "#E0E080";
+    divItemName.style.fontSize = (px_per_inch * min_text_ratio * view_dist_inch) + "px";
+    divItemName.style.width = "100%";
+    divItemName.style.height = "20%";
+    divItemName.style.userSelect = "none";
+    divItemName.style.textAlign = "center";
+    divItemName.style.textOverflow = "ellipsis";
+    divItemName.style.whiteSpace = "nowrap";
+    divItem.appendChild(imgItem);
+    divItem.appendChild(divItemName);
+    divItems.appendChild(divItem);
 }
 
 function resize() {
