@@ -26,18 +26,18 @@ self.init = function init({
     });
     const storedVersion = window.siteSessionStorage.getItem("version");
     if (requestedVersion !== null) {
-      window.siteSessionStorage.setItem("version", requestedVersion);
+      window.siteSessionStorage.set("version", requestedVersion);
       const newSearchParams = new self.URLSearchParams(selfURL.searchParams.toString());
       newSearchParams.delete("version");
       const newURL = new self.URL(selfURL.protocol + "//" + selfURL.host + selfURL.pathname + ((newSearchParams.size === 0) ? "" : "?" + newSearchParams.toString()) + selfURL.hash);
       window.history.replaceState(null, "", newURL.toString());
     } else if (storedVersion !== null) {
-      window.siteSessionStorage.setItem("version", storedVersion);
+      window.siteSessionStorage.set("version", storedVersion);
     } else {
-      window.siteSessionStorage.setItem("version", latestVersion);
+      window.siteSessionStorage.set("version", latestVersion);
     }
     self._version = function () {
-      return window.siteSessionStorage.getItem("version");
+      return window.siteSessionStorage.get("version");
     }
     const styleElem = document.createElement("link");
     styleElem.href = "./" + self._version() + "/style.css";
