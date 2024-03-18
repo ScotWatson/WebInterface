@@ -336,10 +336,14 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   }
   
   const OBJECT_FUNCTIONS = new Map();
-  OBJECT_FUNCTIONS.set("1b86fbea-6abc-4b65-9189-d4a6033fe8bf", createList);
-  OBJECT_FUNCTIONS.set("35017865-1b42-430b-9fc3-61cece306d6d", createTiles);
-  OBJECT_FUNCTIONS.set("92fcd3cb-76bb-47a5-8693-31a8bbd19739", createImage);
-  OBJECT_FUNCTIONS.set("9db9ca53-1d3b-49a9-9d22-8b1d08177c92", createBlankDiv);
+  const OBJECT_LIST      = "1b86fbea-6abc-4b65-9189-d4a6033fe8bf";
+  OBJECT_FUNCTIONS.set(OBJECT_LIST, createList);
+  const OBJECT_TILES     = "35017865-1b42-430b-9fc3-61cece306d6d";
+  OBJECT_FUNCTIONS.set(OBJECT_TILES, createTiles);
+  const OBJECT_IMAGE     = "92fcd3cb-76bb-47a5-8693-31a8bbd19739";
+  OBJECT_FUNCTIONS.set(OBJECT_IMAGE, createImage);
+  const OBJECT_BLANK_DIV = "9db9ca53-1d3b-49a9-9d22-8b1d08177c92";
+  OBJECT_FUNCTIONS.set(OBJECT_BLANK_DIV, createBlankDiv);
   function createObject({
     objectId,
     parameters,
