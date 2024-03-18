@@ -238,7 +238,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   }) {
     return (factor * px_per_inch * min_touch_inch) + "px";
   }
-  function createEventHandler({
+  function createEventManager({
     element,
     eventName,
   }) {
