@@ -326,6 +326,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     function resize() {
       bodyDiv.style.height = window.innerHeight;
     }
+    document.body.appendChild(bodyDiv);
     window.addEventListener("resize", resize);
     const obj = {};
     const rootSet = createRootSet({
