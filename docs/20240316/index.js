@@ -330,6 +330,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
       window.removeEventListener(resize);
       bodyDiv.remove();
     };
+    return obj;
   }
   
   const OBJECT_FUNCTIONS = new Map();
