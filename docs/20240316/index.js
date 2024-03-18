@@ -320,11 +320,11 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     }
     window.addEventListener("resize", resize);
     const obj = {};
-    const rootSet = createRootSet();
+    const rootSet = createRootSet({
+      element: bodyDiv,
+    });
     obj.createContentRoot = function () {
-      return rootSet.createRoot({
-        element: bodyDiv,
-      });
+      return rootSet.createRoot();
     };
     obj.remove = function () {
       window.removeEventListener(resize);
@@ -370,7 +370,9 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     div.style.padding = "0px";
     parent.appendChild(div);
     const obj = {};
-    const rootSet = createRootSet();
+    const rootSet = createRootSet({
+      element: div,
+    });
     const clickManager = createEventManager({
       element: div,
       eventName: "click",
