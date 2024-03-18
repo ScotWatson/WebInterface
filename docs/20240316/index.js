@@ -661,7 +661,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   mainWindowRoot.show();
   mainRoot.show();
   (function () {})();
-  const hamburgerMenuRoot = mainWindow.createRoot();
+  const hamburgerMenuRoot = mainWindow.createContentRoot();
   const menuList = hamburgerMenuRoot.addObject({
     objectId: OBJECT_LIST,
     parameters: {
