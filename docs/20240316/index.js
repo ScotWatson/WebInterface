@@ -261,6 +261,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
         element.removeEventListener(eventName, handler);
       }
     }
+    return obj;
   }
   function createRootSet({
     element,
