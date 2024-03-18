@@ -325,6 +325,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     bodyDiv.style.backgroundColor = "#808080";
     document.body.appendChild(bodyDiv);
     function resize() {
+      console.log(window.innerHeight);
       bodyDiv.style.height = window.innerHeight;
     }
     window.addEventListener("resize", resize);
