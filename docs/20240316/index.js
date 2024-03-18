@@ -244,19 +244,19 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   }) {
     const obj = {};
     const handlers = new Set();
-    obj.addListener({
+    obj.addListener = function ({
       handler,
     }) {
       handlers.add(handler);
       element.addEventListener(eventName, handler);
     }
-    obj.removeListener({
+    obj.removeListener = function ({
       handler,
     }) {
       handlers.remove(handler);
       element.removeEventListener(eventName, handler);
     }
-    obj.removeAllListeners() {
+    obj.removeAllListeners = function () {
       for (const handler of handlers) {
         element.removeEventListener(eventName, handler);
       }
@@ -321,14 +321,14 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     window.addEventListener("resize", resize);
     const obj = {};
     const rootSet = createRootSet();
-    obj.remove = function () {
-      window.removeEventListener(resize);
-      bodyDiv.remove();
-    }
     obj.createContentRoot = function () {
       return rootSet.createRoot({
         element: bodyDiv,
       });
+    };
+    obj.remove = function () {
+      window.removeEventListener(resize);
+      bodyDiv.remove();
     };
   }
   
@@ -387,11 +387,11 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     };
     obj.createContentRoot = function () {
       return rootSet.createRoot();
-    }
+    };
     obj.remove = function () {
       clickManager.removeAllListeners();
       div.remove();
-    }
+    };
     return obj;
   }
   function createImage({
@@ -425,7 +425,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     obj.remove = function () {
       clickManager.removeAllListeners();
       img.remove();
-    }
+    };
     return obj;
   }
   function createTiles({
@@ -517,7 +517,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
       itemObj.remove = function () {
         clickManager.removeAllListeners();
         divItem.remove();
-      }
+      };
       return itemObj;
     };
     return obj;
@@ -590,7 +590,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
       objItem.remove = function () {
         clickManager.removeAllListeners();
         divItem.remove();
-      }
+      };
       return objItem;
     };
     return obj;
