@@ -481,6 +481,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     divItems.style.backgroundPosition = "left top";
     divItems.style.backgroundRepeat = "repeat-y";
     div.appendChild(divItems);
+    parent.appendChild(div);
     const obj = {};
     obj.addItem = function ({
       imgSrc,
