@@ -298,6 +298,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
           object.remove();
         }
       };
+      return objRoot;
     };
     return obj;
   }
