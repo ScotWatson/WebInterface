@@ -323,11 +323,12 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     bodyDiv.style.padding = "0";
     bodyDiv.style.overflow = "hidden";
     bodyDiv.style.backgroundColor = "#808080";
+    document.body.appendChild(bodyDiv);
     function resize() {
       bodyDiv.style.height = window.innerHeight;
     }
-    document.body.appendChild(bodyDiv);
     window.addEventListener("resize", resize);
+    resize();
     const obj = {};
     const rootSet = createRootSet({
       element: bodyDiv,
