@@ -326,7 +326,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     document.body.appendChild(bodyDiv);
     function resize() {
       console.log(window.innerHeight);
-      bodyDiv.style.height = window.innerHeight;
+      bodyDiv.style.height = window.innerHeight + "px";
     }
     window.addEventListener("resize", resize);
     resize();
