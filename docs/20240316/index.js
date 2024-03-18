@@ -208,11 +208,11 @@ const DEFAULT_SETTINGS = {
 function start( [ evtWindow, moduleErrorHandling ] ) {
   let users;
   function createNewUser({
-    name,
+    username,
   }) {
     const newUserId = self.crypto.randomUUID();
     const newUser = {
-      name: name,
+      username: name,
       id: newUserId,
     };
     users.push(newUser);
@@ -226,8 +226,8 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   if (usersJSON === null) {
     users = [];
     createNewUser({
-      name: "User",
-    }) {
+      username: "User",
+    });
   } else {
     users = JSON.parse(usersJSON);
   }
