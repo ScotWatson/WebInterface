@@ -653,7 +653,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     },
   });
   for (const thisUser of users) {
-    userScroll.addItem({
+    userTiles.addItem({
       imgSrc: "Anonymous.webp",
       itemName: thisUser.username,
     });
