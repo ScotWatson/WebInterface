@@ -231,19 +231,6 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   } else {
     users = JSON.parse(usersJSON);
   }
-  
-  document.body.style.boxSizing = "border-box";
-  document.body.style.margin = "0";
-  document.body.style.border = "0";
-  document.body.style.padding = "0";
-  document.body.style.overflow = "hidden";
-  document.body.style.backgroundColor = "#808080";
-  document.body.style.fontFamily = "standard";
-  const bodyDiv = document.createElement("div");
-  function resize() {
-    bodyDiv.style.height = window.innerHeight;
-  }
-  window.addEventListener("resize", resize);
 
   // Returns a CSS string for a touch element, sized in terms of a factor times the minimum size
   function touchCss({
@@ -251,124 +238,212 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   }) {
     return (factor * px_per_inch * min_touch_inch) + "px";
   }
+  function createEventHandler({
+    element,
+    eventName,
+  }) {
+    const obj = {};
+    const handlers = new Set();
+    obj.addListener({
+      handler,
+    }) {
+      handlers.add(handler);
+      element.addEventListener(eventName, handler);
+    }
+    obj.removeListener({
+      handler,
+    }) {
+      handlers.remove(handler);
+      element.removeEventListener(eventName, handler);
+    }
+    obj.removeAllListeners() {
+      for (const handler of handlers) {
+        element.removeEventListener(eventName, handler);
+      }
+    }
+  }
+  function createRootSet({
+    element,
+  }) {
+    const roots = new Set();
+    const obj = {};
+    obj.createRoot = function () {
+      const shadowDom = element.attachShadow({ mode: "closed" });
+      roots.add(shadowDom);
+      const thisStyle = new CSSStyleSheet();
+      shadowDom.adoptedStyleSheets = [ thisStyle ];
+      const contents = new Set();
+      const objRoot = {};
+      objRoot.addObject = function ({
+        objectId,
+        parameters,
+      }) {
+        const newObject = createObject({
+          objectId,
+          parameters,
+          parent: shadowDom,
+        });
+        contents.add(newObject);
+        return newObject;
+      };
+      objRoot.show = function () {
+        for (const root of roots) {
+          root.adoptedStyleSheets[0].replaceSync("* { display:none; }");
+        }
+        thisStyle.replaceSync("* { display:block; }");
+      };
+      objRoot.remove = function () {
+        thisStyle.replaceSync("* { display:none; }");
+        for (const object of contents) {
+          object.remove();
+        }
+      };
+    };
+  }
+  function initBody() {
+    document.body.style.boxSizing = "border-box";
+    document.body.style.margin = "0";
+    document.body.style.border = "0";
+    document.body.style.padding = "0";
+    document.body.style.overflow = "hidden";
+    const bodyDiv = document.createElement("div");
+    bodyDiv.style.width = "100%";
+    bodyDiv.style.height = "100%";
+    bodyDiv.style.boxSizing = "border-box";
+    bodyDiv.style.margin = "0";
+    bodyDiv.style.border = "0";
+    bodyDiv.style.padding = "0";
+    bodyDiv.style.overflow = "hidden";
+    bodyDiv.style.backgroundColor = "#808080";
+    function resize() {
+      bodyDiv.style.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resize);
+    const obj = {};
+    const rootSet = createRootSet();
+    obj.remove = function () {
+      window.removeEventListener(resize);
+      bodyDiv.remove();
+    }
+    obj.createContentRoot = function () {
+      return rootSet.createRoot({
+        element: bodyDiv,
+      });
+    };
+  }
   
+  const OBJECT_FUNCTIONS = new Map();
+  OBJECT_FUNCTIONS.set("1b86fbea-6abc-4b65-9189-d4a6033fe8bf", createList);
+  OBJECT_FUNCTIONS.set("35017865-1b42-430b-9fc3-61cece306d6d", createTiles);
+  OBJECT_FUNCTIONS.set("92fcd3cb-76bb-47a5-8693-31a8bbd19739", createImage);
+  OBJECT_FUNCTIONS.set("9db9ca53-1d3b-49a9-9d22-8b1d08177c92", createBlankDiv);
+  function createObject({
+    objectId,
+    parameters,
+    parent,
+  }) {
+    const objectConstructor = OBJECT_FUNCTIONS.get(objectId);
+    if (typeof objectConstructor !== "function") {
+      console.error("Object ID is not recognized: " + objectId);
+    }
+    const newObject = objectConstructor({
+      parameters,
+      parent,
+    });
+    return newObject;
+  }
   function createBlankDiv({
-    top,
-    right,
-    width,
-    height,
-    parent,  // expected to be a document fragment
-    contents,  // expected to be a document fragment
+    parameters,
+    parent,
   }) {
     const div = document.createElement("div");
-    const divShadowDom = div.appendShadow({ mode: "closed" });
     div.style.display = "block";
     div.style.position = "absolute";
-    div.style.top = top + "px";
-    div.style.right = right + "px";
-    div.style.width = width + "px";
-    div.style.height = height + "px";
+    div.style.top = parameters.top;
+    div.style.right = parameters.right;
+    div.style.width = parameters.width;
+    div.style.height = parameters.height;
     div.style.backgroundColor = "white";
     div.style.boxSizing = "border-box";
     div.style.margin = "0px";
     div.style.border = "0px";
     div.style.padding = "0px";
     parent.appendChild(div);
-    divShadowDom.appendChild(contents);
     const obj = {};
-    obj.remove = function () {
-      div.remove();
-    }
+    const rootSet = createRootSet();
+    const clickManager = createEventManager({
+      element: div,
+      eventName: "click",
+    });
     obj.addClickListener = function ({
       handler,
     }) {
-      div.addEventListener("click", handler);
+      clickManager.addListener({ handler });
     };
+    obj.removeClickListener = function ({
+      handler,
+    }) {
+      clickManager.removeListener({ handler });
+    };
+    obj.createContentRoot = function () {
+      return rootSet.createRoot();
+    }
+    obj.remove = function () {
+      clickManager.removeAllListeners();
+      div.remove();
+    }
     return obj;
   }
   function createImage({
-    top,
-    right,
-    width,
-    height,
-    src,
-    parent,  // expected to be a document fragment
+    parameters,
+    parent,
   }) {
     const img = document.createElement("img");
-    img.src = src;
+    img.src = parameters.src;
     img.style.display = "block";
     img.style.position = "absolute";
-    img.style.top = top;
-    img.style.left = left;
-    img.style.width = width;
-    img.style.height = height;
+    img.style.top = parameters.top;
+    img.style.left = parameters.left;
+    img.style.width = parameters.width;
+    img.style.height = parameters.height;
     img.style.backgroundColor = "white";
     const obj = {};
+    const clickManager = createEventManager({
+      element: img,
+      eventName: "click",
+    });
     obj.addClickListener = function ({
       handler,
     }) {
-      div.addEventListener("click", handler);
+      clickManager.addListener({ handler });
     };
+    obj.removeClickListener = function ({
+      handler,
+    }) {
+      clickManager.removeListener({ handler });
+    };
+    obj.remove = function () {
+      clickManager.removeAllListeners();
+      img.remove();
+    }
+    return obj;
   }
-
-  const frag0 = document.createDocumentFragment();
-  const imgHamburgerMenu = createImage({
-    top: "0px",
-    left: "0px",
-    width: "100%",
-    height: "100%",
-    src: "Hamburger_icon.svg",
-    parent: frag0,
-  });
-  imgHamburgerMenu.addClickListener(function () {
-    mainHamburgerMenu();
-  });
-  const frag1 = document.createDocumentFragment();
-  const btnHamburgerMenu = createBlankDiv({
-    top: "0px",
-    right: "0px",
-    width: touchCss({ factor: 1 }),
-    height: touchCss({ factor: 1 }),
-    parent: frag1,
-    contents: frag0,
-  });
-  const frag2 = document.createDocumentFragment();
-  const divUserScroll = createTiles({
-    left: "0px",
-    top: touchCss({ factor: 2 }),
-    width: "100%",
-    height: "calc(100% - " + touchCss({ factor: 2 }) + ")",
-    parent: frag2,
-  });
-  bodyDiv.appendChild(divUserScroll);
-  for (const thisUser of users) {
-    divUserScroll.addItem({
-      imgSrc: "Anonymous.webp",
-      itemName: thisUser.username,
-    });
-  }
-  bodyDiv.appendChild(frag1);
-
   function createTiles({
-    top,
-    right,
-    width,
-    height,
-    parent,  // expected to be a document fragment
+    parameters,
+    parent,
   }) {
     const div = document.createElement("div");
-    const divShadowDom = div.attachShadow({ mode: "closed" });
     div.style.display = "block";
     div.style.boxSizing = "border-box";
     div.style.position = "absolute";
-    div.style.left = left + "px";
-    div.style.top = top + "px";
+    div.style.left = parameters.left + "px";
+    div.style.top = parameters.top + "px";
     div.style.backgroundColor = "#C0C0C0";
     div.style.padding = "0px";
     div.style.border = "0px";
     div.style.margin = "0px";
-    div.style.width = width + "px";
-    div.style.height = height + "px";
+    div.style.width = parameters.width;
+    div.style.height = parameters.height;
     div.style.overflow = "hidden auto";
     const divItems = document.createElement("div");
     divItems.style.display = "flex";
@@ -387,7 +462,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     divItems.style.backgroundSize = touchCss({ factor: 1 }) + " " + touchCss({ factor: 1 });
     divItems.style.backgroundPosition = "left top";
     divItems.style.backgroundRepeat = "repeat-y";
-    divShadowDom.appendChild(divItems);
+    div.appendChild(divItems);
     const obj = {};
     obj.addItem = function ({
       imgSrc,
@@ -425,45 +500,39 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
       divItem.appendChild(divItemName);
       divItems.appendChild(divItem);
       const itemObj = {};
+      const clickManager = createEventManager({
+        element: divItem,
+        eventName: "click",
+      });
       itemObj.addClickListener = function ({
         handler,
       }) {
-        divItem.addEventListener("click", handler);
+        clickManager.addListener({ handler });
       };
+      itemObj.removeClickListener = function ({
+        handler,
+      }) {
+        clickManager.removeListener({ handler });
+      };
+      itemObj.remove = function () {
+        clickManager.removeAllListeners();
+        divItem.remove();
+      }
       return itemObj;
     };
     return obj;
   }
-
-  function mainHamburgerMenu() {
-    imgHamburgerMenu.setSrc("LeftArrowIcon.png");
-    const menuList = createList({
-      top: touchCss({ factor: 1 }),
-      left: "0px",
-      width: "100%",
-      height: "calc(100% - " + touchCss({ factor: 1 }) + ")",
-    });
-    const item = menuList.addItem({
-      itemName: "Toggle Full Screen",
-    });
-    item.addClickListener({
-      handler: toggleFullscreen,
-    });
-  }
   function createList({
-    top,
-    left,
-    width,
-    height,
+    parameters,
     parent,
   }) {
     const div = document.createElement("div");
     div.style.display = "block";
     div.style.position = "absolute";
-    div.style.top = top;
-    div.style.left = left;
-    div.style.width = width;
-    div.style.height = height;
+    div.style.top = parameters.top;
+    div.style.left = parameters.left;
+    div.style.width = parameters.width;
+    div.style.height = parameters.height;
     div.style.boxSizing = "border-box";
     div.style.backgroundColor = "#C0C0C0";
     div.style.margin = "0";
@@ -504,130 +573,169 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
       divItem.append(itemName);
       divList.appendChild(divItem);
       const objItem = {};
+      const clickManager = createEventManager({
+        element: divItem,
+        eventName: "click",
+      });
       objItem.addClickListener = function ({
         handler,
       }) {
-        divList.addEventListener("click", handler);
+        clickManager.addListener({ handler });
       };
+      objItem.removeClickListener = function ({
+        handler,
+      }) {
+        clickManager.removeListener({ handler });
+      };
+      objItem.remove = function () {
+        clickManager.removeAllListeners();
+        divItem.remove();
+      }
       return objItem;
     };
     return obj;
   }
-      {
-        itemName: "Add User",
-        action: addUser,
-      },
-      {
-        itemName: "Calibrate Screen",
-        action: addUser,
-      },
-      {
-        caption: "Set Viewing Distance",
-        action: addUser,
-      },
-      {
-        caption: "Set Minimum Text Size",
-        action: addUser,
-      },
-      {
-        caption: "Set Minimum Touch Size",
-        action: addUser,
-      },
-      {
-        caption: "other",
-        action: addUser,
-      },
-      {
-        caption: "other",
-        action: addUser,
-      },
-      {
-        caption: "other",
-        action: addUser,
-      },
-      {
-        caption: "other",
-        action: addUser,
-      },
-      {
-        caption: "other",
-        action: addUser,
-      },
-      {
-        caption: "other",
-        action: addUser,
-      },
-      {
-        caption: "other",
-        action: addUser,
-      },
-      {
-        caption: "other",
-        action: addUser,
-      },
-    ];
-    const btnCancel = document.createElement("div");
-    btnCancel.style.display = "block";
-    btnCancel.style.position = "absolute";
-    btnCancel.style.top = "0";
-    btnCancel.style.right = "0";
-    btnCancel.style.width = touchCss({ factor: 1 });
-    btnCancel.style.height = touchCss({ factor: 1 });
-    btnCancel.style.boxSizing = "border-box";
-    btnCancel.style.backgroundColor = "#00E0E0";
-    btnCancel.style.margin = "0";
-    btnCancel.style.border = "0";
-    btnCancel.style.padding = "0";
-    btnCancel.addEventListener("click", function (evt) {
-      divMenu.remove();
-    });
-    divMenu.appendChild(btnCancel);
-    const imgCancel = document.createElement("img");
-    imgCancel.src = 
-    imgCancel.style.width = "100%";
-    imgCancel.style.height = "100%";
-    imgCancel.style.boxSizing = "border-box";
-    imgCancel.style.margin = "0";
-    imgCancel.style.border = "0";
-    imgCancel.style.padding = "0";
-    btnCancel.appendChild(imgCancel);
 
-    obj.addItem = function () {
-    }
-    divItem.addEventListener("click", function (evt) {
-      divMenu.remove();
-      item.action();
+  
+  const main = initBody();
+  const mainRoot = main.createContentRoot();
+  const btnHamburgerMenu = mainRoot.addObject({
+    objectId: OBJECT_BLANK_DIV,
+    parameters: {
+      top: "0px",
+      right: "0px",
+      width: touchCss({ factor: 1 }),
+      height: touchCss({ factor: 1 }),
+    },
+  });
+  const btnHamburgerMenuRoot = btnHamburgerMenu.createContentRoot();
+  const imgHamburgerMenu = btnHamburgerMenuRoot.addObject({
+    objectId: OBJECT_IMAGE,
+    parameters: {
+      top: "0px",
+      left: "0px",
+      width: "100%",
+      height: "100%",
+      src: "Hamburger_icon.svg",
+    },
+  });
+  imgHamburgerMenu.addClickListener(function () {
+    mainHamburgerMenu();
+  });
+  btnHamburgerMenuRoot.show();
+  const mainWindow = mainRoot.addObject({
+    objectId: OBJECT_BLANK_DIV,
+    parameters: {
+      left: "0px",
+      top: touchCss({ factor: 2 }),
+      width: "100%",
+      height: "calc(100% - " + touchCss({ factor: 2 }) + ")",
+    },
+  });
+  const mainWindowRoot = mainWindow.createContentRoot();
+  const userTiles = mainWindowRoot.addObject({
+    objectId: OBJECT_TILES,
+    parameters: {
+      left: "0px",
+      top: "0px",
+      width: "100%",
+      height: "100%",
+    },
+  });
+  for (const thisUser of users) {
+    userScroll.addItem({
+      imgSrc: "Anonymous.webp",
+      itemName: thisUser.username,
     });
-    for (const item of items) {
-    }
-
-    
-    function toggleFullscreen() {
-      if (document.fullscreenElement === null) {
-        document.documentElement.requestFullscreen();
-      } else {
-        document.exitFullscreen();
-      }
-    }
-    function addUser() {
+  }
+  mainWindowRoot.show();
+  mainRoot.show();
+  (function () {})();
+  const hamburgerMenuRoot = mainWindow.createRoot();
+  const menuList = hamburgerMenuRoot.addObject({
+    objectId: OBJECT_LIST,
+    parameters: {
+      top: touchCss({ factor: 1 }),
+      left: "0px",
+      width: "100%",
+      height: "100%",
+    },
+  });
+  menuList.addItem({
+    itemName: "Toggle Full Screen",
+  }).addClickListener({
+    handler: toggleFullscreen,
+  });
+  menuList.addItem({
+    itemName: "Add User",
+  }).addClickListener({
+    handler: addUser,
+  });
+  menuList.addItem({
+    itemName: "Calibrate Screen",
+  });
+  menuList.addItem({
+    itemName: "Set Viewing Distance",
+  });
+  menuList.addItem({
+    itemName: "Set Minimum Text Size",
+  });
+  menuList.addItem({
+    itemName: "Set Minimum Touch Size",
+  });
+  menuList.addItem({
+    itemName: "other",
+  });
+  menuList.addItem({
+    itemName: "other",
+  });
+  menuList.addItem({
+    itemName: "other",
+  });
+  menuList.addItem({
+    itemName: "other",
+  });
+  menuList.addItem({
+    itemName: "other",
+  });
+  menuList.addItem({
+    itemName: "other",
+  });
+  menuList.addItem({
+    itemName: "other",
+  });
+  function showHamburgerMenu() {
+    imgHamburgerMenu.setSrc("LeftArrowIcon.png");
+    hamburgerMenuRoot.show();
+    addClickListener(hideHamburgerMenu);
+    removeClickListener(showHamburgerMenu);
+  }
+  function hideHamburgerMenu() {
+    imgHamburgerMenu.setSrc("Hamburger_icon.png");
+    hamburgerMenuRoot.show();
+    addClickListener(showHamburgerMenu);
+    removeClickListener(hideHamburgerMenu);
+  }
+  function toggleFullscreen() {
+    if (document.fullscreenElement === null) {
+      document.documentElement.requestFullscreen();
+    } else {
+      document.exitFullscreen();
     }
   }
+  function addUser() {
+  }
 
-function loginScreen() {
-  const inpUsername = document.createElement("input");
-  const inpPassword = document.createElement("input");
-  const btnLogin = document.createElement("div");
-  btnLogin.innerHTML = "Login";
-  btnLogin.addEventListener("click", function (evt) {
-    
-  });
-  const btnLoginAnonymous = document.createElement("div");
-  btnLoginAnonymous.innerHTML = "Login as Anonymous";
-  btnLoginAnonymous.addEventListener("click", function (evt) {
-    
-  });
-}
-
+  function loginScreen() {
+    const inpUsername = document.createElement("input");
+    const inpPassword = document.createElement("input");
+    const btnLogin = document.createElement("div");
+    btnLogin.innerHTML = "Login";
+    btnLogin.addEventListener("click", function (evt) {
+      
+    });
+  }
+  
 
 let clientWidth_CSS_px;
 let clientHeight_CSS_px;
@@ -755,14 +863,6 @@ function wifResizeClient() {
   clientWidth_CSS_mm = clientWidth_CSS_in * 25.4;
   clientHeight_CSS_mm = clientHeight_CSS_in * 25.4;
   wifRedrawChildren(document.body, clientWidth_CSS_px, clientHeight_CSS_px);
-}
-
-function wifRedrawChildren(parent, width, height) {
-  for (let child of parent.children) {
-    if (child.redraw) {
-      child.redraw(width, height);
-    }
-  }
 }
 
 function startCalibrationX() {
