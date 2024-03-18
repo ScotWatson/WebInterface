@@ -206,11 +206,13 @@ const DEFAULT_SETTINGS = {
 };
 
 function start( [ evtWindow, moduleErrorHandling ] ) {
-  let users = [];
-  function createNewUser() {
+  let users;
+  function createNewUser({
+    name,
+  }) {
     const newUserId = self.crypto.randomUUID();
     const newUser = {
-      name: "User",
+      name: name,
       id: newUserId,
     };
     users.push(newUser);
@@ -220,31 +222,16 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     };
     window.siteLocalStorage.set("User:" + newUserId, JSON.stringify(newUserInfo));
   }
-  function createDefaultSettings() {
-    const settings = {}
-    return self.;
-  }
-  const usersJSON = window.siteLocalStorage.get("users");
+  const usersJSON = window.siteLocalStorage.get("Users");
   if (usersJSON === null) {
     users = [];
+    createNewUser({
+      name: "User",
+    }) {
   } else {
     users = JSON.parse(usersJSON);
   }
   
-  window.addEventListener("resize", resize);
-  switch (mode) {
-    case "":
-      user = "";
-      loginScreen();
-      break;
-    case "standalone":
-      user = "Anonymous";
-      
-      break;
-    default:
-      user = "";
-      break;
-  }
   document.body.style.boxSizing = "border-box";
   document.body.style.margin = "0";
   document.body.style.border = "0";
@@ -252,18 +239,29 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   document.body.style.overflow = "hidden";
   document.body.style.backgroundColor = "#808080";
   document.body.style.fontFamily = "standard";
-  document.createElement();
+  const bodyDiv = document.createElement("div");
+  function resize() {
+    bodyDiv.style.height = window.innerHeight;
+  }
+  window.addEventListener("resize", resize);
 
-  const min_touch_px = px_per_inch * min_touch_inch;
+  // Returns a CSS string for a touch element, sized in terms of a factor times the minimum size
+  function touchCss({
+    factor,
+  }) {
+    return (factor * px_per_inch * min_touch_inch) + "px";
+  }
   
   function createBlankDiv({
     top,
     right,
     width,
     height,
+    parent,  // expected to be a document fragment
+    contents,  // expected to be a document fragment
   }) {
-    const { top, right, width, height } = args;
     const div = document.createElement("div");
+    const divShadowDom = div.appendShadow({ mode: "closed" });
     div.style.display = "block";
     div.style.position = "absolute";
     div.style.top = top + "px";
@@ -273,59 +271,100 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     div.style.backgroundColor = "white";
     div.style.boxSizing = "border-box";
     div.style.margin = "0px";
-    div.style.border = "1px solid black";
+    div.style.border = "0px";
     div.style.padding = "0px";
-    return div;
+    parent.appendChild(div);
+    divShadowDom.appendChild(contents);
+    const obj = {};
+    obj.remove = function () {
+      div.remove();
+    }
+    obj.addClickListener = function ({
+      handler,
+    }) {
+      div.addEventListener("click", handler);
+    };
+    return obj;
+  }
+  function createImage({
+    top,
+    right,
+    width,
+    height,
+    src,
+    parent,  // expected to be a document fragment
+  }) {
+    const img = document.createElement("img");
+    img.src = src;
+    img.style.display = "block";
+    img.style.position = "absolute";
+    img.style.top = top;
+    img.style.left = left;
+    img.style.width = width;
+    img.style.height = height;
+    img.style.backgroundColor = "white";
+    const obj = {};
+    obj.addClickListener = function ({
+      handler,
+    }) {
+      div.addEventListener("click", handler);
+    };
   }
 
-  const btnHamburgerMenu = createBlankDiv({
-    top: 0,
-    right: 0,
-    width: min_touch_px,
-    height: min_touch_px,
+  const frag0 = document.createDocumentFragment();
+  const imgHamburgerMenu = createImage({
+    top: "0px",
+    left: "0px",
+    width: "100%",
+    height: "100%",
+    src: "Hamburger_icon.svg",
+    parent: frag0,
   });
-  btnHamburgerMenu.style.border = "1px solid black";
-  btnHamburgerMenu.addEventListener("click", function () {
+  imgHamburgerMenu.addClickListener(function () {
     mainHamburgerMenu();
   });
-  document.body.appendChild(btnHamburgerMenu);
+  const frag1 = document.createDocumentFragment();
+  const btnHamburgerMenu = createBlankDiv({
+    top: "0px",
+    right: "0px",
+    width: touchCss({ factor: 1 }),
+    height: touchCss({ factor: 1 }),
+    parent: frag1,
+    contents: frag0,
+  });
+  const frag2 = document.createDocumentFragment();
+  const divUserScroll = createTiles({
+    left: "0px",
+    top: touchCss({ factor: 2 }),
+    width: "100%",
+    height: "calc(100% - " + touchCss({ factor: 2 }) + ")",
+    parent: frag2,
+  });
+  bodyDiv.appendChild(divUserScroll);
+  for (const thisUser of users) {
+    divUserScroll.addItem({
+      imgSrc: "Anonymous.webp",
+      itemName: thisUser.username,
+    });
+  }
+  bodyDiv.appendChild(frag1);
 
-  const imgHamburgerMenu = document.createElement("img");
-  imgHamburgerMenu.src = "Hamburger_icon.svg";
-  imgHamburgerMenu.style.display = "block";
-  imgHamburgerMenu.style.position = "absolute";
-  imgHamburgerMenu.style.top = "0px";
-  imgHamburgerMenu.style.left = "0px";
-  imgHamburgerMenu.style.width = "100%";
-  imgHamburgerMenu.style.height = "100%";
-  imgHamburgerMenu.style.backgroundColor = "white";
-  btnHamburgerMenu.appendChild(imgHamburgerMenu);
-  const inpUsername = document.createElement("input");
-  inpUsername.style.display = "block";
-  inpUsername.style.boxSizing = "border-box";
-  inpUsername.style.position = "absolute";
-  inpUsername.style.left = "0px";
-  inpUsername.style.top = (px_per_inch * min_touch_inch) + "px";
-  inpUsername.style.width = "100%";
-  inpUsername.style.height = (px_per_inch * min_touch_inch) + "px";
-  inpUsername.style.padding = "0px";
-  inpUsername.style.border = "5px solid black";
-  inpUsername.style.margin = "0px";
-  inpUsername.style.fontSize = (px_per_inch * min_text_ratio * view_dist_inch) + "px";
-  inpUsername.setAttribute("placeholder", "Username");
-  document.body.appendChild(inpUsername);
-  const users = [ "vnfkjl iove", "oipfe jwna", "pkojij onj", "bjbh bfty", "uiunjwb nsw", "oknwn dips" ];
-
-  function createScroll() {
+  function createTiles({
+    top,
+    right,
+    width,
+    height,
+    parent,  // expected to be a document fragment
+  }) {
     const div = document.createElement("div");
-    const divShadowDOM = div.attachShadow({ mode: "closed" });
+    const divShadowDom = div.attachShadow({ mode: "closed" });
     div.style.display = "block";
     div.style.boxSizing = "border-box";
     div.style.position = "absolute";
     div.style.left = left + "px";
     div.style.top = top + "px";
     div.style.backgroundColor = "#C0C0C0";
-    div.style.padding = 0 + "px";
+    div.style.padding = "0px";
     div.style.border = "0px";
     div.style.margin = "0px";
     div.style.width = width + "px";
@@ -338,229 +377,241 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     divItems.style.boxSizing = "border-box";
     divItems.style.width = "100%";
     divItems.style.backgroundColor = "#A0A0A0";
-    divItems.style.paddingLeft = min_touch_px + "px";
-    divItems.style.paddingRight = 0 + "px";
-    divItems.style.paddingTop = 0 + "px";
-    divItems.style.paddingBottom = 0 + "px";
+    divItems.style.paddingLeft = touchCss({ factor: 1 });
+    divItems.style.paddingRight = "0px";
+    divItems.style.paddingTop = "0px";
+    divItems.style.paddingBottom = "0px";
     divItems.style.border = "0px";
     divItems.style.margin = "0px";
     divItems.style.backgroundImage = "url(ScrollGutter.svg)";
-    divItems.style.backgroundSize = min_touch_px + "px " + min_touch_px + "px";
+    divItems.style.backgroundSize = touchCss({ factor: 1 }) + " " + touchCss({ factor: 1 });
     divItems.style.backgroundPosition = "left top";
     divItems.style.backgroundRepeat = "repeat-y";
-    div.appendChild(divItems);
-    const control = {};
-    control.addItem = function () {
-      divShadowDOM.appendChild();
+    divShadowDom.appendChild(divItems);
+    const obj = {};
+    obj.addItem = function ({
+      imgSrc,
+      itemName,
+    }) {
+      const divItem = document.createElement("div");
+      divItem.style.display = "flex";
+      divItem.style.flexFlow = "column nowrap";
+      divItem.style.justifyContent = "space-around";
+      divItem.style.alignItems = "center";
+      divItem.style.boxSizing = "border-box";
+      divItem.style.width = touchCss({ factor: 2 });
+      divItem.style.height = touchCss({ factor: 2 });
+      divItem.style.textAlign = "center";
+      divItem.style.backgroundColor = "#808080";
+      const imgItem = document.createElement("img");
+      imgItem.src = imgSrc;
+      imgItem.style.display = "inline-block";
+      imgItem.style.boxSizing = "border-box";
+      imgItem.style.width = "80%";
+      imgItem.style.height = "80%";
+      const divItemName = document.createElement("div");
+      divItemName.append(itemName);
+      divItemName.style.display = "block";
+      divItemName.style.boxSizing = "border-box";
+      divItemName.style.backgroundColor = "#E0E080";
+      divItemName.style.fontSize = (px_per_inch * min_text_ratio * view_dist_inch) + "px";
+      divItemName.style.width = "100%";
+      divItemName.style.height = "20%";
+      divItemName.style.userSelect = "none";
+      divItemName.style.textAlign = "center";
+      divItemName.style.textOverflow = "ellipsis";
+      divItemName.style.whiteSpace = "nowrap";
+      divItem.appendChild(imgItem);
+      divItem.appendChild(divItemName);
+      divItems.appendChild(divItem);
+      const itemObj = {};
+      itemObj.addClickListener = function ({
+        handler,
+      }) {
+        divItem.addEventListener("click", handler);
+      };
+      return itemObj;
     };
-    control.element = function () {
-      return div;
-    };
+    return obj;
   }
 
-  const divUserScroll = createScroll({
-    left: 0,
-    top: 2 * min_touch_px,
-    width: window.innerWidth,
-    height: window.innerHeight - (2 * min_touch_px),
-  });
-  document.body.appendChild(divUserScroll);
-  
-  for (const thisUser of users) {
+  function mainHamburgerMenu() {
+    imgHamburgerMenu.setSrc("LeftArrowIcon.png");
+    const menuList = createList({
+      top: touchCss({ factor: 1 }),
+      left: "0px",
+      width: "100%",
+      height: "calc(100% - " + touchCss({ factor: 1 }) + ")",
+    });
+    const item = menuList.addItem({
+      itemName: "Toggle Full Screen",
+    });
+    item.addClickListener({
+      handler: toggleFullscreen,
+    });
   }
-  resize();
+  function createList({
+    top,
+    left,
+    width,
+    height,
+    parent,
+  }) {
+    const div = document.createElement("div");
+    div.style.display = "block";
+    div.style.position = "absolute";
+    div.style.top = top;
+    div.style.left = left;
+    div.style.width = width;
+    div.style.height = height;
+    div.style.boxSizing = "border-box";
+    div.style.backgroundColor = "#C0C0C0";
+    div.style.margin = "0";
+    div.style.border = "0";
+    div.style.padding = "0";
+    div.style.overflow = "hidden auto";
+    div.setAttribute("class", "invisible-scrollbar");
+    parent.appendChild(div);
+    const divList = document.createElement("div");
+    divList.style.display = "flex";
+    divList.style.flexFlow = "column wrap";
+    divList.style.justifyContent = "space-around";
+    divList.style.boxSizing = "border-box";
+    divList.style.backgroundColor = "#A0A0A0";
+    divList.style.margin = "0";
+    divList.style.border = "0";
+    divList.style.paddingLeft = touchCss({ factor: 1 });
+    divList.style.paddingRight = "0";
+    divList.style.paddingTop = "0";
+    divList.style.paddingBottom = "0";
+    divList.style.backgroundImage = "url(ScrollGutter.svg)";
+    divList.style.backgroundSize = touchCss({ factor: 1 }) + " " + touchCss({ factor: 1 });
+    divList.style.backgroundPosition = "left top";
+    divList.style.backgroundRepeat = "repeat-y";
+    div.appendChild(divList);
+    const obj = {};
+    obj.addItem = function ({
+      itemName,
+    }) {
+      const divItem = document.createElement("div");
+      divItem.style.width = "100%";
+      divItem.style.height = "50px";
+      divItem.style.boxSizing = "border-box";
+      divItem.style.backgroundColor = "#808080";
+      divItem.style.margin = "0";
+      divItem.style.border = "0";
+      divItem.style.padding = "5%";
+      divItem.append(itemName);
+      divList.appendChild(divItem);
+      const objItem = {};
+      objItem.addClickListener = function ({
+        handler,
+      }) {
+        divList.addEventListener("click", handler);
+      };
+      return objItem;
+    };
+    return obj;
+  }
+      {
+        itemName: "Add User",
+        action: addUser,
+      },
+      {
+        itemName: "Calibrate Screen",
+        action: addUser,
+      },
+      {
+        caption: "Set Viewing Distance",
+        action: addUser,
+      },
+      {
+        caption: "Set Minimum Text Size",
+        action: addUser,
+      },
+      {
+        caption: "Set Minimum Touch Size",
+        action: addUser,
+      },
+      {
+        caption: "other",
+        action: addUser,
+      },
+      {
+        caption: "other",
+        action: addUser,
+      },
+      {
+        caption: "other",
+        action: addUser,
+      },
+      {
+        caption: "other",
+        action: addUser,
+      },
+      {
+        caption: "other",
+        action: addUser,
+      },
+      {
+        caption: "other",
+        action: addUser,
+      },
+      {
+        caption: "other",
+        action: addUser,
+      },
+      {
+        caption: "other",
+        action: addUser,
+      },
+    ];
+    const btnCancel = document.createElement("div");
+    btnCancel.style.display = "block";
+    btnCancel.style.position = "absolute";
+    btnCancel.style.top = "0";
+    btnCancel.style.right = "0";
+    btnCancel.style.width = touchCss({ factor: 1 });
+    btnCancel.style.height = touchCss({ factor: 1 });
+    btnCancel.style.boxSizing = "border-box";
+    btnCancel.style.backgroundColor = "#00E0E0";
+    btnCancel.style.margin = "0";
+    btnCancel.style.border = "0";
+    btnCancel.style.padding = "0";
+    btnCancel.addEventListener("click", function (evt) {
+      divMenu.remove();
+    });
+    divMenu.appendChild(btnCancel);
+    const imgCancel = document.createElement("img");
+    imgCancel.src = 
+    imgCancel.style.width = "100%";
+    imgCancel.style.height = "100%";
+    imgCancel.style.boxSizing = "border-box";
+    imgCancel.style.margin = "0";
+    imgCancel.style.border = "0";
+    imgCancel.style.padding = "0";
+    btnCancel.appendChild(imgCancel);
 
-      imgItem.src = "Anonymous.webp";
-    divItemName.innerHTML = thisUser;
-
-    const divItem = document.createElement("div");
-    divItem.style.display = "flex";
-    divItem.style.flexFlow = "column nowrap";
-    divItem.style.justifyContent = "space-around";
-    divItem.style.alignItems = "center";
-    divItem.style.boxSizing = "border-box";
-    divItem.style.width = (2 * min_touch_px) + "px";
-    divItem.style.height = (2 * min_touch_px) + "px";
-    divItem.style.textAlign = "center";
-    divItem.style.backgroundColor = "#808080";
-    const imgItem = document.createElement("img");
-    imgItem.src = "Anonymous.webp";
-    imgItem.style.display = "inline-block";
-    imgItem.style.boxSizing = "border-box";
-    imgItem.style.width = "80%";
-    imgItem.style.height = "80%";
-    const divItemName = document.createElement("div");
-    divItemName.innerHTML = thisUser;
-    divItemName.style.display = "block";
-    divItemName.style.boxSizing = "border-box";
-    divItemName.style.backgroundColor = "#E0E080";
-    divItemName.style.fontSize = (px_per_inch * min_text_ratio * view_dist_inch) + "px";
-    divItemName.style.width = "100%";
-    divItemName.style.height = "20%";
-    divItemName.style.userSelect = "none";
-    divItemName.style.textAlign = "center";
-    divItemName.style.textOverflow = "ellipsis";
-    divItemName.style.whiteSpace = "nowrap";
-    divItem.appendChild(imgItem);
-    divItem.appendChild(divItemName);
-    divItems.appendChild(divItem);
-}
-
-function resize() {
-//  window.innerWidth + window.innerHeight;
-}
-
-function mainHamburgerMenu() {
-  const divMenu = document.createElement("div");
-  divMenu.style.display = "block";
-  divMenu.style.position = "absolute";
-  divMenu.style.left = "0";
-  divMenu.style.top = "0";
-  divMenu.style.width = "100%";
-  divMenu.style.height = "100%";
-  divMenu.style.boxSizing = "border-box";
-  divMenu.style.backgroundColor = "#E0E0E0";
-  document.body.appendChild(divMenu);
-  const divScroll = document.createElement("div");
-  divScroll.style.display = "block";
-  divScroll.style.position = "absolute";
-  divScroll.style.top = (px_per_inch * min_touch_inch) + "px";
-  divScroll.style.width = "100%";
-  divScroll.style.height = "calc(100% - " + (px_per_inch * min_touch_inch) + "px)";
-  divScroll.style.boxSizing = "border-box";
-  divScroll.style.backgroundColor = "#C0C0C0";
-  divScroll.style.margin = "0";
-  divScroll.style.border = "0";
-  divScroll.style.padding = "0";
-  divScroll.style.overflow = "hidden auto";
-  divScroll.setAttribute("class", "invisible-scrollbar");
-  divMenu.appendChild(divScroll);
-  const divList = document.createElement("div");
-  divList.style.display = "flex";
-  divList.style.flexFlow = "column wrap";
-  divList.style.justifyContent = "space-around";
-  divList.style.boxSizing = "border-box";
-  divList.style.backgroundColor = "#A0A0A0";
-  divList.style.margin = "0";
-  divList.style.border = "0";
-  divList.style.paddingLeft = (px_per_inch * min_touch_inch) + "px";
-  divList.style.paddingRight = "0";
-  divList.style.paddingTop = "0";
-  divList.style.paddingBottom = "0";
-  divList.style.backgroundImage = "url(ScrollGutter.svg)";
-  divList.style.backgroundSize = (px_per_inch * min_touch_inch) + "px " + (px_per_inch * min_touch_inch) + "px";
-  divList.style.backgroundPosition = "left top";
-  divList.style.backgroundRepeat = "repeat-y";
-  divScroll.appendChild(divList);
-  const items = [
-    {
-      caption: "Toggle Full Screen",
-      action: toggleFullscreen,
-    },
-    {
-      caption: "Add User",
-      action: addUser,
-    },
-    {
-      caption: "Calibrate Screen",
-      action: addUser,
-    },
-    {
-      caption: "Set Viewing Distance",
-      action: addUser,
-    },
-    {
-      caption: "Set Minimum Text Size",
-      action: addUser,
-    },
-    {
-      caption: "Set Minimum Touch Size",
-      action: addUser,
-    },
-    {
-      caption: "other",
-      action: addUser,
-    },
-    {
-      caption: "other",
-      action: addUser,
-    },
-    {
-      caption: "other",
-      action: addUser,
-    },
-    {
-      caption: "other",
-      action: addUser,
-    },
-    {
-      caption: "other",
-      action: addUser,
-    },
-    {
-      caption: "other",
-      action: addUser,
-    },
-    {
-      caption: "other",
-      action: addUser,
-    },
-    {
-      caption: "other",
-      action: addUser,
-    },
-  ];
-  const btnCancel = document.createElement("div");
-  btnCancel.style.display = "block";
-  btnCancel.style.position = "absolute";
-  btnCancel.style.top = "0";
-  btnCancel.style.right = "0";
-  btnCancel.style.width = (px_per_inch * min_touch_inch) + "px";
-  btnCancel.style.height = (px_per_inch * min_touch_inch) + "px";
-  btnCancel.style.boxSizing = "border-box";
-  btnCancel.style.backgroundColor = "#00E0E0";
-  btnCancel.style.margin = "0";
-  btnCancel.style.border = "0";
-  btnCancel.style.padding = "0";
-  btnCancel.addEventListener("click", function (evt) {
-    divMenu.remove();
-  });
-  divMenu.appendChild(btnCancel);
-  const imgCancel = document.createElement("img");
-  imgCancel.src = "LeftArrowIcon.png"
-  imgCancel.style.width = "100%";
-  imgCancel.style.height = "100%";
-  imgCancel.style.boxSizing = "border-box";
-  imgCancel.style.margin = "0";
-  imgCancel.style.border = "0";
-  imgCancel.style.padding = "0";
-  btnCancel.appendChild(imgCancel);
-  for (const item of items) {
-    const btnItem = document.createElement("div");
-    btnItem.style.width = "100%";
-    btnItem.style.height = "50px";
-    btnItem.style.boxSizing = "border-box";
-    btnItem.style.backgroundColor = "#808080";
-    btnItem.style.margin = "0";
-    btnItem.style.border = "0";
-    btnItem.style.padding = "5%";
-    btnItem.appendChild(document.createTextNode(item.caption));
-    btnItem.addEventListener("click", function (evt) {
+    obj.addItem = function () {
+    }
+    divItem.addEventListener("click", function (evt) {
       divMenu.remove();
       item.action();
     });
-    divList.appendChild(btnItem);
-  }
-  function toggleFullscreen() {
-    if (document.fullscreenElement === null) {
-      document.documentElement.requestFullscreen();
-    } else {
-      document.exitFullscreen();
+    for (const item of items) {
+    }
+
+    
+    function toggleFullscreen() {
+      if (document.fullscreenElement === null) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    }
+    function addUser() {
     }
   }
-  function addUser() {
-  }
-}
 
 function loginScreen() {
   const inpUsername = document.createElement("input");
