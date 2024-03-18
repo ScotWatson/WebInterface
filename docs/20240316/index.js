@@ -269,10 +269,12 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     const roots = new Set();
     const obj = {};
     obj.createRoot = function () {
-      const shadowDom = element.attachShadow({ mode: "closed" });
-      roots.add(shadowDom);
-      const thisStyle = new CSSStyleSheet();
-      shadowDom.adoptedStyleSheets = [ thisStyle ];
+      const contentRoot = document.createElement("div");
+      contentRoot.style.display = "none";
+      contentRoot.style.width = "100%";
+      contentRoot.style.height = "100%";
+      element.appendChild(contentRoot);
+      roots.add(contentRoot);
       const contents = new Set();
       const objRoot = {};
       objRoot.addObject = function ({
@@ -282,19 +284,22 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
         const newObject = createObject({
           objectId,
           parameters,
-          parent: shadowDom,
+          parent: contentRoot,
         });
         contents.add(newObject);
         return newObject;
       };
       objRoot.show = function () {
         for (const root of roots) {
-          root.adoptedStyleSheets[0].replaceSync("* { display:none; }");
+          root.style.display = "none";
         }
-        thisStyle.replaceSync("* { display:block; }");
+        contentRoot.style.display = "block";
+      };
+      objRoot.hide = function () {
+        contentRoot.style.display = "none";
       };
       objRoot.remove = function () {
-        thisStyle.replaceSync("* { display:none; }");
+        contentRoot.style.display = "none";
         for (const object of contents) {
           object.remove();
         }
