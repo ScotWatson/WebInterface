@@ -735,8 +735,8 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
       
     });
   }
-  
-
+}
+/*
 let clientWidth_CSS_px;
 let clientHeight_CSS_px;
 let clientWidth_CSS_in;
@@ -808,13 +808,7 @@ function wifCreateFullClientDiv() {
 let units = "IP";
 
 let CSS_multiplier = 1;
-/*
-window.addEventListener("load", function (evt) {
-  document.body.style.overflow = "none";
-  wifResizeClient();
-  startCalibrationX();
-});
-*/
+
 class wifSelectorList extends HTMLElement {
   constructor(objParams) {
     if (!(objParams.options instanceof Array)) {
@@ -852,9 +846,6 @@ function wifShowUsers() {
   const divMain = wifCreateFullClientDiv();
   
 }
-/*
-window.addEventListener("resize", wifResizeClient);
-*/
 function wifResizeClient() {
   clientWidth_CSS_px = window.innerWidth;
   clientHeight_CSS_px = window.innerHeight;
@@ -979,7 +970,6 @@ function startCalibrationX() {
     return false;
   }
 }
-/*
 // Register service worker to control making site work offline
 let myServiceWorkerRegistration;
 if ("serviceWorker" in navigator) {
@@ -987,7 +977,6 @@ if ("serviceWorker" in navigator) {
     myServiceWorkerRegistration = registration;
   });
 }
-*/
 function remainder() {
   let mapFileHashes = new Map();
 
@@ -1075,7 +1064,6 @@ function remainder() {
         ],
         silent: false,
       });
-      /*
       let myNotification = new Notification("New Version", {
         dir: "auto",
         lang: "en-US",
@@ -1090,7 +1078,6 @@ function remainder() {
         requireInteraction: false,
         silent: false,
       });
-      */
       myNotification.addEventListener("click", function (evt) {
         switch (evt.action) {
           case "Reload":
@@ -1237,9 +1224,6 @@ function remainder() {
     document.body.appendChild(divScrollHeight);
     resize();
   }
-/*
-  window.addEventListener("resize", resize);
-*/
 
   window.addEventListener("message", function (e) {
     console.log(e);
@@ -1357,4 +1341,4 @@ function remainder() {
       error: "Unrecognized command",
     };
   }
-}
+*/
