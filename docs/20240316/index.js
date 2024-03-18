@@ -299,6 +299,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
         }
       };
     };
+    return obj;
   }
   function initBody() {
     document.body.style.boxSizing = "border-box";
