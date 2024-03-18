@@ -24,7 +24,7 @@ self.init = function init({
       uri: self._siteURI(),
       storage: window.localStorage,
     });
-    const storedVersion = window.siteSessionStorage.getItem("version");
+    const storedVersion = window.siteSessionStorage.get("version");
     if (requestedVersion !== null) {
       window.siteSessionStorage.set("version", requestedVersion);
       const newSearchParams = new self.URLSearchParams(selfURL.searchParams.toString());
