@@ -465,7 +465,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     parent.appendChild(span);
     const obj = {};
     const clickManager = createEventManager({
-      element: img,
+      element: span,
       eventName: "click",
     });
     obj.addClickListener = function ({
@@ -480,7 +480,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     };
     obj.remove = function () {
       clickManager.removeAllListeners();
-      img.remove();
+      span.remove();
     };
     obj.setText = function ({
       text,
