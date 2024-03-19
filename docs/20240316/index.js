@@ -21,7 +21,11 @@ const initPageTime = performance.now();
 
 const loadErrorHandlingModule = import("https://scotwatson.github.io/Debug/20230705/ErrorLog.mjs");
 
-Promise.all( [ loadWindow, loadErrorHandlingModule ] ).then(start, fail);
+const loadInterface = loadWindow.then(function () {
+  return import("interface.mjs");
+});
+
+Promise.all( [ loadInterface, loadErrorHandlingModule ] ).then(start, fail);
 
 let params = (new URL(window.location)).searchParams;
 let mode = params.get("mode");
@@ -193,11 +197,7 @@ mssitemodejumplistitemremoved
 msthumbnailclick
 */
 
-const DEFAULT_SETTINGS = {
-  
-};
-
-function start( [ evtWindow, moduleErrorHandling ] ) {
+function start( [ Interface, moduleErrorHandling ] ) {
   let users;
   function createNewUser({
     username,
@@ -224,8 +224,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     users = JSON.parse(usersJSON);
   }
 
-  const main = initBody();
-  const mainRoot = main.createContentRoot();
+  const mainRoot = Interface.BODY.createContentRoot();
   const appHeader = mainRoot.addObject({
     objectId: OBJECT_TEXT,
     parameters: {
