@@ -668,7 +668,9 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
       height: "100%",
     },
   });
+  console.log(users);
   for (const thisUser of users) {
+    console.log(thisUser.username);
     userTiles.addItem({
       imgSrc: "Anonymous.webp",
       itemName: thisUser.username,
