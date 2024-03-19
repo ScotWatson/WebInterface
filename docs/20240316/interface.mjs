@@ -355,7 +355,6 @@ function createTiles({
     const sizeFactor = 2;
     const fontsize = (settings.px_per_inch * settings.min_text_ratio * settings.view_dist_inch);
     const itemSize = sizeFactor * (settings.px_per_inch * settings.min_touch_inch);
-    console.log(imgSrc);
     const itemObj = {};
     const divItem = document.createElement("div");
     const imgItem = document.createElement("img");
@@ -376,7 +375,6 @@ function createTiles({
       divItem.style.textAlign = "center";
       divItem.style.backgroundColor = "#808080";
       imgItem.src = imgSrc;
-      console.log(imgItem);
       imgItem.style.display = "inline-block";
       imgItem.style.boxSizing = "border-box";
       imgItem.style.aspectRatio = "1";
@@ -395,7 +393,7 @@ function createTiles({
       divItemName.style.textOverflow = "ellipsis";
       divItemName.style.whiteSpace = "nowrap";
     };
-    obj.refresh();
+    itemObj.refresh();
     divItem.style.display = "block";
     const clickManager = createEventManager({
       element: divItem,
