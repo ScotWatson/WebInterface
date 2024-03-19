@@ -410,6 +410,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     parameters,
     parent,
   }) {
+    console.log(parameters);
     const img = document.createElement("img");
     img.src = parameters.src;
     img.style.display = "block";
