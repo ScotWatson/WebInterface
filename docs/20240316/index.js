@@ -489,6 +489,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
       imgSrc,
       itemName,
     }) {
+      console.log(itemName);
       const sizeFactor = 2;
       const fontsize = (px_per_inch * min_text_ratio * view_dist_inch);
       const itemSize = sizeFactor * (px_per_inch * min_touch_inch);
