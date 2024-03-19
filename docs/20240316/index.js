@@ -21,14 +21,6 @@ const initPageTime = performance.now();
 
 const loadErrorHandlingModule = import("https://scotwatson.github.io/Debug/20230705/ErrorLog.mjs");
 
-loadErrorHandlingModule.then(function () {
-  console.log("ErrorLog Success");
-});
-
-loadWindow.then(function () {
-  console.log("Window Success");
-});
-
 Promise.all( [ loadWindow, loadErrorHandlingModule ] ).then(start, fail);
 
 let params = (new URL(window.location)).searchParams;
@@ -666,9 +658,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
       height: "100%",
     },
   });
-  console.log(users);
   for (const thisUser of users) {
-    console.log(thisUser.username);
     userTiles.addItem({
       imgSrc: "Anonymous.webp",
       itemName: thisUser.username,
@@ -731,6 +721,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     itemName: "other",
   });
   function showHamburgerMenu() {
+    console.log("show");
     imgHamburgerMenu.setSrc("LeftArrowIcon.png");
     hamburgerMenuRoot.show();
     imgHamburgerMenu.addClickListener(hideHamburgerMenu);
