@@ -226,7 +226,7 @@ function start( [ Interface, moduleErrorHandling ] ) {
 
   const mainRoot = Interface.BODY.createContentRoot();
   const appHeader = mainRoot.addObject({
-    objectId: OBJECT_TEXT,
+    objectId: Interface.OBJECT_TEXT,
     parameters: {
       top: "0px",
       left: "0px",
@@ -237,7 +237,7 @@ function start( [ Interface, moduleErrorHandling ] ) {
     },
   });
   const imgHamburgerMenu = mainRoot.addObject({
-    objectId: OBJECT_IMAGE,
+    objectId: Interface.OBJECT_IMAGE,
     parameters: {
       top: "0px",
       left: "calc(100% - " + touchCss({ factor: 1 }) + ")",
@@ -248,7 +248,7 @@ function start( [ Interface, moduleErrorHandling ] ) {
   });
   imgHamburgerMenu.addClickListener({ handler: showHamburgerMenu });
   const mainWindow = mainRoot.addObject({
-    objectId: OBJECT_BLANK_DIV,
+    objectId: Interface.OBJECT_BLANK_DIV,
     parameters: {
       left: "0px",
       top: touchCss({ factor: 1 }),
@@ -258,7 +258,7 @@ function start( [ Interface, moduleErrorHandling ] ) {
   });
   const mainWindowRoot = mainWindow.createContentRoot();
   const userTiles = mainWindowRoot.addObject({
-    objectId: OBJECT_TILES,
+    objectId: Interface.OBJECT_TILES,
     parameters: {
       left: "0px",
       top: "0px",
@@ -277,7 +277,7 @@ function start( [ Interface, moduleErrorHandling ] ) {
   (function () {})();
   const hamburgerMenuRoot = mainWindow.createContentRoot();
   const menuList = hamburgerMenuRoot.addObject({
-    objectId: OBJECT_LIST,
+    objectId: Interface.OBJECT_LIST,
     parameters: {
       top: "0px",
       left: "0px",
