@@ -480,6 +480,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     divItems.style.backgroundSize = touchCss({ factor: 1 }) + " " + touchCss({ factor: 1 });
     divItems.style.backgroundPosition = "left top";
     divItems.style.backgroundRepeat = "repeat-y";
+    divItems.style.minHeight = "100%";
     div.appendChild(divItems);
     parent.appendChild(div);
     const obj = {};
@@ -487,30 +488,34 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
       imgSrc,
       itemName,
     }) {
+      const sizeFactor = 2;
+      const fontsize = (px_per_inch * min_text_ratio * view_dist_inch);
+      const itemSize = sizeFactor * (px_per_inch * min_touch_inch);
       const divItem = document.createElement("div");
       divItem.style.display = "flex";
       divItem.style.flexFlow = "column nowrap";
       divItem.style.justifyContent = "space-around";
       divItem.style.alignItems = "center";
       divItem.style.boxSizing = "border-box";
-      divItem.style.width = touchCss({ factor: 2 });
-      divItem.style.height = touchCss({ factor: 2 });
+      divItem.style.width = itemSize + "px";
+      divItem.style.height = itemSize + "px";
       divItem.style.textAlign = "center";
       divItem.style.backgroundColor = "#808080";
       const imgItem = document.createElement("img");
       imgItem.src = imgSrc;
       imgItem.style.display = "inline-block";
       imgItem.style.boxSizing = "border-box";
-      imgItem.style.width = "80%";
-      imgItem.style.height = "80%";
+      imgItem.style.width = "100%";
+      imgItem.style.height = (itemSize - fontsize) + "px";
       const divItemName = document.createElement("div");
       divItemName.append(itemName);
-      divItemName.style.display = "block";
+      divItemName.style.display = "table-cell";
+      divItemName.style.verticalAlign = "center";
       divItemName.style.boxSizing = "border-box";
       divItemName.style.backgroundColor = "#E0E080";
-      divItemName.style.fontSize = (px_per_inch * min_text_ratio * view_dist_inch) + "px";
+      divItemName.style.fontSize = fontsize + "px";
       divItemName.style.width = "100%";
-      divItemName.style.height = "20%";
+      divItemName.style.height = divItemName.style.fontSize;
       divItemName.style.userSelect = "none";
       divItemName.style.textAlign = "center";
       divItemName.style.textOverflow = "ellipsis";
