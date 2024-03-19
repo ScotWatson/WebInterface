@@ -780,7 +780,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   }
   function hideHamburgerMenu() {
     imgHamburgerMenu.setSrc({ src: "Hamburger_icon.svg" });
-    hamburgerMenuRoot.show();
+    mainWindowRoot.show();
     imgHamburgerMenu.addClickListener({ handler: showHamburgerMenu });
     imgHamburgerMenu.removeClickListener({ handler: hideHamburgerMenu });
   }
