@@ -645,9 +645,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
       src: "Hamburger_icon.svg",
     },
   });
-  imgHamburgerMenu.addClickListener(function () {
-    mainHamburgerMenu();
-  });
+  imgHamburgerMenu.addClickListener(showHamburgerMenu);
   btnHamburgerMenuRoot.show();
   const mainWindow = mainRoot.addObject({
     objectId: OBJECT_BLANK_DIV,
@@ -735,14 +733,14 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   function showHamburgerMenu() {
     imgHamburgerMenu.setSrc("LeftArrowIcon.png");
     hamburgerMenuRoot.show();
-    addClickListener(hideHamburgerMenu);
-    removeClickListener(showHamburgerMenu);
+    imgHamburgerMenu.addClickListener(hideHamburgerMenu);
+    imgHamburgerMenu.removeClickListener(showHamburgerMenu);
   }
   function hideHamburgerMenu() {
     imgHamburgerMenu.setSrc("Hamburger_icon.png");
     hamburgerMenuRoot.show();
-    addClickListener(showHamburgerMenu);
-    removeClickListener(hideHamburgerMenu);
+    imgHamburgerMenu.addClickListener(showHamburgerMenu);
+    imgHamburgerMenu.removeClickListener(hideHamburgerMenu);
   }
   function toggleFullscreen() {
     if (document.fullscreenElement === null) {
