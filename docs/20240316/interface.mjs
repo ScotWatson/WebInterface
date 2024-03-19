@@ -3,7 +3,7 @@
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-const DEFAULT_SETTINGS = {
+export const DEFAULT_SETTINGS = {
   px_per_inch: 96,
   min_touch_inch: 0.5,
   min_text_ratio: 0.007,
@@ -56,7 +56,7 @@ export function getSettings() {
 }
 
 // Returns a CSS string for a touch element, sized in terms of a factor times the minimum size
-function touchCss({
+export function touchCss({
   factor,
 }) {
   return (factor * settings.px_per_inch * settings.min_touch_inch) + "px";
