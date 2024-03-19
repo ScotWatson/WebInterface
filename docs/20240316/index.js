@@ -239,6 +239,9 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     obj.addListener = function ({
       handler,
     }) {
+      console.log(element)
+      console.log(eventName)
+      console.log(handler)
       handlers.add(handler);
       element.addEventListener(eventName, handler);
     }
