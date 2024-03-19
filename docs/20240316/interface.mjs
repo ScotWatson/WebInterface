@@ -376,7 +376,7 @@ function createTiles({
       divItem.style.textAlign = "center";
       divItem.style.backgroundColor = "#808080";
       imgItem.src = imgSrc;
-      console.log(imgItem.src);
+      console.log(imgItem);
       imgItem.style.display = "inline-block";
       imgItem.style.boxSizing = "border-box";
       imgItem.style.aspectRatio = "1";
