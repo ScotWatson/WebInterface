@@ -1,7 +1,7 @@
 export async function base64Decode(str) {
   return await (new self.Blob([ self.atob(str) ])).arrayBuffer();
 }
-export async function base64Encode(view) {
+export function base64Encode(view) {
   let rawString = "";
   for (const byte of view) {
     rawString += String.fromCharCode(byte);
