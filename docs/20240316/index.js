@@ -437,6 +437,12 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
       clickManager.removeAllListeners();
       img.remove();
     };
+    obj.setSrc = function ({
+      src,
+    }) {
+      img.src = src;
+      img.remove();
+    };
     return obj;
   }
   function createTiles({
@@ -722,13 +728,13 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   });
   function showHamburgerMenu() {
     console.log("show");
-    imgHamburgerMenu.setSrc("LeftArrowIcon.png");
+    imgHamburgerMenu.setSrc({ src: "LeftArrowIcon.png" });
     hamburgerMenuRoot.show();
     imgHamburgerMenu.addClickListener({ handler: hideHamburgerMenu });
     imgHamburgerMenu.removeClickListener({ handler: showHamburgerMenu });
   }
   function hideHamburgerMenu() {
-    imgHamburgerMenu.setSrc("Hamburger_icon.png");
+    imgHamburgerMenu.setSrc({ src: "Hamburger_icon.png" });
     hamburgerMenuRoot.show();
     imgHamburgerMenu.addClickListener({ handler: showHamburgerMenu });
     imgHamburgerMenu.removeClickListener({ handler: hideHamburgerMenu });
