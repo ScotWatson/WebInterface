@@ -22,7 +22,7 @@ const initPageTime = performance.now();
 const loadErrorHandlingModule = import("https://scotwatson.github.io/Debug/20230705/ErrorLog.mjs");
 
 const loadInterface = loadWindow.then(function () {
-  return import("/" + _version() + "/interface.mjs");
+  return import("./" + _version() + "/interface.mjs");
 });
 
 Promise.all( [ loadInterface, loadErrorHandlingModule ] ).then(start, fail);
