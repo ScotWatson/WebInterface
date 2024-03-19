@@ -245,7 +245,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     obj.removeListener = function ({
       handler,
     }) {
-      handlers.remove(handler);
+      handlers.delete(handler);
       element.removeEventListener(eventName, handler);
     }
     obj.removeAllListeners = function () {
