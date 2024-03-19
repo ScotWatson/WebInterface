@@ -311,6 +311,7 @@ function createTiles({
   parameters,
   parent,
 }) {
+  const obj = {};
   const div = document.createElement("div");
   const divItems = document.createElement("div");
   obj.refresh = function () {
@@ -347,7 +348,6 @@ function createTiles({
   obj.refresh();
   div.appendChild(divItems);
   parent.appendChild(div);
-  const obj = {};
   obj.addItem = function ({
     imgSrc,
     itemName,
