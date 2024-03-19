@@ -212,7 +212,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   }) {
     const newUserId = self.crypto.randomUUID();
     const newUser = {
-      username: name,
+      username: username,
       id: newUserId,
     };
     users.push(newUser);
@@ -425,6 +425,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     img.style.width = parameters.width;
     img.style.height = parameters.height;
     img.style.backgroundColor = "white";
+    parent.appendChild(img);
     const obj = {};
     const clickManager = createEventManager({
       element: img,
