@@ -450,6 +450,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     parameters,
     parent,
   }) {
+    console.log(parameters);
     const span = document.createElement("span");
     span.append(parameters.text);
     span.style.display = "block";
