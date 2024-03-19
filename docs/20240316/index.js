@@ -722,7 +722,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   const menuList = hamburgerMenuRoot.addObject({
     objectId: OBJECT_LIST,
     parameters: {
-      top: touchCss({ factor: 1 }),
+      top: "0px",
       left: "0px",
       width: "100%",
       height: "100%",
@@ -779,7 +779,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     imgHamburgerMenu.removeClickListener({ handler: showHamburgerMenu });
   }
   function hideHamburgerMenu() {
-    imgHamburgerMenu.setSrc({ src: "Hamburger_icon.png" });
+    imgHamburgerMenu.setSrc({ src: "Hamburger_icon.svg" });
     hamburgerMenuRoot.show();
     imgHamburgerMenu.addClickListener({ handler: showHamburgerMenu });
     imgHamburgerMenu.removeClickListener({ handler: hideHamburgerMenu });
