@@ -239,9 +239,6 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     obj.addListener = function ({
       handler,
     }) {
-      console.log(element)
-      console.log(eventName)
-      console.log(handler)
       handlers.add(handler);
       element.addEventListener(eventName, handler);
     }
@@ -640,7 +637,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
       src: "Hamburger_icon.svg",
     },
   });
-  imgHamburgerMenu.addClickListener(showHamburgerMenu);
+  imgHamburgerMenu.addClickListener({ handler: showHamburgerMenu });
   btnHamburgerMenuRoot.show();
   const mainWindow = mainRoot.addObject({
     objectId: OBJECT_BLANK_DIV,
@@ -727,14 +724,14 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     console.log("show");
     imgHamburgerMenu.setSrc("LeftArrowIcon.png");
     hamburgerMenuRoot.show();
-    imgHamburgerMenu.addClickListener(hideHamburgerMenu);
-    imgHamburgerMenu.removeClickListener(showHamburgerMenu);
+    imgHamburgerMenu.addClickListener({ handler: hideHamburgerMenu });
+    imgHamburgerMenu.removeClickListener({ handler: showHamburgerMenu });
   }
   function hideHamburgerMenu() {
     imgHamburgerMenu.setSrc("Hamburger_icon.png");
     hamburgerMenuRoot.show();
-    imgHamburgerMenu.addClickListener(showHamburgerMenu);
-    imgHamburgerMenu.removeClickListener(hideHamburgerMenu);
+    imgHamburgerMenu.addClickListener({ handler: showHamburgerMenu });
+    imgHamburgerMenu.removeClickListener({ handler: hideHamburgerMenu });
   }
   function toggleFullscreen() {
     if (document.fullscreenElement === null) {
