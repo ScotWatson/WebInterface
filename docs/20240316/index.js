@@ -345,6 +345,8 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   OBJECT_FUNCTIONS.set(OBJECT_IMAGE, createImage);
   const OBJECT_BLANK_DIV = "9db9ca53-1d3b-49a9-9d22-8b1d08177c92";
   OBJECT_FUNCTIONS.set(OBJECT_BLANK_DIV, createBlankDiv);
+  const OBJECT_TEXT      = "f2666550-108e-47e3-8154-762b1acc1936";
+  OBJECT_FUNCTIONS.set(OBJECT_TEXT, createText);
   function createObject({
     objectId,
     parameters,
@@ -441,7 +443,50 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
       src,
     }) {
       img.src = src;
+    };
+    return obj;
+  }
+  function createText({
+    parameters,
+    parent,
+  }) {
+    const span = document.createElement("span");
+    span.append(parameters.text);
+    span.style.display = "table-cell";
+    span.style.verticalAlign = "center";
+    span.style.textAlign = "center";
+    span.style.position = "absolute";
+    span.style.top = parameters.top;
+    span.style.left = parameters.left;
+    span.style.width = parameters.width;
+    span.style.height = parameters.height;
+    span.style.fontSize = (parameters.fontSizeFactor * min_text_ratio * view_dist_inch * px_per_inch) + "px";
+    span.style.backgroundColor = "white";
+    parent.appendChild(span);
+    const obj = {};
+    const clickManager = createEventManager({
+      element: img,
+      eventName: "click",
+    });
+    obj.addClickListener = function ({
+      handler,
+    }) {
+      clickManager.addListener({ handler });
+    };
+    obj.removeClickListener = function ({
+      handler,
+    }) {
+      clickManager.removeListener({ handler });
+    };
+    obj.remove = function () {
+      clickManager.removeAllListeners();
       img.remove();
+    };
+    obj.setText = function ({
+      text,
+    }) {
+      span.innerHTML = "";
+      span.append(text);
     };
     return obj;
   }
@@ -623,35 +668,35 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   
   const main = initBody();
   const mainRoot = main.createContentRoot();
-  const btnHamburgerMenu = mainRoot.addObject({
-    objectId: OBJECT_BLANK_DIV,
-    parameters: {
-      top: "0px",
-      right: "0px",
-      width: touchCss({ factor: 1 }),
-      height: touchCss({ factor: 1 }),
-    },
-  });
-  const btnHamburgerMenuRoot = btnHamburgerMenu.createContentRoot();
-  const imgHamburgerMenu = btnHamburgerMenuRoot.addObject({
-    objectId: OBJECT_IMAGE,
+  const appHeader = mainRoot.addObject({
+    objectId: OBJECT_TEXT,
     parameters: {
       top: "0px",
       left: "0px",
-      width: "100%",
-      height: "100%",
+      width: "(100% - " + touchCss({ factor: 1 }) + ")",
+      height: touchCss({ factor: 1 }),
+      fontSizeFactor: 2,
+      text: "Web Interface",
+    },
+  });
+  const imgHamburgerMenu = mainRoot.addObject({
+    objectId: OBJECT_IMAGE,
+    parameters: {
+      top: "0px",
+      left: "(100% - " + touchCss({ factor: 1 }) + ")",
+      width: touchCss({ factor: 1 }),
+      height: touchCss({ factor: 1 }),
       src: "Hamburger_icon.svg",
     },
   });
   imgHamburgerMenu.addClickListener({ handler: showHamburgerMenu });
-  btnHamburgerMenuRoot.show();
   const mainWindow = mainRoot.addObject({
     objectId: OBJECT_BLANK_DIV,
     parameters: {
       left: "0px",
-      top: touchCss({ factor: 2 }),
+      top: touchCss({ factor: 1 }),
       width: "100%",
-      height: "calc(100% - " + touchCss({ factor: 2 }) + ")",
+      height: "calc(100% - " + touchCss({ factor: 1 }) + ")",
     },
   });
   const mainWindowRoot = mainWindow.createContentRoot();
