@@ -352,14 +352,18 @@ function createTiles({
     imgSrc,
     itemName,
   }) {
-    console.log(imgSrc);
-    const itemObj = {};
     const sizeFactor = 2;
     const fontsize = (settings.px_per_inch * settings.min_text_ratio * settings.view_dist_inch);
     const itemSize = sizeFactor * (settings.px_per_inch * settings.min_touch_inch);
+    console.log(imgSrc);
+    const itemObj = {};
     const divItem = document.createElement("div");
     const imgItem = document.createElement("img");
     const divItemName = document.createElement("div");
+    divItem.style.display = "none";
+    divItems.appendChild(divItem);
+    divItem.appendChild(imgItem);
+    divItem.appendChild(divItemName);
     divItemName.append(itemName);
     itemObj.refresh = function () {
       divItem.style.display = "flex";
@@ -372,26 +376,27 @@ function createTiles({
       divItem.style.textAlign = "center";
       divItem.style.backgroundColor = "#808080";
       imgItem.src = imgSrc;
+      console.log(imgItem.src);
       imgItem.style.display = "inline-block";
       imgItem.style.boxSizing = "border-box";
+      imgItem.style.aspectRatio = "1";
       imgItem.style.width = "100%";
       imgItem.style.height = (itemSize - fontsize) + "px";
-      divItemName.style.display = "table-cell";
+      divItemName.style.display = "block";
       divItemName.style.verticalAlign = "center";
       divItemName.style.boxSizing = "border-box";
       divItemName.style.backgroundColor = "#E0E080";
       divItemName.style.fontSize = fontsize + "px";
       divItemName.style.width = "100%";
       divItemName.style.height = divItemName.style.fontSize;
+      divItemName.style.lineHeight = divItemName.style.fontSize;
       divItemName.style.userSelect = "none";
       divItemName.style.textAlign = "center";
       divItemName.style.textOverflow = "ellipsis";
       divItemName.style.whiteSpace = "nowrap";
     };
     obj.refresh();
-    divItem.appendChild(imgItem);
-    divItem.appendChild(divItemName);
-    divItems.appendChild(divItem);
+    divItem.style.display = "block";
     const clickManager = createEventManager({
       element: divItem,
       eventName: "click",
