@@ -410,7 +410,6 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     parameters,
     parent,
   }) {
-    console.log(parameters);
     const img = document.createElement("img");
     img.src = parameters.src;
     img.style.display = "block";
@@ -684,7 +683,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     objectId: OBJECT_IMAGE,
     parameters: {
       top: "0px",
-      left: "(100% - " + touchCss({ factor: 1 }) + ")",
+      left: "calc(100% - " + touchCss({ factor: 1 }) + ")",
       width: touchCss({ factor: 1 }),
       height: touchCss({ factor: 1 }),
       src: "Hamburger_icon.svg",
