@@ -673,7 +673,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     parameters: {
       top: "0px",
       left: "0px",
-      width: "(100% - " + touchCss({ factor: 1 }) + ")",
+      width: "calc(100% - " + touchCss({ factor: 1 }) + ")",
       height: touchCss({ factor: 1 }),
       fontSizeFactor: 2,
       text: "Web Interface",
