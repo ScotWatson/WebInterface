@@ -210,7 +210,7 @@ function start( [ Interface, moduleErrorHandling ] ) {
     users.push(newUser);
     window.siteLocalStorage.set("Users", JSON.stringify(users));
     const newUserInfo = {
-      settings: self.structuredClone(DEFAULT_SETTINGS),
+      settings: self.structuredClone(Interface.DEFAULT_SETTINGS),
     };
     window.siteLocalStorage.set("User:" + newUserId, JSON.stringify(newUserInfo));
   }
@@ -230,8 +230,8 @@ function start( [ Interface, moduleErrorHandling ] ) {
     parameters: {
       top: "0px",
       left: "0px",
-      width: "calc(100% - " + touchCss({ factor: 1 }) + ")",
-      height: touchCss({ factor: 1 }),
+      width: "calc(100% - " + Interface.touchCss({ factor: 1 }) + ")",
+      height: Interface.touchCss({ factor: 1 }),
       fontSizeFactor: 2,
       text: "Web Interface",
     },
@@ -240,9 +240,9 @@ function start( [ Interface, moduleErrorHandling ] ) {
     objectId: Interface.OBJECT_IMAGE,
     parameters: {
       top: "0px",
-      left: "calc(100% - " + touchCss({ factor: 1 }) + ")",
-      width: touchCss({ factor: 1 }),
-      height: touchCss({ factor: 1 }),
+      left: "calc(100% - " + Interface.touchCss({ factor: 1 }) + ")",
+      width: Interface.touchCss({ factor: 1 }),
+      height: Interface.touchCss({ factor: 1 }),
       src: "Hamburger_icon.svg",
     },
   });
@@ -251,9 +251,9 @@ function start( [ Interface, moduleErrorHandling ] ) {
     objectId: Interface.OBJECT_BLANK_DIV,
     parameters: {
       left: "0px",
-      top: touchCss({ factor: 1 }),
+      top: Interface.touchCss({ factor: 1 }),
       width: "100%",
-      height: "calc(100% - " + touchCss({ factor: 1 }) + ")",
+      height: "calc(100% - " + Interface.touchCss({ factor: 1 }) + ")",
     },
   });
   const mainWindowRoot = mainWindow.createContentRoot();
