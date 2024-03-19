@@ -370,7 +370,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     div.style.display = "block";
     div.style.position = "absolute";
     div.style.top = parameters.top;
-    div.style.right = parameters.right;
+    div.style.left = parameters.left;
     div.style.width = parameters.width;
     div.style.height = parameters.height;
     div.style.backgroundColor = "white";
@@ -450,7 +450,6 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     parameters,
     parent,
   }) {
-    console.log(parameters);
     const span = document.createElement("span");
     span.append(parameters.text);
     span.style.display = "block";
@@ -500,8 +499,8 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     div.style.display = "block";
     div.style.boxSizing = "border-box";
     div.style.position = "absolute";
-    div.style.left = parameters.left + "px";
-    div.style.top = parameters.top + "px";
+    div.style.left = parameters.left;
+    div.style.top = parameters.top;
     div.style.backgroundColor = "#C0C0C0";
     div.style.padding = "0px";
     div.style.border = "0px";
@@ -534,7 +533,6 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
       imgSrc,
       itemName,
     }) {
-      console.log(itemName);
       const sizeFactor = 2;
       const fontsize = (px_per_inch * min_text_ratio * view_dist_inch);
       const itemSize = sizeFactor * (px_per_inch * min_touch_inch);
