@@ -452,7 +452,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
   }) {
     const span = document.createElement("span");
     span.append(parameters.text);
-    span.style.display = "table-cell";
+    span.style.display = "block";
     span.style.verticalAlign = "center";
     span.style.textAlign = "center";
     span.style.position = "absolute";
@@ -461,6 +461,7 @@ function start( [ evtWindow, moduleErrorHandling ] ) {
     span.style.width = parameters.width;
     span.style.height = parameters.height;
     span.style.fontSize = (parameters.fontSizeFactor * min_text_ratio * view_dist_inch * px_per_inch) + "px";
+    span.style.lineHeight = parameters.height;
     span.style.backgroundColor = "white";
     parent.appendChild(span);
     const obj = {};
