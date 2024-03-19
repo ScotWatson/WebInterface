@@ -31,9 +31,7 @@ BODY.refresh = function () {
   bodyDiv.style.padding = "0";
   bodyDiv.style.overflow = "hidden";
   bodyDiv.style.backgroundColor = "#808080";
-  for (const root of bodyRootSet) {
-    root.refresh();
-  }
+  bodyRootSet.refresh();
 };
 BODY.refresh();
 document.body.appendChild(bodyDiv);
@@ -93,6 +91,11 @@ function createRootSet({
 }) {
   const roots = new Set();
   const obj = {};
+  obj.refresh = function () {
+    for (const root of roots) {
+      root.refresh();
+    }
+  }
   obj.createRoot = function () {
     const contentRoot = document.createElement("div");
     contentRoot.style.display = "none";
@@ -133,6 +136,7 @@ function createRootSet({
       for (const object of contents) {
         object.remove();
       }
+      roots.delete(objRoot);
     };
     return objRoot;
   };
