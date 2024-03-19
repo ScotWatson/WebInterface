@@ -352,6 +352,7 @@ function createTiles({
     imgSrc,
     itemName,
   }) {
+    console.log(imgSrc);
     const itemObj = {};
     const sizeFactor = 2;
     const fontsize = (settings.px_per_inch * settings.min_text_ratio * settings.view_dist_inch);
