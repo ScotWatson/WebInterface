@@ -23,6 +23,7 @@ BODY.refresh = function () {
   document.body.style.border = "0";
   document.body.style.padding = "0";
   document.body.style.overflow = "hidden";
+  document.body.attachShadow({ mode: "closed" });
   bodyDiv.style.width = "100%";
   bodyDiv.style.height = "100%";
   bodyDiv.style.boxSizing = "border-box";
@@ -150,14 +151,14 @@ export const OBJECT_TILES     = "35017865-1b42-430b-9fc3-61cece306d6d";
 OBJECT_FUNCTIONS.set(OBJECT_TILES, createTiles);
 export const OBJECT_IMAGE     = "92fcd3cb-76bb-47a5-8693-31a8bbd19739";
 OBJECT_FUNCTIONS.set(OBJECT_IMAGE, createImage);
-export const OBJECT_BLANK_DIV = "9db9ca53-1d3b-49a9-9d22-8b1d08177c92";
-OBJECT_FUNCTIONS.set(OBJECT_BLANK_DIV, createBlankDiv);
+export const OBJECT_LAYOUT    = "9db9ca53-1d3b-49a9-9d22-8b1d08177c92";
+OBJECT_FUNCTIONS.set(OBJECT_LAYOUT, createLayout);
 export const OBJECT_TEXT      = "f2666550-108e-47e3-8154-762b1acc1936";
 OBJECT_FUNCTIONS.set(OBJECT_TEXT, createText);
 function createObject({
   objectId,
   parameters,
-  parent,
+  area,
 }) {
   const objectConstructor = OBJECT_FUNCTIONS.get(objectId);
   if (typeof objectConstructor !== "function") {
@@ -165,18 +166,18 @@ function createObject({
   }
   const newObject = objectConstructor({
     parameters,
-    parent,
+    area,
   });
   return newObject;
 }
-function createBlankDiv({
+function createLayout({
   parameters,
   parent,
 }) {
   const obj = {};
   const div = document.createElement("div");
   obj.refresh = function () {
-    div.style.display = "block";
+    div.style.display = "grid";
     div.style.position = "absolute";
     div.style.top = parameters.top;
     div.style.left = parameters.left;
@@ -190,22 +191,58 @@ function createBlankDiv({
   };
   obj.refresh();
   parent.appendChild(div);
-  const rootSet = createRootSet({
-    element: div,
-  });
+  const contents = new Map(areaname, obj);
   const clickManager = createEventManager({
     element: div,
     eventName: "click",
   });
-  obj.addClickListener = function ({
-    handler,
-  }) {
-    clickManager.addListener({ handler });
+  obj.areaAttachPoint() {
+    objPoint.attach(attachObj) {
+      attachObj.
+      div.appendChild(...);
+    };
   };
-  obj.removeClickListener = function ({
-    handler,
+  obj.createInArea({
+    areaname,
+    objectId,
+    parameters,
   }) {
-    clickManager.removeListener({ handler });
+    const newObj = createObject({
+      objectId,
+      parameters,
+      parent: div,
+    });
+    const detachObj = {};
+    detachObj.detach = function () {
+      newObj.remove();
+    };
+    detachObj.attach = function () {
+      div.appendChild();
+    };
+    detachObj.object = function () {
+      return newObj;
+    };
+    return detachObj;
+  };
+  obj.createDetached({
+    objectId,
+    parameters,
+  }) {
+    const newObj = createObject({
+      objectId,
+      parameters,
+      parent: div,
+    });
+    newObj.remove();
+  };
+  obj.detachfromArea({
+    areaname,
+  }) {
+    const objDetached = {};
+    objDetached.attach = function () {
+      div.appendChild();
+    };
+    return objDetached;
   };
   obj.createContentRoot = function () {
     return rootSet.createRoot();
@@ -218,7 +255,7 @@ function createBlankDiv({
 }
 function createImage({
   parameters,
-  parent,
+  area,
 }) {
   const obj = {};
   const img = document.createElement("img");
@@ -233,7 +270,9 @@ function createImage({
     img.style.backgroundColor = "white";
   };
   obj.refresh();
-  parent.appendChild(img);
+  area.appendChild(function (parent) {
+    parent.appendChild(img);
+  });
   const clickManager = createEventManager({
     element: img,
     eventName: "click",
