@@ -224,46 +224,40 @@ function start( [ Interface, moduleErrorHandling ] ) {
     users = JSON.parse(usersJSON);
   }
 
-  const mainRoot = Interface.BODY.createContentRoot();
-  const appHeader = mainRoot.addObject({
+  const BODY = Interface.createBodyObject();
+  const appLayout = mainRoot.createAttached({
+    objectId: Interface.OBJECT_LAYOUT,
+    parameters: {
+      layoutId: Interface.LAYOUT_HEADER,
+    },
+  });
+  const appHeader = appLayout.createAttached({
+    area: "header",
+    objectId: Interface.OBJECT_LAYOUT,
+    parameters: {
+      layoutId: Interface.LAYOUT_SIDE_TOUCH,
+    },
+  });
+  const appTitle = appHeader.createAttached({
+    area: "main",
     objectId: Interface.OBJECT_TEXT,
     parameters: {
-      top: "0px",
-      left: "0px",
-      width: "calc(100% - " + Interface.touchCss({ factor: 1 }) + ")",
-      height: Interface.touchCss({ factor: 1 }),
       fontSizeFactor: 2,
       text: "Web Interface",
     },
   });
-  const imgHamburgerMenu = mainRoot.addObject({
+  const imgHamburgerMenu = appHeader.createAttached({
+    area: "touch",
     objectId: Interface.OBJECT_IMAGE,
     parameters: {
-      top: "0px",
-      left: "calc(100% - " + Interface.touchCss({ factor: 1 }) + ")",
-      width: Interface.touchCss({ factor: 1 }),
-      height: Interface.touchCss({ factor: 1 }),
       src: "Hamburger_icon.svg",
     },
   });
   imgHamburgerMenu.addClickListener({ handler: showHamburgerMenu });
-  const mainWindow = mainRoot.addObject({
-    objectId: Interface.OBJECT_BLANK_DIV,
-    parameters: {
-      left: "0px",
-      top: Interface.touchCss({ factor: 1 }),
-      width: "100%",
-      height: "calc(100% - " + Interface.touchCss({ factor: 1 }) + ")",
-    },
-  });
-  const mainWindowRoot = mainWindow.createContentRoot();
-  const userTiles = mainWindowRoot.addObject({
+  const userTiles = appLayout.createAttached({
+    area: "body",
     objectId: Interface.OBJECT_TILES,
     parameters: {
-      left: "0px",
-      top: "0px",
-      width: "100%",
-      height: "100%",
     },
   });
   for (const thisUser of users) {
@@ -272,17 +266,10 @@ function start( [ Interface, moduleErrorHandling ] ) {
       itemName: thisUser.username,
     });
   }
-  mainWindowRoot.show();
-  mainRoot.show();
-  (function () {})();
-  const hamburgerMenuRoot = mainWindow.createContentRoot();
-  const menuList = hamburgerMenuRoot.addObject({
+  const hamburgerMenuList = appLayout.createDetached({
+    area: "body",
     objectId: Interface.OBJECT_LIST,
     parameters: {
-      top: "0px",
-      left: "0px",
-      width: "100%",
-      height: "100%",
     },
   });
   menuList.addItem({
@@ -329,15 +316,14 @@ function start( [ Interface, moduleErrorHandling ] ) {
     itemName: "other",
   });
   function showHamburgerMenu() {
-    console.log("show");
     imgHamburgerMenu.setSrc({ src: "LeftArrowIcon.png" });
-    hamburgerMenuRoot.show();
+    hamburgerMenuList.attach();
     imgHamburgerMenu.addClickListener({ handler: hideHamburgerMenu });
     imgHamburgerMenu.removeClickListener({ handler: showHamburgerMenu });
   }
   function hideHamburgerMenu() {
     imgHamburgerMenu.setSrc({ src: "Hamburger_icon.svg" });
-    mainWindowRoot.show();
+    userTiles.attach();
     imgHamburgerMenu.addClickListener({ handler: showHamburgerMenu });
     imgHamburgerMenu.removeClickListener({ handler: hideHamburgerMenu });
   }
