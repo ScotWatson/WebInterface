@@ -307,8 +307,8 @@ function createText({
   rootElement.append(parameters.text);
   object.refresh = function () {
     rootElement.style.display = "flex";
-    rootElement.style.justify-content = "center";
-    rootElement.style.align-items = "center";
+    rootElement.style.justifyContent = "center";
+    rootElement.style.alignItems = "center";
     rootElement.style.width = "100%";
     rootElement.style.height = "100%";
     rootElement.style.fontSize = (parameters.fontSizeFactor * settings.min_text_ratio * settings.view_dist_inch * settings.px_per_inch) + "px";
