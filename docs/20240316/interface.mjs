@@ -392,7 +392,6 @@ function createTiles({
     const divItem = document.createElement("div");
     const imgItem = document.createElement("img");
     const divItemName = document.createElement("div");
-    divItem.style.display = "none";
     divItems.appendChild(divItem);
     divItem.appendChild(imgItem);
     divItem.appendChild(divItemName);
@@ -427,7 +426,6 @@ function createTiles({
       divItemName.style.whiteSpace = "nowrap";
     };
     itemObj.refresh();
-    divItem.style.display = "block";
     const clickManager = createEventManager({
       element: divItem,
       eventName: "click",
