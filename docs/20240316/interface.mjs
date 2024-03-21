@@ -222,14 +222,14 @@ const LAYOUT_STYLES = new Map();
 export const LAYOUT_HEADER      = "dd13d7bd-7a0d-41bc-965d-f70a02d97e35";
 LAYOUT_STYLES.set(LAYOUT_HEADER, function (rootElement) {
   rootElement.style.gridTemplateColumns = "100%";
-  rootElement.style.gridTemplateRows = touchCss({ factor: 2 }) + " 100fr";
+  rootElement.style.gridTemplateRows = touchCss({ factor: 1 }) + " 100fr";
   rootElement.style.gridTemplateAreas = "\"header\"\n\"body\"";
 });
 export const LAYOUT_SIDE_TOUCH  = "ec3456ab-f5ef-47d5-8456-db86f3d3d5b1";
 LAYOUT_STYLES.set(LAYOUT_SIDE_TOUCH, function (rootElement) {
-  rootElement.style.gridTemplateColumns = touchCss({ factor: 2 }) + " 100fr";
+  rootElement.style.gridTemplateColumns = "100fr " + touchCss({ factor: 1 });
   rootElement.style.gridTemplateRows = "100%";
-  rootElement.style.gridTemplateAreas = "\"touch\"\n\"main\"";
+  rootElement.style.gridTemplateAreas = "\"main touch\"";
 });
 function createLayout({
   parameters,
