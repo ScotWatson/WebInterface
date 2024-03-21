@@ -190,7 +190,7 @@ export function createBodyObject({
     };
     return retVal.object;
   };
-  BODY.delete = function () {
+  object.delete = function () {
     if (content) {
       content.delete();
     }
