@@ -223,7 +223,7 @@ function start( [ Interface, moduleErrorHandling ] ) {
   } else {
     users = JSON.parse(usersJSON);
   }
-
+  console.warn("Interface");
   const BODY = Interface.createBodyObject();
   const appLayout = mainRoot.createAttached({
     objectId: Interface.OBJECT_LAYOUT,
