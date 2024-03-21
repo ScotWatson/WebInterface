@@ -19,17 +19,17 @@ const bodyRootSet = createRootSet({
 });
 BODY.refresh = function () {
   document.body.style.boxSizing = "border-box";
-  document.body.style.margin = "0";
-  document.body.style.border = "0";
-  document.body.style.padding = "0";
+  document.body.style.margin = "0px";
+  document.body.style.border = "0px";
+  document.body.style.padding = "0px";
   document.body.style.overflow = "hidden";
   document.body.attachShadow({ mode: "closed" });
   bodyDiv.style.width = "100%";
   bodyDiv.style.height = "100%";
   bodyDiv.style.boxSizing = "border-box";
-  bodyDiv.style.margin = "0";
-  bodyDiv.style.border = "0";
-  bodyDiv.style.padding = "0";
+  bodyDiv.style.margin = "0px";
+  bodyDiv.style.border = "0px";
+  bodyDiv.style.padding = "0px";
   bodyDiv.style.overflow = "hidden";
   bodyDiv.style.backgroundColor = "#808080";
   bodyRootSet.refresh();
@@ -87,6 +87,7 @@ function createEventManager({
   }
   return obj;
 }
+/*
 function createRootSet({
   element,
 }) {
@@ -143,6 +144,7 @@ function createRootSet({
   };
   return obj;
 }
+*/
 
 const OBJECT_FUNCTIONS = new Map();
 export const OBJECT_LIST      = "1b86fbea-6abc-4b65-9189-d4a6033fe8bf";
@@ -158,214 +160,183 @@ OBJECT_FUNCTIONS.set(OBJECT_TEXT, createText);
 function createObject({
   objectId,
   parameters,
-  area,
 }) {
   const objectConstructor = OBJECT_FUNCTIONS.get(objectId);
   if (typeof objectConstructor !== "function") {
     console.error("Object ID is not recognized: " + objectId);
   }
-  const newObject = objectConstructor({
+  return objectConstructor({
     parameters,
-    area,
   });
-  return newObject;
 }
 function createLayout({
   parameters,
-  parent,
 }) {
-  const obj = {};
-  const div = document.createElement("div");
-  obj.refresh = function () {
-    div.style.display = "grid";
-    div.style.position = "absolute";
-    div.style.top = parameters.top;
-    div.style.left = parameters.left;
-    div.style.width = parameters.width;
-    div.style.height = parameters.height;
-    div.style.backgroundColor = "white";
-    div.style.boxSizing = "border-box";
-    div.style.margin = "0px";
-    div.style.border = "0px";
-    div.style.padding = "0px";
+  const object = {};
+  const rootElement = document.createElement("div");
+  object.refresh = function () {
+    rootElement.style.display = "grid";
+    rootElement.style.position = "absolute";
+    rootElement.style.top = parameters.top;
+    rootElement.style.left = parameters.left;
+    rootElement.style.width = parameters.width;
+    rootElement.style.height = parameters.height;
+    rootElement.style.backgroundColor = "white";
+    rootElement.style.boxSizing = "border-box";
+    rootElement.style.margin = "0px";
+    rootElement.style.border = "0px";
+    rootElement.style.padding = "0px";
   };
-  obj.refresh();
-  parent.appendChild(div);
-  const contents = new Map(areaname, obj);
-  const clickManager = createEventManager({
-    element: div,
-    eventName: "click",
-  });
-  obj.areaAttachPoint() {
-    objPoint.attach(attachObj) {
-      attachObj.
-      div.appendChild(...);
-    };
-  };
-  obj.createInArea({
-    areaname,
+  object.refresh();
+  const contents = new Map();
+  object.createInArea({
+    area,
     objectId,
     parameters,
   }) {
-    const newObj = createObject({
+    const retVal = createObject({
       objectId,
       parameters,
-      parent: div,
     });
-    const detachObj = {};
-    detachObj.detach = function () {
-      newObj.remove();
+    retVal.object.detach = function () {
+      retVal.rootElement.remove();
+      contents.delete(area);
     };
-    detachObj.attach = function () {
-      div.appendChild();
+    retVal.object.attach = function () {
+      const prevObject = contents.get(area);
+      if (prevObject) {
+        prevObject.detach();
+      }
+      retVal.object.refresh();
+      retVal.rootElement.style.gridArea = area;
+      rootElement.appendChild(retVal.rootElement);
     };
-    detachObj.object = function () {
-      return newObj;
-    };
-    return detachObj;
+    return retVal.object;
   };
-  obj.createDetached({
-    objectId,
-    parameters,
-  }) {
-    const newObj = createObject({
-      objectId,
-      parameters,
-      parent: div,
-    });
-    newObj.remove();
+  object.delete = function () {
+    for (const object of contents) {
+      object.delete();
+    }
+    object.detach();
   };
-  obj.detachfromArea({
-    areaname,
-  }) {
-    const objDetached = {};
-    objDetached.attach = function () {
-      div.appendChild();
-    };
-    return objDetached;
+  return {
+    object,
+    rootElement,
   };
-  obj.createContentRoot = function () {
-    return rootSet.createRoot();
-  };
-  obj.remove = function () {
-    clickManager.removeAllListeners();
-    div.remove();
-  };
-  return obj;
 }
 function createImage({
   parameters,
-  area,
 }) {
-  const obj = {};
-  const img = document.createElement("img");
-  obj.refresh = function () {
-    img.src = parameters.src;
-    img.style.display = "block";
-    img.style.position = "absolute";
-    img.style.top = parameters.top;
-    img.style.left = parameters.left;
-    img.style.width = parameters.width;
-    img.style.height = parameters.height;
-    img.style.backgroundColor = "white";
+  const object = {};
+  const rootElement = document.createElement("img");
+  object.refresh = function () {
+    rootElement.src = parameters.src;
+    rootElement.style.display = "block";
+    rootElement.style.position = "absolute";
+    rootElement.style.top = parameters.top;
+    rootElement.style.left = parameters.left;
+    rootElement.style.width = parameters.width;
+    rootElement.style.height = parameters.height;
+    rootElement.style.backgroundColor = "white";
   };
-  obj.refresh();
-  area.appendChild(function (parent) {
-    parent.appendChild(img);
-  });
+  object.refresh();
   const clickManager = createEventManager({
     element: img,
     eventName: "click",
   });
-  obj.addClickListener = function ({
+  object.addClickListener = function ({
     handler,
   }) {
     clickManager.addListener({ handler });
   };
-  obj.removeClickListener = function ({
+  object.removeClickListener = function ({
     handler,
   }) {
     clickManager.removeListener({ handler });
   };
-  obj.remove = function () {
+  object.delete = function () {
     clickManager.removeAllListeners();
-    img.remove();
+    object.detach();
   };
-  obj.setSrc = function ({
+  object.setSrc = function ({
     src,
   }) {
-    img.src = src;
+    rootElement.src = src;
   };
-  return obj;
+  return {
+    object,
+    rootElement,
+  };
 }
 function createText({
   parameters,
-  parent,
 }) {
-  const obj = {};
-  const span = document.createElement("span");
-  span.append(parameters.text);
-  obj.refresh = function () {
-    span.style.display = "block";
-    span.style.verticalAlign = "center";
-    span.style.textAlign = "center";
-    span.style.position = "absolute";
-    span.style.top = parameters.top;
-    span.style.left = parameters.left;
-    span.style.width = parameters.width;
-    span.style.height = parameters.height;
-    span.style.fontSize = (parameters.fontSizeFactor * settings.min_text_ratio * settings.view_dist_inch * settings.px_per_inch) + "px";
-    span.style.lineHeight = parameters.height;
-    span.style.backgroundColor = "white";
+  const object = {};
+  const rootElement = document.createElement("span");
+  rootElement.append(parameters.text);
+  object.refresh = function () {
+    rootElement.style.display = "block";
+    rootElement.style.verticalAlign = "center";
+    rootElement.style.textAlign = "center";
+    rootElement.style.position = "absolute";
+    rootElement.style.top = parameters.top;
+    rootElement.style.left = parameters.left;
+    rootElement.style.width = parameters.width;
+    rootElement.style.height = parameters.height;
+    rootElement.style.fontSize = (parameters.fontSizeFactor * settings.min_text_ratio * settings.view_dist_inch * settings.px_per_inch) + "px";
+    rootElement.style.lineHeight = parameters.height;
+    rootElement.style.backgroundColor = "white";
   };
-  obj.refresh();
-  parent.appendChild(span);
+  object.refresh();
   const clickManager = createEventManager({
     element: span,
     eventName: "click",
   });
-  obj.addClickListener = function ({
+  object.addClickListener = function ({
     handler,
   }) {
     clickManager.addListener({ handler });
   };
-  obj.removeClickListener = function ({
+  object.removeClickListener = function ({
     handler,
   }) {
     clickManager.removeListener({ handler });
   };
-  obj.remove = function () {
+  object.delete = function () {
     clickManager.removeAllListeners();
-    span.remove();
+    rootElement.innerHTML = "";
+    object.detach();
   };
-  obj.setText = function ({
+  object.setText = function ({
     text,
   }) {
-    span.innerHTML = "";
-    span.append(text);
+    rootElement.innerHTML = "";
+    rootElement.append(text);
   };
-  return obj;
+  return {
+    object,
+    rootElement,
+  };
 }
 function createTiles({
   parameters,
-  parent,
 }) {
-  const obj = {};
-  const div = document.createElement("div");
+  const object = {};
+  const rootElement = document.createElement("div");
   const divItems = document.createElement("div");
-  obj.refresh = function () {
-    div.style.display = "block";
-    div.style.boxSizing = "border-box";
-    div.style.position = "absolute";
-    div.style.left = parameters.left;
-    div.style.top = parameters.top;
-    div.style.backgroundColor = "#C0C0C0";
-    div.style.padding = "0px";
-    div.style.border = "0px";
-    div.style.margin = "0px";
-    div.style.width = parameters.width;
-    div.style.height = parameters.height;
-    div.style.overflow = "hidden auto";
+  object.refresh = function () {
+    rootElement.style.display = "block";
+    rootElement.style.boxSizing = "border-box";
+    rootElement.style.position = "absolute";
+    rootElement.style.left = parameters.left;
+    rootElement.style.top = parameters.top;
+    rootElement.style.backgroundColor = "#C0C0C0";
+    rootElement.style.padding = "0px";
+    rootElement.style.border = "0px";
+    rootElement.style.margin = "0px";
+    rootElement.style.width = parameters.width;
+    rootElement.style.height = parameters.height;
+    rootElement.style.overflow = "hidden auto";
     divItems.style.display = "flex";
     divItems.style.flexFlow = "row wrap";
     divItems.style.justifyContent = "space-around";
@@ -384,10 +355,9 @@ function createTiles({
     divItems.style.backgroundRepeat = "repeat-y";
     divItems.style.minHeight = "100%";
   };
-  obj.refresh();
-  div.appendChild(divItems);
-  parent.appendChild(div);
-  obj.addItem = function ({
+  object.refresh();
+  rootElement.appendChild(divItems);
+  object.addItem = function ({
     imgSrc,
     itemName,
   }) {
@@ -454,29 +424,31 @@ function createTiles({
     };
     return itemObj;
   };
-  return obj;
+  return {
+    object,
+    rootElement,
+  };
 }
 function createList({
   parameters,
-  parent,
 }) {
-  const obj = {};
-  const div = document.createElement("div");
+  const object = {};
+  const rootElement = document.createElement("div");
   const divList = document.createElement("div");
-  obj.refresh = function () {
-    div.style.display = "block";
-    div.style.position = "absolute";
-    div.style.top = parameters.top;
-    div.style.left = parameters.left;
-    div.style.width = parameters.width;
-    div.style.height = parameters.height;
-    div.style.boxSizing = "border-box";
-    div.style.backgroundColor = "#C0C0C0";
-    div.style.margin = "0px";
-    div.style.border = "0px";
-    div.style.padding = "0px";
-    div.style.overflow = "hidden auto";
-    div.setAttribute("class", "invisible-scrollbar");
+  object.refresh = function () {
+    rootElement.style.display = "block";
+    rootElement.style.position = "absolute";
+    rootElement.style.top = parameters.top;
+    rootElement.style.left = parameters.left;
+    rootElement.style.width = parameters.width;
+    rootElement.style.height = parameters.height;
+    rootElement.style.boxSizing = "border-box";
+    rootElement.style.backgroundColor = "#C0C0C0";
+    rootElement.style.margin = "0px";
+    rootElement.style.border = "0px";
+    rootElement.style.padding = "0px";
+    rootElement.style.overflow = "hidden auto";
+    rootElement.setAttribute("class", "invisible-scrollbar");
     divList.style.display = "flex";
     divList.style.flexFlow = "column wrap";
     divList.style.justifyContent = "space-around";
@@ -493,10 +465,9 @@ function createList({
     divList.style.backgroundPosition = "right top";
     divList.style.backgroundRepeat = "repeat-y";
   };
-  obj.refresh();
-  div.appendChild(divList);
-  parent.appendChild(div);
-  obj.addItem = function ({
+  object.refresh();
+  rootElement.appendChild(divList);
+  object.addItem = function ({
     itemName,
   }) {
     const objItem = {};
@@ -533,5 +504,8 @@ function createList({
     };
     return objItem;
   };
-  return obj;
+  return {
+    object,
+    rootElement,
+  };
 }
