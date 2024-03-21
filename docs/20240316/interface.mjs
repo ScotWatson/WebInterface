@@ -381,7 +381,7 @@ function createText({
   };
   object.refresh();
   const clickManager = createEventManager({
-    element: span,
+    element: rootElement,
     eventName: "click",
   });
   object.addClickListener = function ({
