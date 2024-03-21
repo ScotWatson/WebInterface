@@ -167,7 +167,7 @@ export function createBodyObject({
     element.style.backgroundColor = "#808080";
   };
   object.refresh();
-  object.createObject = function ({
+  function create({
     objectId,
     parameters,
   }) {
@@ -189,6 +189,27 @@ export function createBodyObject({
       content = retVal.object;
     };
     return retVal.object;
+  };
+  object.createAttached = function ({
+    objectId,
+    parameters,
+  }) {
+    const obj = create({
+      objectId,
+      parameters,
+    });
+    obj.attach();
+    return obj;
+  };
+  object.createDetached = function ({
+    objectId,
+    parameters,
+  }) {
+    const obj = create({
+      objectId,
+      parameters,
+    });
+    return obj;
   };
   object.delete = function () {
     if (content) {
@@ -233,7 +254,7 @@ function createLayout({
     }
   };
   object.refresh();
-  object.createInArea = function ({
+   function create({
     area,
     objectId,
     parameters,
@@ -257,6 +278,31 @@ function createLayout({
       contents.set(area, retVal.object);
     };
     return retVal.object;
+  };
+  object.createAttached = function ({
+    area,
+    objectId,
+    parameters,
+  }) {
+    const obj = create({
+      area,
+      objectId,
+      parameters,
+    });
+    obj.attach();
+    return obj;
+  };
+  object.createDetached = function ({
+    area,
+    objectId,
+    parameters,
+  }) {
+    const obj = create({
+      area,
+      objectId,
+      parameters,
+    });
+    return obj;
   };
   object.delete = function () {
     for (const object of contents) {
