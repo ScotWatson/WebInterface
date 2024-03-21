@@ -227,7 +227,7 @@ function start( [ Interface, moduleErrorHandling ] ) {
   const BODY = Interface.createBodyObject({
     parameters: {},
   });
-  const appLayout = mainRoot.createAttached({
+  const appLayout = BODY.createAttached({
     objectId: Interface.OBJECT_LAYOUT,
     parameters: {
       layoutId: Interface.LAYOUT_HEADER,
