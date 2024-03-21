@@ -17,7 +17,6 @@ export function restoreDefaults() {
 }
 export function setSettings() {
   settings = structuredClone(DEFAULT_SETTINGS);
-  BODY.refresh();
 }
 export function getSettings() {
   return structuredClone(settings);
@@ -92,7 +91,6 @@ export function createBodyObject({
     element.style.height = window.innerHeight + "px";
   }
   window.addEventListener("resize", resize);
-  resize();
   object.refresh = function () {
     document.body.style.boxSizing = "border-box";
     document.body.style.margin = "0px";
@@ -109,6 +107,7 @@ export function createBodyObject({
     element.style.backgroundColor = "#808080";
   };
   object.refresh();
+  resize();
   function create({
     objectId,
     parameters,
