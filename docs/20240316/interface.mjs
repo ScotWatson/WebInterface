@@ -234,7 +234,7 @@ function createLayout({
     }
   };
   object.refresh();
-  object.createInArea({
+  object.createInArea = function ({
     area,
     objectId,
     parameters,
