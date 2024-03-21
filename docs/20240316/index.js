@@ -223,7 +223,7 @@ function start( [ Interface, moduleErrorHandling ] ) {
   } else {
     users = JSON.parse(usersJSON);
   }
-  console.warn("Interface");
+
   const BODY = Interface.createBodyObject({
     parameters: {},
   });
