@@ -324,16 +324,13 @@ function createImage({
   object.refresh = function () {
     rootElement.src = parameters.src;
     rootElement.style.display = "block";
-    rootElement.style.position = "absolute";
-    rootElement.style.top = parameters.top;
-    rootElement.style.left = parameters.left;
-    rootElement.style.width = parameters.width;
-    rootElement.style.height = parameters.height;
+    rootElement.style.width = "100%";
+    rootElement.style.height = "100%";
     rootElement.style.backgroundColor = "white";
   };
   object.refresh();
   const clickManager = createEventManager({
-    element: img,
+    element: rootElement,
     eventName: "click",
   });
   object.addClickListener = function ({
@@ -370,13 +367,10 @@ function createText({
     rootElement.style.display = "block";
     rootElement.style.verticalAlign = "center";
     rootElement.style.textAlign = "center";
-    rootElement.style.position = "absolute";
-    rootElement.style.top = parameters.top;
-    rootElement.style.left = parameters.left;
-    rootElement.style.width = parameters.width;
-    rootElement.style.height = parameters.height;
+    rootElement.style.width = "100%";
+    rootElement.style.height = "100%";
     rootElement.style.fontSize = (parameters.fontSizeFactor * settings.min_text_ratio * settings.view_dist_inch * settings.px_per_inch) + "px";
-    rootElement.style.lineHeight = parameters.height;
+    rootElement.style.lineHeight = "100%";
     rootElement.style.backgroundColor = "white";
   };
   object.refresh();
@@ -419,15 +413,12 @@ function createTiles({
   object.refresh = function () {
     rootElement.style.display = "block";
     rootElement.style.boxSizing = "border-box";
-    rootElement.style.position = "absolute";
-    rootElement.style.left = parameters.left;
-    rootElement.style.top = parameters.top;
     rootElement.style.backgroundColor = "#C0C0C0";
     rootElement.style.padding = "0px";
     rootElement.style.border = "0px";
     rootElement.style.margin = "0px";
-    rootElement.style.width = parameters.width;
-    rootElement.style.height = parameters.height;
+    rootElement.style.width = "100%";
+    rootElement.style.height = "100%";
     rootElement.style.overflow = "hidden auto";
     divItems.style.display = "flex";
     divItems.style.flexFlow = "row wrap";
@@ -529,11 +520,8 @@ function createList({
   const divList = document.createElement("div");
   object.refresh = function () {
     rootElement.style.display = "block";
-    rootElement.style.position = "absolute";
-    rootElement.style.top = parameters.top;
-    rootElement.style.left = parameters.left;
-    rootElement.style.width = parameters.width;
-    rootElement.style.height = parameters.height;
+    rootElement.style.width = "100%";
+    rootElement.style.height = "100%";
     rootElement.style.boxSizing = "border-box";
     rootElement.style.backgroundColor = "#C0C0C0";
     rootElement.style.margin = "0px";
