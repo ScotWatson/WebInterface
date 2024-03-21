@@ -54,64 +54,6 @@ function createEventManager({
   }
   return obj;
 }
-/*
-function createRootSet({
-  element,
-}) {
-  const roots = new Set();
-  const obj = {};
-  obj.refresh = function () {
-    for (const root of roots) {
-      root.refresh();
-    }
-  }
-  obj.createRoot = function () {
-    const contentRoot = document.createElement("div");
-    contentRoot.style.display = "none";
-    contentRoot.style.width = "100%";
-    contentRoot.style.height = "100%";
-    element.appendChild(contentRoot);
-    roots.add(contentRoot);
-    const contents = new Set();
-    const objRoot = {};
-    objRoot.refresh = function () {
-      for (const obj of contents) {
-        obj.refresh();
-      }
-    };
-    objRoot.addObject = function ({
-      objectId,
-      parameters,
-    }) {
-      const newObject = createObject({
-        objectId,
-        parameters,
-        parent: contentRoot,
-      });
-      contents.add(newObject);
-      return newObject;
-    };
-    objRoot.show = function () {
-      for (const root of roots) {
-        root.style.display = "none";
-      }
-      contentRoot.style.display = "block";
-    };
-    objRoot.hide = function () {
-      contentRoot.style.display = "none";
-    };
-    objRoot.remove = function () {
-      contentRoot.style.display = "none";
-      for (const object of contents) {
-        object.remove();
-      }
-      roots.delete(objRoot);
-    };
-    return objRoot;
-  };
-  return obj;
-}
-*/
 
 const OBJECT_FUNCTIONS = new Map();
 export const OBJECT_LIST      = "1b86fbea-6abc-4b65-9189-d4a6033fe8bf";
@@ -364,9 +306,9 @@ function createText({
   const rootElement = document.createElement("span");
   rootElement.append(parameters.text);
   object.refresh = function () {
-    rootElement.style.display = "block";
-    rootElement.style.verticalAlign = "center";
-    rootElement.style.textAlign = "center";
+    rootElement.style.display = "flex";
+    rootElement.style.justify-content = "center";
+    rootElement.style.align-items = "center";
     rootElement.style.width = "100%";
     rootElement.style.height = "100%";
     rootElement.style.fontSize = (parameters.fontSizeFactor * settings.min_text_ratio * settings.view_dist_inch * settings.px_per_inch) + "px";
