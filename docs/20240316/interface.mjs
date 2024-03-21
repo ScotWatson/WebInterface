@@ -185,7 +185,7 @@ export function createBodyObject({
         prevObject.detach();
       }
       retVal.object.refresh();
-      rootElement.appendChild(retVal.rootElement);
+      element.appendChild(retVal.rootElement);
       content = retVal.object;
     };
     return retVal.object;
