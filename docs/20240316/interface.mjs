@@ -196,6 +196,19 @@ export function createBodyObject({
     }
   };
 }
+const LAYOUT_STYLES = new Map();
+export const LAYOUT_HEADER      = "";
+LAYOUT_STYLES.set(LAYOUT_HEADER, function (rootElement) {
+  rootElement.style.gridTemplateColumns = "100%";
+  rootElement.style.gridTemplateRows = touchCss({ factor: 2 }) + " 100fr";
+  rootElement.style.gridTemplateAreas = "\"header\"\n\"body\"";
+});
+export const LAYOUT_SIDE_TOUCH      = "";
+LAYOUT_STYLES.set(LAYOUT_SIDE_TOUCH, function (rootElement) {
+  rootElement.style.gridTemplateColumns = touchCss({ factor: 2 }) + " 100fr";
+  rootElement.style.gridTemplateRows = "100%";
+  rootElement.style.gridTemplateAreas = "\"touch\"\n\"main\"";
+});
 function createLayout({
   parameters,
 }) {
@@ -204,11 +217,12 @@ function createLayout({
   const contents = new Map();
   object.refresh = function () {
     rootElement.style.display = "grid";
-    rootElement.style.position = "absolute";
-    rootElement.style.top = parameters.top;
-    rootElement.style.left = parameters.left;
-    rootElement.style.width = parameters.width;
-    rootElement.style.height = parameters.height;
+    const styleFunc = LAYOUT_STYLES.get(parameters.layoutId);
+    if (typeof styleFunc === "function") {
+      styleFunc(rootElement);
+    }
+    rootElement.style.width = "100$";
+    rootElement.style.height = "100%";
     rootElement.style.backgroundColor = "white";
     rootElement.style.boxSizing = "border-box";
     rootElement.style.margin = "0px";
