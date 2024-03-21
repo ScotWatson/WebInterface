@@ -224,7 +224,9 @@ function start( [ Interface, moduleErrorHandling ] ) {
     users = JSON.parse(usersJSON);
   }
   console.warn("Interface");
-  const BODY = Interface.createBodyObject();
+  const BODY = Interface.createBodyObject({
+    parameters: {},
+  });
   const appLayout = mainRoot.createAttached({
     objectId: Interface.OBJECT_LAYOUT,
     parameters: {
