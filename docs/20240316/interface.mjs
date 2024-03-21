@@ -216,6 +216,7 @@ export function createBodyObject({
       content.delete();
     }
   };
+  return object;
 }
 const LAYOUT_STYLES = new Map();
 export const LAYOUT_HEADER      = "dd13d7bd-7a0d-41bc-965d-f70a02d97e35";
