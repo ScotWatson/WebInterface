@@ -168,7 +168,7 @@ export function createBodyObject({
     element.style.backgroundColor = "#808080";
   };
   object.refresh();
-  object.createObject({
+  object.createObject = function ({
     objectId,
     parameters,
   }) {
