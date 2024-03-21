@@ -141,11 +141,12 @@ function createObject({
 export function createBodyObject({
   parameters,
 }) {
+  console.log("body");
   const object = {}
   const element = document.createElement("div");
   let content = null;
-  document.body.attachShadow({ mode: "closed" });
-  document.body.appendChild(element);
+  const shadowDOM = document.body.attachShadow({ mode: "closed" });
+  shadowDOM.appendChild(element);
   function resize() {
     bodyDiv.style.height = window.innerHeight + "px";
   }
