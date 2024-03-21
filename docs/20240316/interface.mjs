@@ -12,39 +12,6 @@ export const DEFAULT_SETTINGS = {
 
 let settings = structuredClone(DEFAULT_SETTINGS);
 
-export const BODY = {};
-const bodyDiv = document.createElement("div");
-const bodyRootSet = createRootSet({
-  element: bodyDiv,
-});
-BODY.refresh = function () {
-  document.body.style.boxSizing = "border-box";
-  document.body.style.margin = "0px";
-  document.body.style.border = "0px";
-  document.body.style.padding = "0px";
-  document.body.style.overflow = "hidden";
-  document.body.attachShadow({ mode: "closed" });
-  bodyDiv.style.width = "100%";
-  bodyDiv.style.height = "100%";
-  bodyDiv.style.boxSizing = "border-box";
-  bodyDiv.style.margin = "0px";
-  bodyDiv.style.border = "0px";
-  bodyDiv.style.padding = "0px";
-  bodyDiv.style.overflow = "hidden";
-  bodyDiv.style.backgroundColor = "#808080";
-  bodyRootSet.refresh();
-};
-BODY.refresh();
-document.body.appendChild(bodyDiv);
-window.addEventListener("resize", resize);
-resize();
-function resize() {
-  bodyDiv.style.height = window.innerHeight + "px";
-}
-BODY.createContentRoot = function () {
-  return bodyRootSet.createRoot();
-};
-
 export function restoreDefaults() {
   setSettings(DEFAULT_SETTINGS);
 }
@@ -169,11 +136,72 @@ function createObject({
     parameters,
   });
 }
+// There can only be at most one at a time
+// It is the only object without a parent
+export function createBodyObject({
+  parameters,
+}) {
+  const object = {}
+  const element = document.createElement("div");
+  let content = null;
+  document.body.attachShadow({ mode: "closed" });
+  document.body.appendChild(element);
+  function resize() {
+    bodyDiv.style.height = window.innerHeight + "px";
+  }
+  window.addEventListener("resize", resize);
+  resize();
+  object.refresh = function () {
+    document.body.style.boxSizing = "border-box";
+    document.body.style.margin = "0px";
+    document.body.style.border = "0px";
+    document.body.style.padding = "0px";
+    document.body.style.overflow = "hidden";
+    element.style.width = "100%";
+    element.style.height = "100%";
+    element.style.boxSizing = "border-box";
+    element.style.margin = "0px";
+    element.style.border = "0px";
+    element.style.padding = "0px";
+    element.style.overflow = "hidden";
+    element.style.backgroundColor = "#808080";
+  };
+  object.refresh();
+  object.createObject({
+    objectId,
+    parameters,
+  }) {
+    const retVal = createObject({
+      objectId,
+      parameters,
+    });
+    retVal.object.detach = function () {
+      retVal.rootElement.remove();
+      content = null;
+    };
+    retVal.object.attach = function () {
+      const prevObject = content;
+      if (prevObject) {
+        prevObject.detach();
+      }
+      retVal.object.refresh();
+      rootElement.appendChild(retVal.rootElement);
+      content = retVal.object;
+    };
+    return retVal.object;
+  };
+  BODY.delete = function () {
+    if (content) {
+      content.delete();
+    }
+  };
+}
 function createLayout({
   parameters,
 }) {
   const object = {};
   const rootElement = document.createElement("div");
+  const contents = new Map();
   object.refresh = function () {
     rootElement.style.display = "grid";
     rootElement.style.position = "absolute";
@@ -186,9 +214,11 @@ function createLayout({
     rootElement.style.margin = "0px";
     rootElement.style.border = "0px";
     rootElement.style.padding = "0px";
+    for (const object of contents) {
+      object.refresh();
+    }
   };
   object.refresh();
-  const contents = new Map();
   object.createInArea({
     area,
     objectId,
@@ -210,6 +240,7 @@ function createLayout({
       retVal.object.refresh();
       retVal.rootElement.style.gridArea = area;
       rootElement.appendChild(retVal.rootElement);
+      contents.set(area, retVal.object);
     };
     return retVal.object;
   };
