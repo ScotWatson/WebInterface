@@ -274,47 +274,47 @@ function start( [ Interface, moduleErrorHandling ] ) {
     parameters: {
     },
   });
-  menuList.addItem({
+  hamburgerMenuList.addItem({
     itemName: "Toggle Full Screen",
   }).addClickListener({
     handler: toggleFullscreen,
   });
-  menuList.addItem({
+  hamburgerMenuList.addItem({
     itemName: "Add User",
   }).addClickListener({
     handler: addUser,
   });
-  menuList.addItem({
+  hamburgerMenuList.addItem({
     itemName: "Calibrate Screen",
   });
-  menuList.addItem({
+  hamburgerMenuList.addItem({
     itemName: "Set Viewing Distance",
   });
-  menuList.addItem({
+  hamburgerMenuList.addItem({
     itemName: "Set Minimum Text Size",
   });
-  menuList.addItem({
+  hamburgerMenuList.addItem({
     itemName: "Set Minimum Touch Size",
   });
-  menuList.addItem({
+  hamburgerMenuList.addItem({
     itemName: "other",
   });
-  menuList.addItem({
+  hamburgerMenuList.addItem({
     itemName: "other",
   });
-  menuList.addItem({
+  hamburgerMenuList.addItem({
     itemName: "other",
   });
-  menuList.addItem({
+  hamburgerMenuList.addItem({
     itemName: "other",
   });
-  menuList.addItem({
+  hamburgerMenuList.addItem({
     itemName: "other",
   });
-  menuList.addItem({
+  hamburgerMenuList.addItem({
     itemName: "other",
   });
-  menuList.addItem({
+  hamburgerMenuList.addItem({
     itemName: "other",
   });
   function showHamburgerMenu() {
