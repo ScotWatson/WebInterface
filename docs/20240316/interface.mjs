@@ -55,16 +55,18 @@ function createEventManager({
 }
 
 const OBJECT_FUNCTIONS = new Map();
-export const OBJECT_LIST      = "1b86fbea-6abc-4b65-9189-d4a6033fe8bf";
+export const OBJECT_LIST        = "1b86fbea-6abc-4b65-9189-d4a6033fe8bf";
 OBJECT_FUNCTIONS.set(OBJECT_LIST, createList);
-export const OBJECT_TILES     = "35017865-1b42-430b-9fc3-61cece306d6d";
+export const OBJECT_TILES       = "35017865-1b42-430b-9fc3-61cece306d6d";
 OBJECT_FUNCTIONS.set(OBJECT_TILES, createTiles);
-export const OBJECT_IMAGE     = "92fcd3cb-76bb-47a5-8693-31a8bbd19739";
+export const OBJECT_IMAGE       = "92fcd3cb-76bb-47a5-8693-31a8bbd19739";
 OBJECT_FUNCTIONS.set(OBJECT_IMAGE, createImage);
-export const OBJECT_LAYOUT    = "9db9ca53-1d3b-49a9-9d22-8b1d08177c92";
+export const OBJECT_LAYOUT      = "9db9ca53-1d3b-49a9-9d22-8b1d08177c92";
 OBJECT_FUNCTIONS.set(OBJECT_LAYOUT, createLayout);
-export const OBJECT_TEXT      = "f2666550-108e-47e3-8154-762b1acc1936";
+export const OBJECT_TEXT        = "f2666550-108e-47e3-8154-762b1acc1936";
 OBJECT_FUNCTIONS.set(OBJECT_TEXT, createText);
+export const OBJECT_TEXT_PROMPT = "f2666550-108e-47e3-8154-762b1acc1936";
+OBJECT_FUNCTIONS.set(OBJECT_TEXT_PROMPT, createTextPrompt);
 function createObject({
   objectId,
   parameters,
@@ -522,6 +524,69 @@ function createList({
       divItem.remove();
     };
     return objItem;
+  };
+  return {
+    object,
+    rootElement,
+  };
+}
+function createTextPrompt({
+  parameters,
+}) {
+  const object = {};
+  const rootElement = document.createElement("span");
+  const label = document.createElement("label");
+  rootElement.appendChild(label);
+  label.append(parameters.prompt);
+  const input = document.createElement("input");
+  input.type = "text";
+  rootElement.appendChild(input);
+  object.refresh = function () {
+    rootElement.style.display = "flex";
+    rootElement.style.justifyContent = "center";
+    rootElement.style.alignItems = "center";
+    rootElement.style.width = "100%";
+    rootElement.style.height = "100%";
+    rootElement.style.fontSize = (parameters.fontSizeFactor * settings.min_text_ratio * settings.view_dist_inch * settings.px_per_inch) + "px";
+    rootElement.style.backgroundColor = "white";
+    label.style.display = "flex";
+    label.style.justifyContent = "center";
+    label.style.alignItems = "center";
+    label.style.width = "100%";
+    label.style.height = "100%";
+    label.style.fontSize = (parameters.fontSizeFactor * settings.min_text_ratio * settings.view_dist_inch * settings.px_per_inch) + "px";
+    label.style.backgroundColor = "white";
+    input.style.display = "flex";
+    input.style.justifyContent = "center";
+    input.style.alignItems = "center";
+    input.style.width = "100%";
+    input.style.height = "100%";
+    input.style.fontSize = (parameters.fontSizeFactor * settings.min_text_ratio * settings.view_dist_inch * settings.px_per_inch) + "px";
+    input.style.backgroundColor = "white";
+  };
+  object.refresh();
+  const inputManager = createEventManager({
+    element: rootElement,
+    eventName: "input",
+  });
+  object.addInputListener = function ({
+    handler,
+  }) {
+    inputManager.addListener({ handler });
+  };
+  object.removeInputListener = function ({
+    handler,
+  }) {
+    inputManager.removeListener({ handler });
+  };
+  object.delete = function () {
+    inputManager.removeAllListeners();
+    rootElement.innerHTML = "";
+    object.detach();
+  };
+  object.getText = function ({
+  }) {
+    return input.value;
   };
   return {
     object,
