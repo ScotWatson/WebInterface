@@ -292,23 +292,25 @@ function start( [ Interface, moduleErrorHandling ] ) {
         parameters: {
           text: "Login",
         },
-      }).addClickListener(function () {
-        Interface.setSettings(thisUser.settings);
-        BODY.refresh();
-        const mainScreen = appLayout.createAttached({
-          area: "body",
-          objectId: Interface.OBJECT_TILES,
-          parameters: {
-          },
-        });
-        mainScreen.addItem({
-          imgSrc: "Hamburger_icon.svg",
-          itemName: "Apps",
-        });
-        mainScreen.addItem({
-          imgSrc: "Hamburger_icon.svg",
-          itemName: "Settings",
-        });
+      }).addClickListener({
+        handler: function () {
+          Interface.setSettings(thisUser.settings);
+          BODY.refresh();
+          const mainScreen = appLayout.createAttached({
+            area: "body",
+            objectId: Interface.OBJECT_TILES,
+            parameters: {
+            },
+          });
+          mainScreen.addItem({
+            imgSrc: "Hamburger_icon.svg",
+            itemName: "Apps",
+          });
+          mainScreen.addItem({
+            imgSrc: "Hamburger_icon.svg",
+            itemName: "Settings",
+          });
+        },
       });
     };
   }
