@@ -59,14 +59,14 @@ export const OBJECT_LIST        = "1b86fbea-6abc-4b65-9189-d4a6033fe8bf";
 OBJECT_FUNCTIONS.set(OBJECT_LIST, createList);
 export const OBJECT_TILES       = "35017865-1b42-430b-9fc3-61cece306d6d";
 OBJECT_FUNCTIONS.set(OBJECT_TILES, createTiles);
+export const OBJECT_TEXT_PROMPT = "56422341-140a-4195-8ae6-9d4d73391753";
+OBJECT_FUNCTIONS.set(OBJECT_TEXT_PROMPT, createTextPrompt);
 export const OBJECT_IMAGE       = "92fcd3cb-76bb-47a5-8693-31a8bbd19739";
 OBJECT_FUNCTIONS.set(OBJECT_IMAGE, createImage);
 export const OBJECT_LAYOUT      = "9db9ca53-1d3b-49a9-9d22-8b1d08177c92";
 OBJECT_FUNCTIONS.set(OBJECT_LAYOUT, createLayout);
 export const OBJECT_TEXT        = "f2666550-108e-47e3-8154-762b1acc1936";
 OBJECT_FUNCTIONS.set(OBJECT_TEXT, createText);
-export const OBJECT_TEXT_PROMPT = "f2666550-108e-47e3-8154-762b1acc1936";
-OBJECT_FUNCTIONS.set(OBJECT_TEXT_PROMPT, createTextPrompt);
 function createObject({
   objectId,
   parameters,
