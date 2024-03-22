@@ -100,7 +100,7 @@ export function createBodyObject({
     document.body.style.padding = "0px";
     document.body.style.overflow = "hidden";
     element.style.width = "100%";
-    element.style.height = "100%";
+    element.style.height = window.innerHeight + "px";
     element.style.boxSizing = "border-box";
     element.style.margin = "0px";
     element.style.border = "0px";
