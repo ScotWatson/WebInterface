@@ -318,7 +318,9 @@ function start( [ Interface, moduleErrorHandling ] ) {
     userTiles.addItem({
       imgSrc: "Anonymous.webp",
       itemName: thisUser.username,
-    }).addClickListener(createUserClickHandler(thisUser));
+    }).addClickListener({
+      handler: createUserClickHandler(thisUser),
+    });
   }
   const hamburgerMenuList = appLayout.createDetached({
     area: "body",
