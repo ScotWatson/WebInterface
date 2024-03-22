@@ -11,12 +11,6 @@ window.navigator.serviceWorker.addEventListener("message", function (evt) {
 });
 window.navigator.serviceWorker.startMessages();
 
-let min_touch_inch = 0.5; // minimum size of touch object (in inches)
-let min_text_ratio = 0.007; // ratio of text height to viewing distance (unitless)
-
-let px_per_inch = 96;
-let view_dist_inch = 24;
-
 const initPageTime = performance.now();
 
 const loadErrorHandlingModule = import("https://scotwatson.github.io/Debug/20230705/ErrorLog.mjs");
@@ -262,11 +256,67 @@ function start( [ Interface, moduleErrorHandling ] ) {
     parameters: {
     },
   });
+  function createUserClickHandler(thisUser) {
+    return function () {
+      const loginScreen = appLayout.createAttached({
+        area: "body",
+        objectId: Interface.OBJECT_LAYOUT,
+        parameters: {
+          layoutId: Interface.LAYOUT_HEADER,
+        },
+      });
+      loginScreen.createAttached({
+        area: "header",
+        objectId: Interface.OBJECT_TEXT,
+        parameters: {
+          text: thisUser.username,
+        },
+      });
+      const userEntry = loginScreen.createAttached({
+        area: "body",
+        objectId: Interface.OBJECT_LAYOUT,
+        parameters: {
+          layoutId: Interface.LAYOUT_HEADER,
+        },
+      });
+      userEntry.createAttached({
+        area: "header",
+        objectId: Interface.OBJECT_TEXT_PROMPT,
+        parameters: {
+          prompt: "Password",
+        },
+      });
+      userEntry.createAttached({
+        area: "body",
+        objectId: Interface.OBJECT_TEXT,
+        parameters: {
+          text: "Login",
+        },
+      }).addClickListener(function () {
+        Interface.setSettings(thisUser.settings);
+        BODY.refresh();
+        const mainScreen = appLayout.createAttached({
+          area: "body",
+          objectId: Interface.OBJECT_TILES,
+          parameters: {
+          },
+        });
+        mainScreen.addItem({
+          imgSrc: "Hamburger_icon.svg",
+          itemName: "Apps",
+        });
+        mainScreen.addItem({
+          imgSrc: "Hamburger_icon.svg",
+          itemName: "Settings",
+        });
+      });
+    };
+  }
   for (const thisUser of users) {
     userTiles.addItem({
       imgSrc: "Anonymous.webp",
       itemName: thisUser.username,
-    });
+    }).addClickListener(createUserClickHandler(thisUser));
   }
   const hamburgerMenuList = appLayout.createDetached({
     area: "body",
