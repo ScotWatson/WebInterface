@@ -192,8 +192,33 @@ msthumbnailclick
 */
 
 function start( [ Interface, moduleErrorHandling ] ) {
-  Interface.setSettings(Interface.DEFAULT_SETTINGS);
-  const users = new Map();
+  try {
+    Interface.setSettings(Interface.DEFAULT_SETTINGS);
+    const users = new Map();
+    const usersJSON = window.siteLocalStorage.get("Users");
+    if (usersJSON === null) {
+      createNewUser({
+        username: "User",
+      });
+    } else {
+      const usersArray = JSON.parse(usersJSON);
+      for (const userId of usersArray) {
+        const jsonUser = window.siteLocalStorage.get("User:" + userId);
+        if (jsonUser === null) {
+          console.warn(userId + "has no info.");
+        } else {
+          users.set(userId, JSON.parse(jsonUser));
+        }
+      }
+    }
+    const BODY = Interface.createBodyObject({
+      parameters: {},
+    });
+    displayMain(BODY);
+  } catch (e) {
+    
+  }
+
   function createNewUser({
     username,
   }) {
@@ -204,125 +229,110 @@ function start( [ Interface, moduleErrorHandling ] ) {
     const newUser = {
       username: username,
       id: newUserId,
-      settings: self.structuredClone(Interface.DEFAULT_SETTINGS),
+      authentication: null,
+      data: {
+        settings: self.structuredClone(Interface.DEFAULT_SETTINGS),
+      },
     };
     users.set(newUserId, newUser);
     window.siteLocalStorage.set("User:" + newUserId, JSON.stringify(newUser));
   }
-  const usersJSON = window.siteLocalStorage.get("Users");
-  if (usersJSON === null) {
-    createNewUser({
-      username: "User",
-    });
-  } else {
-    const usersArray = JSON.parse(usersJSON);
-    for (const userId of usersArray) {
-      const jsonUser = window.siteLocalStorage.get("User:" + userId);
-      if (jsonUser === null) {
-        console.warn(userId + "has no info.");
-      } else {
-        users.set(userId, JSON.parse(jsonUser));
-      }
-    }
-  }
-
-  const BODY = Interface.createBodyObject({
-    parameters: {},
-  });
-  const appLayout = BODY.createAttached({
-    objectId: Interface.OBJECT_LAYOUT,
-    parameters: {
-      layoutId: Interface.LAYOUT_HEADER,
-    },
-  });
-  const appHeader = appLayout.createAttached({
-    area: "header",
-    objectId: Interface.OBJECT_LAYOUT,
-    parameters: {
-      layoutId: Interface.LAYOUT_SIDE_TOUCH,
-    },
-  });
-  const appTitle = appHeader.createAttached({
-    area: "main",
-    objectId: Interface.OBJECT_TEXT,
-    parameters: {
-      fontSizeFactor: 2,
-      text: "Web Interface",
-    },
-  });
-  const imgHamburgerMenu = appHeader.createAttached({
-    area: "touch",
-    objectId: Interface.OBJECT_IMAGE,
-    parameters: {
-      src: "Hamburger_icon.svg",
-    },
-  });
-  imgHamburgerMenu.addClickListener({ handler: showHamburgerMenu });
-  const userTiles = appLayout.createAttached({
-    area: "body",
-    objectId: Interface.OBJECT_TILES,
-    parameters: {
-    },
-  });
-  for (const thisUser of users.values()) {
-    userTiles.addItem({
-      imgSrc: "Anonymous.webp",
-      itemName: thisUser.username,
-    }).addClickListener({
-      handler: function () {
-        displayLogin(thisUser);
+  function displayMain(parentElement) {
+    const appLayout = parentElement.createAttached({
+      objectId: Interface.OBJECT_LAYOUT,
+      parameters: {
+        layoutId: Interface.LAYOUT_HEADER,
       },
     });
+    const appHeader = appLayout.createAttached({
+      area: "header",
+      objectId: Interface.OBJECT_LAYOUT,
+      parameters: {
+        layoutId: Interface.LAYOUT_SIDE_TOUCH,
+      },
+    });
+    const appTitle = appHeader.createAttached({
+      area: "main",
+      objectId: Interface.OBJECT_TEXT,
+      parameters: {
+        fontSizeFactor: 2,
+        text: "Web Interface",
+      },
+    });
+    const imgHamburgerMenu = appHeader.createAttached({
+      area: "touch",
+      objectId: Interface.OBJECT_IMAGE,
+      parameters: {
+        src: "Hamburger_icon.svg",
+      },
+    });
+    imgHamburgerMenu.addClickListener({ handler: showHamburgerMenu });
+    const userTiles = appLayout.createAttached({
+      area: "body",
+      objectId: Interface.OBJECT_TILES,
+      parameters: {
+      },
+    });
+    for (const thisUser of users.values()) {
+      userTiles.addItem({
+        imgSrc: "Anonymous.webp",
+        itemName: thisUser.username,
+      }).addClickListener({
+        handler: function () {
+          displayLogin(thisUser);
+        },
+      });
+    }
+    const hamburgerMenuList = appLayout.createDetached({
+      area: "body",
+      objectId: Interface.OBJECT_LIST,
+      parameters: {
+      },
+    });
+    hamburgerMenuList.addItem({
+      itemName: "Toggle Full Screen",
+    }).addClickListener({
+      handler: toggleFullscreen,
+    });
+    hamburgerMenuList.addItem({
+      itemName: "Add User",
+    }).addClickListener({
+      handler: addUser,
+    });
+    hamburgerMenuList.addItem({
+      itemName: "Calibrate Screen",
+    });
+    hamburgerMenuList.addItem({
+      itemName: "Set Viewing Distance",
+    });
+    hamburgerMenuList.addItem({
+      itemName: "Set Minimum Text Size",
+    });
+    hamburgerMenuList.addItem({
+      itemName: "Set Minimum Touch Size",
+    });
+    hamburgerMenuList.addItem({
+      itemName: "other",
+    });
+    hamburgerMenuList.addItem({
+      itemName: "other",
+    });
+    hamburgerMenuList.addItem({
+      itemName: "other",
+    });
+    hamburgerMenuList.addItem({
+      itemName: "other",
+    });
+    hamburgerMenuList.addItem({
+      itemName: "other",
+    });
+    hamburgerMenuList.addItem({
+      itemName: "other",
+    });
+    hamburgerMenuList.addItem({
+      itemName: "other",
+    });
   }
-  const hamburgerMenuList = appLayout.createDetached({
-    area: "body",
-    objectId: Interface.OBJECT_LIST,
-    parameters: {
-    },
-  });
-  hamburgerMenuList.addItem({
-    itemName: "Toggle Full Screen",
-  }).addClickListener({
-    handler: toggleFullscreen,
-  });
-  hamburgerMenuList.addItem({
-    itemName: "Add User",
-  }).addClickListener({
-    handler: addUser,
-  });
-  hamburgerMenuList.addItem({
-    itemName: "Calibrate Screen",
-  });
-  hamburgerMenuList.addItem({
-    itemName: "Set Viewing Distance",
-  });
-  hamburgerMenuList.addItem({
-    itemName: "Set Minimum Text Size",
-  });
-  hamburgerMenuList.addItem({
-    itemName: "Set Minimum Touch Size",
-  });
-  hamburgerMenuList.addItem({
-    itemName: "other",
-  });
-  hamburgerMenuList.addItem({
-    itemName: "other",
-  });
-  hamburgerMenuList.addItem({
-    itemName: "other",
-  });
-  hamburgerMenuList.addItem({
-    itemName: "other",
-  });
-  hamburgerMenuList.addItem({
-    itemName: "other",
-  });
-  hamburgerMenuList.addItem({
-    itemName: "other",
-  });
-  hamburgerMenuList.addItem({
-    itemName: "other",
-  });
   function displayPasswordLogin({
     parentObject,
     area,
@@ -352,7 +362,7 @@ function start( [ Interface, moduleErrorHandling ] ) {
         layoutId: Interface.LAYOUT_HEADER,
       },
     });
-    userEntry.createAttached({
+    const passwordEntry = userEntry.createAttached({
       area: "header",
       objectId: Interface.OBJECT_TEXT_PROMPT,
       parameters: {
@@ -388,27 +398,47 @@ function start( [ Interface, moduleErrorHandling ] ) {
     });
     loginScreen.attach();
     function checkPassword() {
-      const saltedPasswordBuffer = new Blob([ password, user.salt ], { type: "text/plain" }).arrayBuffer();
+      const password = passwordEntry.value;
+      const saltedPasswordBuffer = new Blob([ password, user.authentication.salt ], { type: "text/plain" }).arrayBuffer();
       const saltedHash = self.crypto.subtle.digest("SHA-256", saltedPasswordBuffer);
       const length = saltedHash.byteLength;
       let match = true;
       for (let i = 0; i < length; ++i) {
-        if (user.passwordHash[i] !== saltedHash[i]) {
+        if (user.authentication.passwordHash[i] !== saltedHash[i]) {
           match = false;
           break;
         }
       }
+      if (match) {
+        const userDataBlob = new Blob([ base64Decode(user.data) ]);
+        const userDataIv = userDataBlob.slice(16);
+        const userDataEncrypted = userDataBlob.slice(0, 16);
+        const passwordBuffer = new Blob([ password ], { type: "text/plain" }).arrayBuffer();
+        const passwordHash = self.crypto.subtle.digest("SHA-256", password);
+        const key = self.crypto.subtle.importKey("raw", passwordHash, "AES-256", false, [ "decrypt" ]);
+        userdata = self.crypto.subtle.decrypt({
+          name: "AES-256",
+          iv: userDataIv,
+        }, key, userDataEncrypted);
+        displayUserHome({
+          parentObject: appLayout,
+          area: "body",
+          user: thisUser,
+        });
+      } else {
+        window.alert("Incorrect password.");
+      }
     }
   }
   function displayLogin(thisUser) {
-    if (thisUser.authentication === undefined) {
+    if ((typeof thisUser.authentication !== "object") || (thisUser.authentication === null)) {
       displayUserHome({
         parentObject: appLayout,
         area: "body",
         user: thisUser,
       });
     }
-    switch (thisUser.authentication) {
+    switch (thisUser.authentication.type) {
       case "password": {
         displayPasswordLogin({
           parentObject: appLayout,
@@ -418,7 +448,7 @@ function start( [ Interface, moduleErrorHandling ] ) {
       }
         break;
       default: {
-        window.alert("Authentication method not recognized.");
+        window.alert("Authentication type not recognized.");
       }
     };
   }
@@ -427,10 +457,24 @@ function start( [ Interface, moduleErrorHandling ] ) {
     area,
     user,
   }) {
-    Interface.setSettings(user.settings);
+    Interface.setSettings(user.userdata.settings);
     BODY.refresh();
     const mainScreen = parentObject.createAttached({
       area: area,
+      objectId: Interface.OBJECT_LAYOUT,
+      parameters: {
+        layoutId: LAYOUT_HEADER,
+      },
+    });
+    mainScreen.createAttached({
+      area: "header",
+      objectId: Interface.OBJECT_TEXT,
+      parameters: {
+        text: user.username,
+      },
+    });
+    mainScreen.createAttached({
+      area: "body",
       objectId: Interface.OBJECT_TILES,
       parameters: {
       },
