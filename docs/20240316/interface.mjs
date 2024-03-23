@@ -212,11 +212,11 @@ LAYOUT_STYLES.set(LAYOUT_SIDE_TOUCH, function ({
   rootElement,
   parameters,
 }) {
-  if (parameters.handed === "right") {
+  if (parameters.handedness === "right") {
     rootElement.style.gridTemplateColumns = "100fr " + touchCss({ factor: 1 });
     rootElement.style.gridTemplateRows = "100%";
     rootElement.style.gridTemplateAreas = "\"main touch\"";
-  } else if (parameters.handed === "left") {
+  } else if (parameters.handedness === "left") {
     rootElement.style.gridTemplateColumns = touchCss({ factor: 1 }) + " 100fr";
     rootElement.style.gridTemplateRows = "100%";
     rootElement.style.gridTemplateAreas = "\"touch main\"";
