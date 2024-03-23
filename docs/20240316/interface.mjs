@@ -8,6 +8,7 @@ export const DEFAULT_SETTINGS = {
   min_touch_inch: 0.5,
   min_text_ratio: 0.007,
   view_dist_inch: 24,
+  handedness: "right",
 };
 
 let settings = structuredClone(DEFAULT_SETTINGS);
@@ -15,11 +16,19 @@ let settings = structuredClone(DEFAULT_SETTINGS);
 export function restoreDefaults() {
   setSettings(DEFAULT_SETTINGS);
 }
-export function setSettings() {
-  settings = structuredClone(DEFAULT_SETTINGS);
+export function setSettings(newSettings) {
+  settings = structuredClone(newSettings);
+  normalizeSettings(settings);
 }
 export function getSettings() {
   return structuredClone(settings);
+}
+function normalizeSettings(thisSettings) {
+  for (const property in DEFAULT_SETTINGS) {
+    if (thisSettings[property] === undefined) {
+      DEFAULT_SETTINGS[property] = thisSettings[property];
+    }
+  }
 }
 
 // Returns a CSS string for a touch element, sized in terms of a factor times the minimum size
@@ -163,34 +172,55 @@ export function createBodyObject({
 }
 const LAYOUT_STYLES = new Map();
 export const LAYOUT_BREADCRUMBS  = "63bd0889-7788-45f7-84eb-812892624667";
-LAYOUT_STYLES.set(LAYOUT_BREADCRUMBS, function (rootElement) {
+LAYOUT_STYLES.set(LAYOUT_BREADCRUMBS, function ({
+  rootElement,
+  parameters,
+}) {
   rootElement.style.gridTemplateColumns = "25fr " + touchCss({ factor: 1 }) + " 25fr 50fr";
   rootElement.style.gridTemplateRows = "100%";
   rootElement.style.gridTemplateAreas = "\"main button penultimate ultimate\"";
 });
 export const LAYOUT_HORIZ_3SPLIT  = "a6a0af4f-330d-44fd-be70-684a3f0af2f3";
-LAYOUT_STYLES.set(LAYOUT_HORIZ_3SPLIT, function (rootElement) {
+LAYOUT_STYLES.set(LAYOUT_HORIZ_3SPLIT, function ({
+  rootElement,
+  parameters,
+}) {
   rootElement.style.gridTemplateColumns = "33fr 34fr 33fr";
   rootElement.style.gridTemplateRows = "100%";
   rootElement.style.gridTemplateAreas = "\"left center right\"";
 });
 export const LAYOUT_HORIZ_2SPLIT  = "bcfa0a8b-a146-4e58-b581-b26c37c9dd2f";
-LAYOUT_STYLES.set(LAYOUT_HORIZ_2SPLIT, function (rootElement) {
+LAYOUT_STYLES.set(LAYOUT_HORIZ_2SPLIT, function ({
+  rootElement,
+  parameters,
+}) {
   rootElement.style.gridTemplateColumns = "50fr 50fr";
   rootElement.style.gridTemplateRows = "100%";
   rootElement.style.gridTemplateAreas = "\"left right\"";
 });
 export const LAYOUT_HEADER      = "dd13d7bd-7a0d-41bc-965d-f70a02d97e35";
-LAYOUT_STYLES.set(LAYOUT_HEADER, function (rootElement) {
+LAYOUT_STYLES.set(LAYOUT_HEADER, function ({
+  rootElement,
+  parameters,
+}) {
   rootElement.style.gridTemplateColumns = "100%";
   rootElement.style.gridTemplateRows = touchCss({ factor: 1 }) + " 100fr";
   rootElement.style.gridTemplateAreas = "\"header\"\n\"body\"";
 });
 export const LAYOUT_SIDE_TOUCH  = "ec3456ab-f5ef-47d5-8456-db86f3d3d5b1";
-LAYOUT_STYLES.set(LAYOUT_SIDE_TOUCH, function (rootElement) {
-  rootElement.style.gridTemplateColumns = "100fr " + touchCss({ factor: 1 });
-  rootElement.style.gridTemplateRows = "100%";
-  rootElement.style.gridTemplateAreas = "\"main touch\"";
+LAYOUT_STYLES.set(LAYOUT_SIDE_TOUCH, function ({
+  rootElement,
+  parameters,
+}) {
+  if (parameters.handed === "right") {
+    rootElement.style.gridTemplateColumns = "100fr " + touchCss({ factor: 1 });
+    rootElement.style.gridTemplateRows = "100%";
+    rootElement.style.gridTemplateAreas = "\"main touch\"";
+  } else if (parameters.handed === "left") {
+    rootElement.style.gridTemplateColumns = touchCss({ factor: 1 }) + " 100fr";
+    rootElement.style.gridTemplateRows = "100%";
+    rootElement.style.gridTemplateAreas = "\"touch main\"";
+  }
 });
 function createLayout({
   parameters,
@@ -204,9 +234,12 @@ function createLayout({
     const layoutParameters = structuredClone(parameters);
     delete layoutParameters.layoutId;
     if (typeof styleFunc === "function") {
-      styleFunc(rootElement, layoutParameters);
+      styleFunc({
+        rootElement,
+        layoutParameters,
+      });
     }
-    rootElement.style.width = "100$";
+    rootElement.style.width = "100%";
     rootElement.style.height = "100%";
     rootElement.style.backgroundColor = "white";
     rootElement.style.boxSizing = "border-box";
