@@ -256,70 +256,113 @@ function start( [ Interface, moduleErrorHandling ] ) {
     parameters: {
     },
   });
-  function createUserClickHandler(thisUser) {
-    return function () {
-      const loginScreen = appLayout.createAttached({
+  function displayPasswordLogin({
+    parentObject,
+    area,
+    user,
+  }) {
+    const loginScreen = parentObject.createAttached({
+      area: area,
+      objectId: Interface.OBJECT_LAYOUT,
+      parameters: {
+        layoutId: Interface.LAYOUT_HEADER,
+      },
+    });
+    loginScreen.createAttached({
+      area: "header",
+      objectId: Interface.OBJECT_TEXT,
+      parameters: {
+        text: thisUser.username,
+      },
+    });
+    const userEntry = loginScreen.createAttached({
+      area: "body",
+      objectId: Interface.OBJECT_LAYOUT,
+      parameters: {
+        layoutId: Interface.LAYOUT_HEADER,
+      },
+    });
+    userEntry.createAttached({
+      area: "header",
+      objectId: Interface.OBJECT_TEXT_PROMPT,
+      parameters: {
+        prompt: "Password",
+      },
+    });
+    userEntry.createAttached({
+      area: "body",
+      objectId: Interface.OBJECT_TEXT,
+      parameters: {
+        text: "Login",
+      },
+    }).addClickListener({
+      handler: checkPassword,
+    });
+    function checkPassword() {
+      const saltedPasswordBuffer = new Blob([ password, user.salt ], { type: "text/plain" }).arrayBuffer();
+      const saltedHash = self.crypto.subtle.digest("SHA-256", saltedPasswordBuffer);
+      const length = saltedHash.byteLength;
+      let match = true;
+      for (let i = 0, i < length; ++i) {
+        if (user.passwordHash[i] !== saltedHash[i]) {
+          match = false;
+          break;
+        }
+      }
+    }
+  }
+  function displayLogin(thisUser) {
+    if (thisUser.authentication === undefined) {
+      displayUserHome({
+        parentObject: appLayout,
         area: "body",
-        objectId: Interface.OBJECT_LAYOUT,
-        parameters: {
-          layoutId: Interface.LAYOUT_HEADER,
-        },
+        user: thisUser,
       });
-      loginScreen.createAttached({
-        area: "header",
-        objectId: Interface.OBJECT_TEXT,
-        parameters: {
-          text: thisUser.username,
-        },
-      });
-      const userEntry = loginScreen.createAttached({
-        area: "body",
-        objectId: Interface.OBJECT_LAYOUT,
-        parameters: {
-          layoutId: Interface.LAYOUT_HEADER,
-        },
-      });
-      userEntry.createAttached({
-        area: "header",
-        objectId: Interface.OBJECT_TEXT_PROMPT,
-        parameters: {
-          prompt: "Password",
-        },
-      });
-      userEntry.createAttached({
-        area: "body",
-        objectId: Interface.OBJECT_TEXT,
-        parameters: {
-          text: "Login",
-        },
-      }).addClickListener({
-        handler: function () {
-          Interface.setSettings(thisUser.settings);
-          BODY.refresh();
-          const mainScreen = appLayout.createAttached({
-            area: "body",
-            objectId: Interface.OBJECT_TILES,
-            parameters: {
-            },
-          });
-          mainScreen.addItem({
-            imgSrc: "Hamburger_icon.svg",
-            itemName: "Apps",
-          });
-          mainScreen.addItem({
-            imgSrc: "Hamburger_icon.svg",
-            itemName: "Settings",
-          });
-        },
-      });
+    }
+    switch (thisUser.authentication) {
+      case "password": {
+        displayPasswordLogin({
+          parentObject: appLayout,
+          area: "body",
+          user: thisUser,
+        });
+      }
+        break;
+      default: {
+        window.alert("Authentication method not recognized.");
+      }
     };
+  }
+  function displayUserHome({
+    parentObject,
+    area,
+    user,
+  }) {
+    Interface.setSettings(user.settings);
+    BODY.refresh();
+    const mainScreen = parentObject.createAttached({
+      area: area,
+      objectId: Interface.OBJECT_TILES,
+      parameters: {
+      },
+    });
+    mainScreen.addItem({
+      imgSrc: "Hamburger_icon.svg",
+      itemName: "Apps",
+    });
+    mainScreen.addItem({
+      imgSrc: "Hamburger_icon.svg",
+      itemName: "Settings",
+    });
   }
   for (const thisUser of users) {
     userTiles.addItem({
       imgSrc: "Anonymous.webp",
       itemName: thisUser.username,
     }).addClickListener({
-      handler: createUserClickHandler(thisUser),
+      handler: function () {
+        displayLogin(thisUser);
+      },
     });
   }
   const hamburgerMenuList = appLayout.createDetached({
@@ -393,15 +436,6 @@ function start( [ Interface, moduleErrorHandling ] ) {
   function addUser() {
   }
 
-  function loginScreen() {
-    const inpUsername = document.createElement("input");
-    const inpPassword = document.createElement("input");
-    const btnLogin = document.createElement("div");
-    btnLogin.innerHTML = "Login";
-    btnLogin.addEventListener("click", function (evt) {
-      
-    });
-  }
 }
 /*
 let clientWidth_CSS_px;
