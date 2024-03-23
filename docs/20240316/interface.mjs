@@ -235,8 +235,8 @@ function createLayout({
     delete layoutParameters.layoutId;
     if (typeof styleFunc === "function") {
       styleFunc({
-        rootElement,
-        layoutParameters,
+        rootElement: rootElement,
+        parameters: layoutParameters,
       });
     }
     rootElement.style.width = "100%";
