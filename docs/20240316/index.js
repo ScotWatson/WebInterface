@@ -261,7 +261,10 @@ function start( [ Interface, moduleErrorHandling ] ) {
     area,
     user,
   }) {
-    const loginScreen = parentObject.createAttached({
+    const prevScreen = parentObject.getObject({
+      area: area,
+    });
+    const loginScreen = parentObject.createDetached({
       area: area,
       objectId: Interface.OBJECT_LAYOUT,
       parameters: {
@@ -289,8 +292,15 @@ function start( [ Interface, moduleErrorHandling ] ) {
         prompt: "Password",
       },
     });
-    userEntry.createAttached({
+    const buttons = userEntry.createAttached({
       area: "body",
+      objectId: Interface.OBJECT_LAYOUT,
+      parameters: {
+        layoutId: Interface.LAYOUT_HORIZ_2SPLIT,
+      },
+    });
+    buttons.createAttached({
+      area: "left",
       objectId: Interface.OBJECT_TEXT,
       parameters: {
         text: "Login",
@@ -298,6 +308,18 @@ function start( [ Interface, moduleErrorHandling ] ) {
     }).addClickListener({
       handler: checkPassword,
     });
+    buttons.createAttached({
+      area: "right",
+      objectId: Interface.OBJECT_TEXT,
+      parameters: {
+        text: "Cancel",
+      },
+    }).addClickListener({
+      handler: function () {
+        prevScreen.attach();
+      },
+    });
+    loginScreen.attach();
     function checkPassword() {
       const saltedPasswordBuffer = new Blob([ password, user.salt ], { type: "text/plain" }).arrayBuffer();
       const saltedHash = self.crypto.subtle.digest("SHA-256", saltedPasswordBuffer);
