@@ -217,7 +217,11 @@ function start( [ Interface, moduleErrorHandling ] ) {
     const usersArray = JSON.parse(usersJSON);
     for (const user of usersArray) {
       const jsonUser = window.siteLocalStorage.get("User:" + user.id);
-      users.set(user.id, JSON.parse(jsonUser));
+      if (jsonUser === null) {
+        console.warn(user.id + "has no info.");
+      } else {
+        users.set(user.id, JSON.parse(jsonUser));
+      }
     }
   }
 
