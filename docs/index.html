@@ -14,7 +14,7 @@ const pathSegments = selfURL.pathname.split("/");
 init({
   latestVersion: "20240316",
   siteURI: function () {
-    return selfURL.origin + "/" + pathSegments[0] + "/index";
+    return selfURL.origin + pathSegments[0] + "/index";
   },
 });
 // Obtain initialization info
