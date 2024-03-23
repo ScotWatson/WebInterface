@@ -162,6 +162,24 @@ export function createBodyObject({
   return object;
 }
 const LAYOUT_STYLES = new Map();
+export const LAYOUT_BREADCRUMBS  = "63bd0889-7788-45f7-84eb-812892624667";
+LAYOUT_STYLES.set(LAYOUT_BREADCRUMBS, function (rootElement) {
+  rootElement.style.gridTemplateColumns = "25fr " + touchCss({ factor: 1 }) + " 25fr 50fr";
+  rootElement.style.gridTemplateRows = "100%";
+  rootElement.style.gridTemplateAreas = "\"main button penultimate ultimate\"";
+});
+export const LAYOUT_HORIZ_3SPLIT  = "a6a0af4f-330d-44fd-be70-684a3f0af2f3";
+LAYOUT_STYLES.set(LAYOUT_HORIZ_3SPLIT, function (rootElement) {
+  rootElement.style.gridTemplateColumns = "33fr 34fr 33fr";
+  rootElement.style.gridTemplateRows = "100%";
+  rootElement.style.gridTemplateAreas = "\"left center right\"";
+});
+export const LAYOUT_HORIZ_2SPLIT  = "bcfa0a8b-a146-4e58-b581-b26c37c9dd2f";
+LAYOUT_STYLES.set(LAYOUT_HORIZ_2SPLIT, function (rootElement) {
+  rootElement.style.gridTemplateColumns = "50fr 50fr";
+  rootElement.style.gridTemplateRows = "100%";
+  rootElement.style.gridTemplateAreas = "\"left right\"";
+});
 export const LAYOUT_HEADER      = "dd13d7bd-7a0d-41bc-965d-f70a02d97e35";
 LAYOUT_STYLES.set(LAYOUT_HEADER, function (rootElement) {
   rootElement.style.gridTemplateColumns = "100%";
@@ -183,8 +201,10 @@ function createLayout({
   object.refresh = function () {
     rootElement.style.display = "grid";
     const styleFunc = LAYOUT_STYLES.get(parameters.layoutId);
+    const layoutParameters = structuredClone(parameters);
+    delete layoutParameters.layoutId;
     if (typeof styleFunc === "function") {
-      styleFunc(rootElement);
+      styleFunc(rootElement, layoutParameters);
     }
     rootElement.style.width = "100$";
     rootElement.style.height = "100%";
