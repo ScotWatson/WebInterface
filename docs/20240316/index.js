@@ -192,30 +192,33 @@ msthumbnailclick
 */
 
 function start( [ Interface, moduleErrorHandling ] ) {
-  let users;
+  const users = new Map();
   function createNewUser({
     username,
   }) {
+    const usersArray = Array.from(users.keys());
     const newUserId = self.crypto.randomUUID();
+    usersArray.push(newUserId);
+    window.siteLocalStorage.set("Users", JSON.stringify(usersArray));
     const newUser = {
       username: username,
       id: newUserId,
-    };
-    users.push(newUser);
-    window.siteLocalStorage.set("Users", JSON.stringify(users));
-    const newUserInfo = {
       settings: self.structuredClone(Interface.DEFAULT_SETTINGS),
     };
-    window.siteLocalStorage.set("User:" + newUserId, JSON.stringify(newUserInfo));
+    users.set(newUserId, newUser);
+    window.siteLocalStorage.set("User:" + newUserId, JSON.stringify(newUser));
   }
   const usersJSON = window.siteLocalStorage.get("Users");
   if (usersJSON === null) {
-    users = [];
     createNewUser({
       username: "User",
     });
   } else {
-    users = JSON.parse(usersJSON);
+    usersArray = JSON.parse(usersJSON);
+    for (const user of usersArray) {
+      const jsonUser = window.siteLocalStorage.get("User:" + user.id);
+      userinfo.set(user.id, JSON.parse(jsonUser));
+    }
   }
 
   const BODY = Interface.createBodyObject({
