@@ -325,7 +325,7 @@ function start( [ Interface, moduleErrorHandling ] ) {
       const saltedHash = self.crypto.subtle.digest("SHA-256", saltedPasswordBuffer);
       const length = saltedHash.byteLength;
       let match = true;
-      for (let i = 0, i < length; ++i) {
+      for (let i = 0; i < length; ++i) {
         if (user.passwordHash[i] !== saltedHash[i]) {
           match = false;
           break;
