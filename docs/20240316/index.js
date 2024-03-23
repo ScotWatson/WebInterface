@@ -217,7 +217,7 @@ function start( [ Interface, moduleErrorHandling ] ) {
     const usersArray = JSON.parse(usersJSON);
     for (const user of usersArray) {
       const jsonUser = window.siteLocalStorage.get("User:" + user.id);
-      userinfo.set(user.id, JSON.parse(jsonUser));
+      users.set(user.id, JSON.parse(jsonUser));
     }
   }
 
