@@ -26,7 +26,7 @@ export function getSettings() {
 function normalizeSettings(thisSettings) {
   for (const property in DEFAULT_SETTINGS) {
     if (thisSettings[property] === undefined) {
-      DEFAULT_SETTINGS[property] = thisSettings[property];
+      thisSettings[property] = DEFAULT_SETTINGS[property];
     }
   }
 }
