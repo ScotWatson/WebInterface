@@ -215,12 +215,12 @@ function start( [ Interface, moduleErrorHandling ] ) {
     });
   } else {
     const usersArray = JSON.parse(usersJSON);
-    for (const user of usersArray) {
-      const jsonUser = window.siteLocalStorage.get("User:" + user.id);
+    for (const userId of usersArray) {
+      const jsonUser = window.siteLocalStorage.get("User:" + userId);
       if (jsonUser === null) {
-        console.warn(user.id + "has no info.");
+        console.warn(userId + "has no info.");
       } else {
-        users.set(user.id, JSON.parse(jsonUser));
+        users.set(userId, JSON.parse(jsonUser));
       }
     }
   }
