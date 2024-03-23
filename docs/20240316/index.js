@@ -259,6 +259,65 @@ function start( [ Interface, moduleErrorHandling ] ) {
     parameters: {
     },
   });
+  for (const thisUser of users.values()) {
+    userTiles.addItem({
+      imgSrc: "Anonymous.webp",
+      itemName: thisUser.username,
+    }).addClickListener({
+      handler: function () {
+        displayLogin(thisUser);
+      },
+    });
+  }
+  const hamburgerMenuList = appLayout.createDetached({
+    area: "body",
+    objectId: Interface.OBJECT_LIST,
+    parameters: {
+    },
+  });
+  hamburgerMenuList.addItem({
+    itemName: "Toggle Full Screen",
+  }).addClickListener({
+    handler: toggleFullscreen,
+  });
+  hamburgerMenuList.addItem({
+    itemName: "Add User",
+  }).addClickListener({
+    handler: addUser,
+  });
+  hamburgerMenuList.addItem({
+    itemName: "Calibrate Screen",
+  });
+  hamburgerMenuList.addItem({
+    itemName: "Set Viewing Distance",
+  });
+  hamburgerMenuList.addItem({
+    itemName: "Set Minimum Text Size",
+  });
+  hamburgerMenuList.addItem({
+    itemName: "Set Minimum Touch Size",
+  });
+  hamburgerMenuList.addItem({
+    itemName: "other",
+  });
+  hamburgerMenuList.addItem({
+    itemName: "other",
+  });
+  hamburgerMenuList.addItem({
+    itemName: "other",
+  });
+  hamburgerMenuList.addItem({
+    itemName: "other",
+  });
+  hamburgerMenuList.addItem({
+    itemName: "other",
+  });
+  hamburgerMenuList.addItem({
+    itemName: "other",
+  });
+  hamburgerMenuList.addItem({
+    itemName: "other",
+  });
   function displayPasswordLogin({
     parentObject,
     area,
@@ -380,65 +439,6 @@ function start( [ Interface, moduleErrorHandling ] ) {
       itemName: "Settings",
     });
   }
-  for (const thisUser of users) {
-    userTiles.addItem({
-      imgSrc: "Anonymous.webp",
-      itemName: thisUser.username,
-    }).addClickListener({
-      handler: function () {
-        displayLogin(thisUser);
-      },
-    });
-  }
-  const hamburgerMenuList = appLayout.createDetached({
-    area: "body",
-    objectId: Interface.OBJECT_LIST,
-    parameters: {
-    },
-  });
-  hamburgerMenuList.addItem({
-    itemName: "Toggle Full Screen",
-  }).addClickListener({
-    handler: toggleFullscreen,
-  });
-  hamburgerMenuList.addItem({
-    itemName: "Add User",
-  }).addClickListener({
-    handler: addUser,
-  });
-  hamburgerMenuList.addItem({
-    itemName: "Calibrate Screen",
-  });
-  hamburgerMenuList.addItem({
-    itemName: "Set Viewing Distance",
-  });
-  hamburgerMenuList.addItem({
-    itemName: "Set Minimum Text Size",
-  });
-  hamburgerMenuList.addItem({
-    itemName: "Set Minimum Touch Size",
-  });
-  hamburgerMenuList.addItem({
-    itemName: "other",
-  });
-  hamburgerMenuList.addItem({
-    itemName: "other",
-  });
-  hamburgerMenuList.addItem({
-    itemName: "other",
-  });
-  hamburgerMenuList.addItem({
-    itemName: "other",
-  });
-  hamburgerMenuList.addItem({
-    itemName: "other",
-  });
-  hamburgerMenuList.addItem({
-    itemName: "other",
-  });
-  hamburgerMenuList.addItem({
-    itemName: "other",
-  });
   function showHamburgerMenu() {
     imgHamburgerMenu.setSrc({ src: "LeftArrowIcon.png" });
     hamburgerMenuList.attach();
