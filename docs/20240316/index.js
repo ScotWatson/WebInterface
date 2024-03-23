@@ -192,6 +192,7 @@ msthumbnailclick
 */
 
 function start( [ Interface, moduleErrorHandling ] ) {
+  Interface.setSettings(Interface.DEFAULT_SETTINGS);
   const users = new Map();
   function createNewUser({
     username,
