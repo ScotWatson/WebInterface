@@ -259,16 +259,16 @@ function deserializer(obj) {
   }
   delete obj._types;
 }
-function serializeArrayBuffer(obj) {
+function serializerArrayBuffer(obj) {
   return base64Encode(obj);
 }
-function deserializeArrayBuffer(str) {
+function deserializerArrayBuffer(str) {
   return base64Decode(str);
 }
-function serializeUint8Array(obj) {
+function serializerUint8Array(obj) {
   return base64Encode(obj.buffer);
 }
-function deserializeUint8Array(str) {
+function deserializerUint8Array(str) {
   return Uint8Array(base64Decode(str));
 }
 
