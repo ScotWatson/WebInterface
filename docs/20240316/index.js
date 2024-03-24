@@ -191,10 +191,92 @@ mssitemodejumplistitemremoved
 msthumbnailclick
 */
 
+const types = new Map();
+types.set("ArrayBuffer", {
+  serializer: serializerArrayBuffer,
+  deserializer: deserializerArrayBuffer,
+});
+types.set("Uint8Array", {
+  serializer: serializerUint8Array,
+  deserializer: deserializerUint8Array,
+});
+function serialize(obj) {
+  serializer(obj);
+  return JSON.serialize(obj);
+}
+function serializer(obj) {
+  let ret = {};
+  ret._types = {};
+  for (const propertyName in obj) {
+    switch (typeof obj[propertyName]) {
+      case "object": {
+        if (obj.constructor.name === "Object") {
+          obj[propertyName] = serializer(obj[propertyName]);
+        } else {
+          const functions = types.get(obj.constructor.name);
+          if (serializerFunction === undefined) {
+            throw "Unrecognized Type";
+          }
+          ret._types[propertyName] = obj.constructor.name;
+          ret[propertyName] = functions.serializer(obj);
+        }
+      }
+        break;
+      case "number":
+      case "array":
+      case "date":
+      case "string": {
+        return obj;
+      }
+        break;
+      default: {
+        throw "Unrecognized Type";
+      }
+        break;
+    };
+  }
+  return ret;
+}
+function deserialize(str) {
+  const obj = JSON.parse(str);
+  deserializer(obj);
+  return obj;
+}
+function deserializer(obj) {
+  for (const propertyName in obj) {
+    if (typeof obj[propertyName] === "object") {
+      if (obj[propertyName].constructor.name === "Object") {
+        deserializer(obj[propertyName]);
+      }
+    }
+  }
+  for (const propertyName in obj._types) {
+    const functions = types.get(obj._types[propertyName]);
+    if (functions === undefined) {
+      throw "";
+    }
+    obj[propertyName] = functions.deserializer(obj[propertyName]);
+  }
+  delete obj._types;
+}
+function serializeArrayBuffer(obj) {
+  return base64Encode(obj);
+}
+function deserializeArrayBuffer(str) {
+  return base64Decode(str);
+}
+function serializeUint8Array(obj) {
+  return base64Encode(obj.buffer);
+}
+function deserializeUint8Array(str) {
+  return Uint8Array(base64Decode(str));
+}
+
+
 function start( [ Interface, moduleErrorHandling ] ) {
+  const users = new Map();
   try {
     Interface.setSettings(Interface.DEFAULT_SETTINGS);
-    const users = new Map();
     const usersJSON = window.siteLocalStorage.get("Users");
     if (usersJSON === null) {
       createNewUser({
@@ -218,7 +300,6 @@ function start( [ Interface, moduleErrorHandling ] ) {
   } catch (e) {
     
   }
-
   function createNewUser({
     username,
   }) {
