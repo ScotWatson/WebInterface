@@ -362,7 +362,11 @@ function start( [ Interface, moduleErrorHandling ] ) {
         itemName: thisUser.username,
       }).addClickListener({
         handler: function () {
-          displayLogin(thisUser);
+          displayLogin({
+            parentObject: appLayout,
+            area: "body",
+            user: thisUser
+          });
         },
       });
     }
@@ -608,20 +612,24 @@ function start( [ Interface, moduleErrorHandling ] ) {
       }
     }
   }
-  function displayLogin(thisUser) {
-    if ((typeof thisUser.authentication !== "object") || (thisUser.authentication === null)) {
+  function displayLogin({
+    parentObject,
+    area,
+    user,
+  }) {
+    if ((typeof user.authentication !== "object") || (user.authentication === null)) {
       displayUserHome({
-        parentObject: appLayout,
-        area: "body",
-        user: thisUser,
+        parentObject: parentObject,
+        area: area,
+        user: user,
       });
     }
-    switch (thisUser.authentication.type) {
+    switch (user.authentication.type) {
       case "password": {
         displayPasswordLogin({
-          parentObject: appLayout,
-          area: "body",
-          user: thisUser,
+          parentObject: parentObject,
+          area: area,
+          user: user,
         });
       }
         break;
