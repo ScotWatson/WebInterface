@@ -300,11 +300,66 @@ function start( [ Interface, moduleErrorHandling ] ) {
     });
     displayMain(BODY);
   } catch (e) {
-    
+    console.error(e);
   }
+  function saveUsers() {
+    const usersArray = Array.from(users.keys());
+    window.siteLocalStorage.set("Users", JSON.stringify(usersArray));
+    for (const user of users.values()) {
+      window.siteLocalStorage.set("User:" + user.id, serialize(getUserObject(user.id)));
+    }
+  }
+  function saveUser(user) {
+    window.siteLocalStorage.set("User:" + user.id, serialize(user));
+  }
+
+  let activeUserId;
+  // Returns user id
   function createNewUser({
     username,
+  }) {}
+  // Returns undefined
+  function deleteUser({
+    userId,
+  }) {}
+  // Returns authentication object
+  function getUserAuthentication({
+    userId,
+  }) {}
+  // Returns undefined. If user is logged in, sets the authentication object. If user is not logged in, does nothing.
+  function setUserAuthentication({
+    userId,
+    newAuthenticationInfo,
+  }) {}
+  // If user is logged in, returns info object. If user is not logged in, returns null.
+  function getUserInfo({
+    userId,
+  }) {}
+  // Returns undefined. If user is logged in, sets the user info. If user is not logged in, does nothing.
+  function setUserInfo({
+    userId,
+  }) {}
+  // Returns undefined
+  function loginUser({
+    userId,
+    authenticationInfo,
+  }) {}
+  // Returns undefined
+  function logoutUser({
+    userId,
+  }) {}
+  // Returns undefined
+  function getUserObject({
+    userId,
+  }) {}
+
+  
+  function addNewUser({
+    username,
   }) {
+    activeUserId = createNewUser({
+      username,
+    });
     const usersArray = Array.from(users.keys());
     const newUserId = self.crypto.randomUUID();
     usersArray.push(newUserId);
