@@ -251,7 +251,7 @@ function createLayout({
     }
   };
   object.refresh();
-   function create({
+  function create({
     area,
     objectId,
     parameters,
@@ -301,6 +301,15 @@ function createLayout({
     });
     return obj;
   };
+  object.getObject({
+    area,
+  }) {
+    if (contents.has(area)) {
+      return contents.get(area);
+    } else {
+      return null;
+    }
+  }
   object.delete = function () {
     for (const object of contents) {
       object.delete();
