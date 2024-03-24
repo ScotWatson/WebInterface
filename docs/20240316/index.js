@@ -479,7 +479,7 @@ function start( [ Interface, moduleErrorHandling ] ) {
     });
     loginScreen.attach();
     function checkPassword() {
-      const password = passwordEntry.value;
+      const password = passwordEntry.getText();
       const saltedPasswordBuffer = new Blob([ password, user.authentication.salt ], { type: "text/plain" }).arrayBuffer();
       const saltedHash = self.crypto.subtle.digest("SHA-256", saltedPasswordBuffer);
       const length = saltedHash.byteLength;
