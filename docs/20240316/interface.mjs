@@ -301,7 +301,7 @@ function createLayout({
     });
     return obj;
   };
-  object.getObject({
+  object.getObject = function ({
     area,
   }) {
     if (contents.has(area)) {
