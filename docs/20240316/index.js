@@ -250,14 +250,17 @@ function deserializer(obj) {
       }
     }
   }
-  for (const propertyName in obj._types) {
-    const functions = types.get(obj._types[propertyName]);
-    if (functions === undefined) {
-      throw "";
+  if ((typeof obj._types === "object") && (obj._types !== null)) {
+    for (const propertyName in obj._types) {
+      const functions = types.get(obj._types[propertyName]);
+      if (functions === undefined) {
+        console.warn(obj._types + "is not a recognized type.");
+      } else {
+        obj[propertyName] = functions.deserializer(obj[propertyName]);
+      }
     }
-    obj[propertyName] = functions.deserializer(obj[propertyName]);
+    delete obj._types;
   }
-  delete obj._types;
 }
 function serializerArrayBuffer(obj) {
   return base64Encode(obj);
@@ -269,7 +272,7 @@ function serializerUint8Array(obj) {
   return base64Encode(obj.buffer);
 }
 function deserializerUint8Array(str) {
-  return Uint8Array(base64Decode(str));
+  return new Uint8Array(base64Decode(str));
 }
 
 function start( [ Interface, moduleErrorHandling ] ) {
