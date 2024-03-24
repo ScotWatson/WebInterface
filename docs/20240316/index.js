@@ -272,7 +272,6 @@ function deserializeUint8Array(str) {
   return Uint8Array(base64Decode(str));
 }
 
-
 function start( [ Interface, moduleErrorHandling ] ) {
   const users = new Map();
   try {
@@ -392,27 +391,122 @@ function start( [ Interface, moduleErrorHandling ] ) {
     hamburgerMenuList.addItem({
       itemName: "Set Minimum Touch Size",
     });
-    hamburgerMenuList.addItem({
-      itemName: "other",
+  }
+  function displayUserSecurity({
+    parentObject,
+    area,
+    user,
+  }) {
+    const prevScreen = parentObject.getObject({
+      area: area,
     });
-    hamburgerMenuList.addItem({
-      itemName: "other",
+    const securityScreen = parentObject.createDetached({
+      area: area,
+      objectId: Interface.OBJECT_LAYOUT,
+      parameters: {
+        layoutId: Interface.LAYOUT_HEADER,
+      },
     });
-    hamburgerMenuList.addItem({
-      itemName: "other",
+    securityScreen.createAttached({
+      area: "header",
+      objectId: Interface.OBJECT_TEXT,
+      parameters: {
+        text: thisUser.username,
+      },
     });
-    hamburgerMenuList.addItem({
-      itemName: "other",
+    const securityItems = securityScreen.createAttached({
+      area: "body",
+      objectId: Interface.OBJECT_TILES,
+      parameters: {
+      },
     });
-    hamburgerMenuList.addItem({
-      itemName: "other",
+    securityItems.addTile({
+      imgSrc: "Anonymous.webp",
+      itemName: "Password",
+    }).addClickListener({
+      handler: function () {
+        displaySetPassword({
+          parentObject,
+          area,
+          user,
+        });
+      },
     });
-    hamburgerMenuList.addItem({
-      itemName: "other",
+  }
+  function displaySetPassword({
+    parentObject,
+    area,
+    user,
+  }) {
+    const prevScreen = parentObject.getObject({
+      area: area,
     });
-    hamburgerMenuList.addItem({
-      itemName: "other",
+    const passwordScreen = parentObject.createDetached({
+      area: area,
+      objectId: Interface.OBJECT_LAYOUT,
+      parameters: {
+        layoutId: Interface.LAYOUT_HEADER,
+      },
     });
+    const passwordEntry = passwordScreen.createAttached({
+      area: "header",
+      objectId: Interface.OBJECT_TEXT_PROMPT,
+      parameters: {
+        prompt: "Password",
+      },
+    });
+    const buttons = passwordScreen.createAttached({
+      area: "body",
+      objectId: Interface.OBJECT_LAYOUT,
+      parameters: {
+        layoutId: Interface.LAYOUT_HORIZ_2SPLIT,
+      },
+    });
+    buttons.createAttached({
+      area: "left",
+      objectId: Interface.OBJECT_TEXT,
+      parameters: {
+        text: "Login",
+      },
+    }).addClickListener({
+      handler: setPassword,
+    });
+    buttons.createAttached({
+      area: "right",
+      objectId: Interface.OBJECT_TEXT,
+      parameters: {
+        text: "Cancel",
+      },
+    }).addClickListener({
+      handler: function () {
+        prevScreen.attach();
+      },
+    });
+    loginScreen.attach();
+    function setPassword() {
+      user.authentication = {};
+      const password = passwordEntry.getText();
+      user.authentication.salt = new UInt8Array(6);
+      const saltedPasswordBuffer = new Blob([ password, user.authentication.salt ], { type: "text/plain" }).arrayBuffer();
+      user.authentication.passwordHash = self.crypto.subtle.digest("SHA-256", saltedPasswordBuffer);
+    }
+    function saveUser() {
+      const userDataBlob = serialize(user.userdata);
+      const userDataIv = new UInt8Array(16);
+      self.crypto.getRandomValues(userDataIv);
+      const key = self.crypto.subtle.importKey("raw", passwordHash, "AES-256", false, [ "encrypt" ]);
+      const userDataEncrypted = self.crypto.subtle.encrypt({
+        name: "AES-256",
+        iv: userDataIv,
+      }, key, userDataBlob);
+      const passwordBuffer = new Blob([ password ], { type: "text/plain" }).arrayBuffer();
+      const passwordHash = self.crypto.subtle.digest("SHA-256", password);
+      displayUserHome({
+        parentObject: appLayout,
+        area: "body",
+        user: thisUser,
+      });
+    }
   }
   function displayPasswordLogin({
     parentObject,
