@@ -127,10 +127,11 @@ function createMessageSenderForClient({
   };
 }
 // only one receiver
-function createMessageReceiver() {
-  let obj = {};
+function createMessageReceiver({
+  newSourceHandler,
+}) {
+  const obj = {};
   const sources = new Map();
-  const newSourceHandlers = new Set();
   obj.createSource({
     source,
   }) {
@@ -167,12 +168,8 @@ function createMessageReceiver() {
       const handler = handlers.get(evt.data.action);
       handler(evt.data.data);
     };
+    return objSource;
   }
-  obj.addNewSourceHandler = function ({
-    handler,
-  }) {
-    newSourceHandlers.add(handler);
-  };
   self.addEventListener("message", function (evt) {
     if (sources.has(evt.source)) {
       const thisSource = sources.get(evt.source);
@@ -182,7 +179,7 @@ function createMessageReceiver() {
         console.warn(evt.data);
       }
     } else {
-      // new source
+      newSourceHandler(evt);
     }
   });
   return obj;
