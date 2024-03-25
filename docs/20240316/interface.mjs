@@ -74,6 +74,8 @@ export const OBJECT_IMAGE       = "92fcd3cb-76bb-47a5-8693-31a8bbd19739";
 OBJECT_FUNCTIONS.set(OBJECT_IMAGE, createImage);
 export const OBJECT_LAYOUT      = "9db9ca53-1d3b-49a9-9d22-8b1d08177c92";
 OBJECT_FUNCTIONS.set(OBJECT_LAYOUT, createLayout);
+export const OBJECT_HTML        = "d969aa5c-f39a-4081-8137-130e11ac3c53";
+OBJECT_FUNCTIONS.set(OBJECT_HTML, createHtml);
 export const OBJECT_TEXT        = "f2666550-108e-47e3-8154-762b1acc1936";
 OBJECT_FUNCTIONS.set(OBJECT_TEXT, createText);
 function createObject({
@@ -315,6 +317,32 @@ function createLayout({
       object.delete();
     }
     object.detach();
+  };
+  return {
+    object,
+    rootElement,
+  };
+}
+function createHtml({
+  parameters,
+}) {
+  const object = {};
+  const rootElement = document.createElement("div");
+  const shadowDom = rootElement.attachShadow({ mode: "closed" });
+  object.refresh = function () {
+    rootElement.src = parameters.src;
+    rootElement.style.display = "block";
+    rootElement.style.width = "100%";
+    rootElement.style.height = "100%";
+    rootElement.style.backgroundColor = "white";
+  };
+  object.refresh();
+  object.delete = function () {
+    clickManager.removeAllListeners();
+    object.detach();
+  };
+  object.appendChild = function (element) {
+    shadowDom.appendChild(element);
   };
   return {
     object,
