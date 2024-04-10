@@ -31,6 +31,21 @@ function normalizeSettings(thisSettings) {
   }
 }
 
+export function modalSingleFile({
+  parameters,
+}) {
+  return new Promise(function (resolve, reject) {
+    const inpFile = document.createElement("input");
+    inpFile.type = "file";
+    inpFile.style.display = "none";
+    document.body.append(inpFile);
+    inpFile.addEventListener("input", function (evt) {
+      inpFile.remove();
+      resolve(inpFile.files[0]);
+    });
+    inpFile.click();
+  });
+}
 // Returns a CSS string for a touch element, sized in terms of a factor times the minimum size
 export function touchCss({
   factor,
