@@ -350,6 +350,7 @@ function createHtml({
     rootElement.style.width = "100%";
     rootElement.style.height = "100%";
     rootElement.style.backgroundColor = "white";
+    rootElement.style.overflow = "auto";
   };
   object.refresh();
   object.delete = function () {
