@@ -481,7 +481,7 @@ function createTiles({
     divItems.style.paddingBottom = "0px";
     divItems.style.border = "0px";
     divItems.style.margin = "0px";
-    divItems.style.backgroundImage = "url(ScrollGutter.svg)";
+    divItems.style.backgroundImage = "url(https://scotwatson.github.io/WebInterface/ScrollGutter.svg)";
     divItems.style.backgroundSize = touchCss({ factor: 1 }) + " " + touchCss({ factor: 1 });
     divItems.style.backgroundPosition = "right top";
     divItems.style.backgroundRepeat = "repeat-y";
@@ -587,7 +587,7 @@ function createList({
     divList.style.paddingRight = touchCss({ factor: 1 });
     divList.style.paddingTop = "0px";
     divList.style.paddingBottom = "0px";
-    divList.style.backgroundImage = "url(ScrollGutter.svg)";
+    divList.style.backgroundImage = "url(https://scotwatson.github.io/WebInterface/ScrollGutter.svg)";
     divList.style.backgroundSize = touchCss({ factor: 1 }) + " " + touchCss({ factor: 1 });
     divList.style.backgroundPosition = "right top";
     divList.style.backgroundRepeat = "repeat-y";
