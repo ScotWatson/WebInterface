@@ -263,6 +263,7 @@ function createLayout({
     rootElement.style.margin = "0px";
     rootElement.style.border = "0px";
     rootElement.style.padding = "0px";
+    rootElement.style.overflow = "hidden";
     for (const object of contents) {
       object.refresh();
     }
