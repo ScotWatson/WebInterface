@@ -38,7 +38,7 @@ export function modalSingleFile({
     const inpFile = document.createElement("input");
     inpFile.type = "file";
     inpFile.style.display = "none";
-    document.body.append(inpFile);
+    document.body.appendChild(inpFile);
     inpFile.addEventListener("input", function (evt) {
       inpFile.remove();
       resolve(inpFile.files[0]);
