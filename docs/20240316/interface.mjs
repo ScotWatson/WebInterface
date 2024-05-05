@@ -35,24 +35,18 @@ export function modalSingleFile({
   parameters,
 }) {
   return new Promise(function (resolve, reject) {
-    console.log("1");
     const inpFile = document.createElement("input");
-    console.log("2");
     inpFile.type = "file";
-    console.log("3");
     inpFile.style.display = "none";
-    console.log("4");
     document.body.appendChild(inpFile);
-    console.log("5");
+    inpFile.addEventListener("click", function (evt) {
+      evt.stopPropagation();
+    });
     inpFile.addEventListener("input", function (evt) {
-      console.log("8");
       inpFile.remove();
-      console.log("9");
       resolve(inpFile.files[0]);
     });
-    console.log("6");
     inpFile.click();
-    console.log("7");
   });
 }
 // Returns a CSS string for a touch element, sized in terms of a factor times the minimum size
