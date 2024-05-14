@@ -21,18 +21,16 @@ triggerObj = {
   },
 };
 
-function createSignal({
-  triggerObj,
-}) {
+function createSignal() {
   const obj = {};
-  let callback;
+  obj.trigger = function (value) {
+    return;
+  };
   obj.next = function () {
     return new Promise(function (resolve, reject) {
-      triggerObj.execute = function (value) {
-        resolve();
-      }
+      resolve();
     });
-  }
+  };
   return obj;
 }
 function AbortablePromise(promiseFunction, abortFunction) {
