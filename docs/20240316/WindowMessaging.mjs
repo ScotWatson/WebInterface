@@ -64,6 +64,15 @@ unknownSourceSignal.next().then(function () {
 });
 
 function messageReceiver(evt) {
+  if (evt.source === null) {
+    console.log(evt);
+  }
+  if (evt.source.constructor.name === "ServiceWorker") {
+    console.log(evt);
+  }
+  if (evt.source.constructor.name === "WindowProxy") {
+    console.log(evt);
+  }
   if (sourceHandlers.has(evt.source)) {
     const thisHandler = sourceHandlers.get(evt.source);
     thisHandler(evt.data);
