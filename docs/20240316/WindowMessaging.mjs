@@ -74,17 +74,13 @@ function messageReceiver(evt) {
 
 export const serviceWorkerMessageReceiver = (function () {
   const obj = {};
-  let resolveFunc;
-  let rejectFunc;
   obj.message = createSignal(function (resolve, reject) {
-    resolveFunc = resolve;
-    rejectFunc = reject;
-  });
-  window.navigator.serviceWorker.addEventListener("message", function (evt) {
-    resolveFunc(evt);
-  });
-  window.navigator.serviceWorker.addEventListener("messageerror", function (evt) {
-    rejectFunc(evt);
+    window.navigator.serviceWorker.addEventListener("message", function (evt) {
+      resolve(evt);
+    });
+    window.navigator.serviceWorker.addEventListener("messageerror", function (evt) {
+      reject(evt);
+    });
   });
   return obj;
 })();
@@ -93,7 +89,7 @@ export function createMessageReceiver({
   source,
 }) {
   const obj = {};
-  obj.messageSignal = createSignal(function (resolve, reject) {
+  obj.receiveSignal = createSignal(function (resolve, reject) {
     sourceHandlers.set(evt.source, resolve);
   });
   return obj;
@@ -111,4 +107,70 @@ export function createWindowMessageSender({
     window.postMessage(data, origin, transferable);
   };
   return obj;
+}
+
+export function createWorkerMessageSender({
+  worker,
+}) {
+  const obj = {};
+  obj.send = function ({
+    data,
+    transferable,
+  ) {
+    worker.postMessage(data, transferable);
+  };
+  return obj;
+}
+
+export createRemoteCallManager({
+  messageSender,
+  messageReceiver,
+}) {
+  const messageIds = new Map();
+  // returns a promise, so acts as an async function
+  function call({
+    functionName,
+    args,
+    transferable,
+  }) {
+    return new Promise(function (resolve, reject) {
+      const messageId = self.crypto.randomUUID();
+      messageIds.set(messageId, { resolve, reject });
+      messageSender.send({
+        data: {
+          id: messageId,
+          action: "request",
+          functionName: functionName,
+          args: args,
+        },
+        transferable: transferable,
+      });
+    });
+  }
+  messageReceiver.receive.next().then(function (data) {
+    switch (data.action) {
+      case "response": {
+        responseHandler(data);
+      }
+        break;
+      case "error": {
+        errorHandler(data);
+      }
+        break;
+      default:
+        throw "Invalid Response";
+    }
+  });
+  function responseHandler(data) {
+    const functions = messageIds.get(data.id);
+    if (functions !== undefined) {
+      functions.resolve(data.response);
+    }
+  };
+  function errorHandler(data) {
+    const functions = messageIds.get(data.id);
+    if (functions !== undefined) {
+      functions.reject(data.error);
+    }
+  };
 }
