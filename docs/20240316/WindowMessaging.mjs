@@ -55,12 +55,8 @@ function AbortablePromise(promiseFunction, abortFunction) {
 window.addEventListener("message", messageHandler);
 const sourceHandlers = new Map();
 let unknownSourceHandler;
-let unknownSourceSignal = createSignal(function (resolve, reject) {
+export const unregisteredSource = createSignal(function (resolve, reject) {
   unknownSourceMessage = resolve;
-});
-
-unknownSourceSignal.next().then(function () {
-  throw "Received message from unrecognized source";
 });
 
 function messageReceiver(evt) {
@@ -73,15 +69,20 @@ function messageReceiver(evt) {
   if (evt.source.constructor.name === "WindowProxy") {
     console.log(evt);
   }
-  if (sourceHandlers.has(evt.source)) {
-    const thisHandler = sourceHandlers.get(evt.source);
-    thisHandler(evt.data);
+  const thisWindow = windowHandlers.get(evt.source);
+  if (thisWindow !== undefined) {
+    const thisHandler = thisWindow.originHandlers.get(evt.origin);
+    if (thisHandler !== undefined) {
+      thisHandler(evt.data);
+    } else {
+      unknownSourceHandler(evt);
+    }
   } else {
     unknownSourceHandler(evt);
   }
 }
 
-export const serviceWorkerMessageReceiver = (function () {
+export const serviceWorkerMessageSource = (function () {
   const obj = {};
   obj.message = createSignal(function (resolve, reject) {
     window.navigator.serviceWorker.addEventListener("message", function (evt) {
@@ -94,17 +95,25 @@ export const serviceWorkerMessageReceiver = (function () {
   return obj;
 })();
 
-export function createMessageReceiver({
-  source,
+export function createMessageSourceForWindowOrigin({
+  window,
+  origin,
 }) {
   const obj = {};
-  obj.receiveSignal = createSignal(function (resolve, reject) {
-    sourceHandlers.set(evt.source, resolve);
+  obj.message = createSignal(function (resolve, reject) {
+    let thisWindow = windowHandlers.get(window);
+    if (thisWindow === undefined) {
+      thisWindow = {
+        originHandlers: new Map(),
+      };
+      windowHandlers.set(window, thisWindow);
+    }
+    windowHandlers.originHandlers.set(origin, resolve);
   });
   return obj;
 }
 
-export function createWindowMessageSender({
+export function createMessageSinkForWindowOrigin({
   window,
   origin,
 }) {
@@ -118,7 +127,7 @@ export function createWindowMessageSender({
   return obj;
 }
 
-export function createWorkerMessageSender({
+export function createMessageSinkForWorker({
   worker,
 }) {
   const obj = {};
@@ -131,13 +140,26 @@ export function createWorkerMessageSender({
   return obj;
 }
 
-export createRemoteCallManager({
-  messageSender,
-  messageReceiver,
+export function createRemoteCallManager({
+  messageSource,
+  messageSink,
 }) {
+  const obj = {};
   const messageIds = new Map();
+  const responseFunctions = new Map();
+  obj.register = function ({
+    functionName,
+    handlerFunc,
+  }) {
+    responseFunctions.set(functionName, handlerFunc);
+  };
+  obj.unregister = function ({
+    functionName,
+  }) {
+    responseFunctions.delete(functionName);
+  };
   // returns a promise, so acts as an async function
-  function call({
+  obj.call = function ({
     functionName,
     args,
     transferable,
@@ -145,7 +167,7 @@ export createRemoteCallManager({
     return new Promise(function (resolve, reject) {
       const messageId = self.crypto.randomUUID();
       messageIds.set(messageId, { resolve, reject });
-      messageSender.send({
+      messageSink.send({
         data: {
           id: messageId,
           action: "request",
@@ -156,30 +178,85 @@ export createRemoteCallManager({
       });
     });
   }
-  messageReceiver.receive.next().then(function (data) {
-    switch (data.action) {
-      case "response": {
-        responseHandler(data);
+  (async function () {
+    for (await data of messageSource.message) {
+      if (!data || !data.messageId || !data.action) {
+        messageSink.send({
+          data: {
+            id: data.messageId,
+            action: "error",
+            error: "Invalid Message",
+          },
+        });
       }
-        break;
-      case "error": {
-        errorHandler(data);
+      switch (data.action) {
+        case "request": {
+          await requestHandler(data);
+        }
+          break;
+        case "response": {
+          responseHandler(data);
+        }
+          break;
+        case "error": {
+          errorHandler(data);
+        }
+          break;
+        default:
+          messageSink.send({
+            data: {
+              id: data.messageId,
+              action: "error",
+              error: "Invalid Message",
+            },
+          });
       }
-        break;
-      default:
-        throw "Invalid Response";
     }
-  });
+  })();
+  async function requestHandler(data) {
+    const thisFunction = responseFunctions.get(data.functionName);
+    if (typeof thisFunction !== "function") {
+      messageSink.send({
+        data: {
+          id: data.messageId,
+          action: "error",
+          reason: "Unregistered function: " + data.functionName,
+        },
+      });
+      return;
+    }
+    try {
+      data.args.transferable = [];
+      const ret = await thisFunction(data.args);
+      messageSink.send({
+        data: {
+          id: data.messageId,
+          action: "response",
+          value: ret,
+        },
+        transferable: data.args.transferable,
+      });
+    } catch (e) {
+      messageSink.send({
+        data: {
+          id: data.messageId,
+          action: "error",
+          error: e,
+        },
+      });
+    }
+  }
   function responseHandler(data) {
     const functions = messageIds.get(data.id);
     if (functions !== undefined) {
-      functions.resolve(data.response);
+      functions.resolve(data.value);
     }
   };
   function errorHandler(data) {
     const functions = messageIds.get(data.id);
     if (functions !== undefined) {
-      functions.reject(data.error);
+      functions.reject(data.reason);
     }
   };
+  return obj;
 }
