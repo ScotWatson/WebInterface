@@ -123,6 +123,7 @@ export function createMessageSinkForWindowOrigin({
     data,
     transferable,
   }) {
+    console.log(data, origin, transferable);
     window.postMessage(data, origin, transferable);
   };
   return obj;
@@ -159,6 +160,8 @@ export function createRemoteCallManager({
   }) {
     responseFunctions.delete(functionName);
   };
+  (async function () {
+  })();
   // returns a promise, so acts as an async function
   obj.call = function ({
     functionName,
@@ -178,7 +181,7 @@ export function createRemoteCallManager({
         transferable: transferable,
       });
     });
-  }
+  };
   (async function () {
     for await (const data of messageSource.message) {
       if (!data || !data.messageId || !data.action) {
@@ -192,7 +195,7 @@ export function createRemoteCallManager({
       }
       switch (data.action) {
         case "request": {
-          await requestHandler(data);
+          requestHandler(data);
         }
           break;
         case "response": {
