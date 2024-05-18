@@ -96,7 +96,6 @@ function messageHandler(evt) {
         data: evt.data,
       });
       break;
-    );
     default:
       // This should not occur for Windows
       throw "Internal Logic Error";
