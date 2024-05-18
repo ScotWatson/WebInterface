@@ -56,7 +56,7 @@ window.addEventListener("message", messageReceiver);
 const sourceHandlers = new Map();
 let unknownSourceHandler;
 export const unregisteredSource = createSignal(function (resolve, reject) {
-  unknownSourceMessage = resolve;
+  unknownSourceHandler = resolve;
 });
 
 function messageReceiver(evt) {
