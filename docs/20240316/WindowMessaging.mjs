@@ -102,6 +102,7 @@ export function createMessageSourceForWindowOrigin({
   const obj = {};
   obj.message = createSignal(function (resolve, reject) {
     let thisWindow = windowHandlers.get(window);
+    console.log(thisWindow);
     if (thisWindow === undefined) {
       thisWindow = {
         originHandlers: new Map(),
