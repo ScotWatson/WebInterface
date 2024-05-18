@@ -69,19 +69,19 @@ function messageReceiver(evt) {
   if (evt.source.constructor.name === "ServiceWorker") {
     console.log(evt);
   }
-  if (evt.source.constructor.name === "WindowProxy") {
-    console.log(evt);
-  }
-  const thisWindow = windowHandlers.get(evt.source);
-  if (thisWindow !== undefined) {
-    const thisHandler = thisWindow.originHandlers.get(evt.origin);
-    if (thisHandler !== undefined) {
-      thisHandler(evt.data);
+  if ((evt.source.constructor.name === "WindowProxy") || (evt.source.constructor.name === "Window")) {
+    console.log(evt.source.constructor.name);
+    const thisWindow = windowHandlers.get(evt.source);
+    if (thisWindow !== undefined) {
+      const thisHandler = thisWindow.originHandlers.get(evt.origin);
+      if (thisHandler !== undefined) {
+        thisHandler(evt.data);
+      } else {
+        unknownSourceHandler(evt);
+      }
     } else {
       unknownSourceHandler(evt);
     }
-  } else {
-    unknownSourceHandler(evt);
   }
 }
 
