@@ -53,7 +53,7 @@ function AbortablePromise(promiseFunction, abortFunction) {
 }
 
 window.addEventListener("message", messageReceiver);
-const sourceHandlers = new Map();
+const windowHandlers = new Map();
 let unknownSourceHandler;
 export const unregisteredSource = createSignal(function (resolve, reject) {
   unknownSourceHandler = resolve;
