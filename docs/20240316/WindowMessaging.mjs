@@ -109,7 +109,7 @@ export function createMessageSourceForWindowOrigin({
       };
       windowHandlers.set(window, thisWindow);
     }
-    windowHandlers.originHandlers.set(origin, resolve);
+    thisWindow.originHandlers.set(origin, resolve);
   });
   return obj;
 }
