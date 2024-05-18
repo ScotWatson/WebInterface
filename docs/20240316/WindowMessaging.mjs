@@ -43,44 +43,80 @@ function createSignal(initFunc) {
   return obj;
 }
 
-function AbortablePromise(promiseFunction, abortFunction) {
+function AbortablePromise({
+  initFunc,
+  abortFunc,
+}) {
+  let resolveFunc;
+  let rejectFunc;
   const ret = new Promise(function (resolve, reject) {
-    promiseFunction(resolve, reject);
+    resolveFunc = resolve;
+    rejectFunc = reject;
+    initFunc(resolve, reject);
   });
-  ret.resolve = function (value) {};
-  ret.reject = function (reason) {};
-  ret.then = function (onFulfilled, onReject) {};
-  ret.catch = function (onReject) {};
+  ret.resolve = function (value) {
+    abortFunc();
+    resolveFunc(value);
+  };
+  ret.reject = function (reason) {
+    abortFunc();
+    rejectFunc(reason);
+  };
   return ret;
 }
 
 window.addEventListener("message", messageReceiver);
-const windowHandlers = new Map();
-let unknownSourceHandler;
-export const unregisteredSource = createSignal(function (resolve, reject) {
-  unknownSourceHandler = resolve;
+const trustedOrigins = new Set();
+export function addTrustedOrigin(origin) {
+  trustedOrigins.add(origin);
+}
+export function removeTrustedOrigin(origin) {
+  trustedOrigins.delete(origin);
+}
+export function isTrustedOrigin(origin) {
+  return trustedOrigins.has(origin);
+}
+let untrustedOriginHandler;
+export const untrustedOrigin = createSignal(function (resolve, reject) {
+  untrustedOriginHandler = resolve;
 });
 
-function messageReceiver(evt) {
+function messageHandler(evt) {
   console.log(evt);
   if (evt.source === null) {
-    console.log(evt);
+    // Should only occur on MessagePorts and Workers
+    throw "Internal Logic Error";
   }
-  if (evt.source.constructor.name === "ServiceWorker") {
-    console.log(evt);
+  switch (evt.source.constructor.name) {
+    case "Window":
+    case "WindowProxy":
+      enqueueWindowMessage({
+        origin: evt.origin,
+        source: evt.source,
+        data: evt.data,
+      });
+      break;
+    );
+    default:
+      // This should not occur for Windows
+      throw "Internal Logic Error";
   }
-  if ((evt.source.constructor.name === "WindowProxy") || (evt.source.constructor.name === "Window")) {
-    console.log(evt.source.constructor.name);
-    const thisWindow = windowHandlers.get(evt.source);
-    if (thisWindow !== undefined) {
-      const thisHandler = thisWindow.originHandlers.get(evt.origin);
-      if (thisHandler !== undefined) {
-        thisHandler(evt.data);
-      } else {
-        unknownSourceHandler(evt);
-      }
-    } else {
-      unknownSourceHandler(evt);
+}
+
+export function enqueueWindowMessage(info) {
+  console.log(info.source.constructor.name);
+  if (trustedOrigins.has(info.origin)) {
+    trustedOriginHandler(info);
+  } else {
+    untrustedOriginHandler(info);
+  }
+}
+
+function trustedOriginHandler(info) {
+  const handlers = windowHandlers.get(info.source);
+  if (handlers !== undefined) {
+    for (const handler of handlers) {
+      handler(info);
     }
   }
 }
@@ -98,20 +134,25 @@ export const serviceWorkerMessageSource = (function () {
   return obj;
 })();
 
-export function createMessageSourceForWindowOrigin({
-  window,
+export function createMessageSourceForOrigin({
   origin,
 }) {
   const obj = {};
   obj.message = createSignal(function (resolve, reject) {
-    let thisWindow = windowHandlers.get(window);
-    if (thisWindow === undefined) {
-      thisWindow = {
-        originHandlers: new Map(),
-      };
-      windowHandlers.set(window, thisWindow);
-    }
-    thisWindow.originHandlers.set(origin, resolve);
+  });
+  return obj;
+}
+
+export function createMessageSourceForWindow({
+  window,
+}) {
+  const obj = {};
+  obj.message = createSignal(function (resolve, reject) {
+    windowHandlers.set(window, resolve);
+  });
+  obj.kill = createSignal(function (resolve, reject) {
+    obj.message = null;
+    windowHandlers.delete(window);
   });
   return obj;
 }
@@ -123,10 +164,9 @@ export function createMessageSinkForWindowOrigin({
   const obj = {};
   obj.send = function ({
     data,
-    transferable,
+    transfer,
   }) {
-    console.log(data, origin, transferable);
-    window.postMessage(data, origin, transferable);
+    window.postMessage(data, origin, transfer);
   };
   return obj;
 }
