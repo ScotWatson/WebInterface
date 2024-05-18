@@ -121,7 +121,7 @@ export function createMessageSinkForWindowOrigin({
   obj.send = function ({
     data,
     transferable,
-  ) {
+  }) {
     window.postMessage(data, origin, transferable);
   };
   return obj;
