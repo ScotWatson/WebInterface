@@ -179,7 +179,7 @@ export function createRemoteCallManager({
     });
   }
   (async function () {
-    for (await data of messageSource.message) {
+    for await (const data of messageSource.message) {
       if (!data || !data.messageId || !data.action) {
         messageSink.send({
           data: {
