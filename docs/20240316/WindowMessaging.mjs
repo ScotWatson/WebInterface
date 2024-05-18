@@ -36,8 +36,8 @@ function createSignal(initFunc) {
   };
   obj[Symbol.asyncIterator] = obj.next;
   initFunc(resolve, reject);
-  delete resolve;
-  delete reject;
+  resolve = null;
+  reject = null;
   return obj;
 }
 
