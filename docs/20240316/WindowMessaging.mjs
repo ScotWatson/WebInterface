@@ -34,7 +34,9 @@ function createSignal(initFunc) {
       rejectArray.push(reject);
     });
   };
-  obj[Symbol.asyncIterator] = obj.next;
+  obj[Symbol.asyncIterator] = function () {
+    return obj;
+  };
   initFunc(resolve, reject);
   resolve = null;
   reject = null;
