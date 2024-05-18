@@ -134,7 +134,7 @@ export function createMessageSinkForWorker({
   obj.send = function ({
     data,
     transferable,
-  ) {
+  }) {
     worker.postMessage(data, transferable);
   };
   return obj;
