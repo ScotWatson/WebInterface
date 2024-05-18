@@ -111,6 +111,7 @@ export function enqueueWindowMessage(info) {
   }
 }
 
+const windowHandlers = new Map();
 function trustedOriginHandler(info) {
   const handlers = windowHandlers.get(info.source);
   if (handlers !== undefined) {
