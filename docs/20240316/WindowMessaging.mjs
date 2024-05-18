@@ -65,7 +65,7 @@ function AbortablePromise({
   return ret;
 }
 
-window.addEventListener("message", messageReceiver);
+window.addEventListener("message", messageHandler);
 const trustedOrigins = new Set();
 export function addTrustedOrigin(origin) {
   trustedOrigins.add(origin);
