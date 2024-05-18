@@ -62,6 +62,7 @@ export const unregisteredSource = createSignal(function (resolve, reject) {
 });
 
 function messageReceiver(evt) {
+  console.log(evt);
   if (evt.source === null) {
     console.log(evt);
   }
