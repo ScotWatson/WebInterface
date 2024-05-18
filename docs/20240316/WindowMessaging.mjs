@@ -104,7 +104,6 @@ export function createMessageSourceForWindowOrigin({
   const obj = {};
   obj.message = createSignal(function (resolve, reject) {
     let thisWindow = windowHandlers.get(window);
-    console.log(thisWindow);
     if (thisWindow === undefined) {
       thisWindow = {
         originHandlers: new Map(),
@@ -162,8 +161,6 @@ export function createRemoteCallManager({
   }) {
     responseFunctions.delete(functionName);
   };
-  (async function () {
-  })();
   // returns a promise, so acts as an async function
   obj.call = function ({
     functionName,
@@ -185,7 +182,6 @@ export function createRemoteCallManager({
     });
   };
   (async function () {
-    console.log(messageSource.message.next);
     for await (const data of messageSource.message) {
       if (!data || !data.messageId || !data.action) {
         messageSink.send({
@@ -221,6 +217,7 @@ export function createRemoteCallManager({
     }
   })();
   async function requestHandler(data) {
+    console.log(data);
     const thisFunction = responseFunctions.get(data.functionName);
     if (typeof thisFunction !== "function") {
       messageSink.send({
