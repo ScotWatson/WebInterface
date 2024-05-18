@@ -183,6 +183,7 @@ export function createRemoteCallManager({
     });
   };
   (async function () {
+    console.log(messageSource.message.next);
     for await (const data of messageSource.message) {
       if (!data || !data.messageId || !data.action) {
         messageSink.send({
