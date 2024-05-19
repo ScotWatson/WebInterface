@@ -193,6 +193,7 @@ export function createRemoteCallManager({
   };
   (async function () {
     for await (const data of messageSource.message) {
+      console.log(data);
       if (!data || !data.messageId || !data.action) {
         messageSink.send({
           data: {
@@ -201,6 +202,7 @@ export function createRemoteCallManager({
             error: "Invalid Message",
           },
         });
+        continue;
       }
       switch (data.action) {
         case "request": {
@@ -260,15 +262,17 @@ export function createRemoteCallManager({
     }
   }
   function responseHandler(data) {
-    const functions = messageIds.get(data.id);
+    const functions = messageIds.get(data.messageId);
     if (functions !== undefined) {
       functions.resolve(data.value);
+      messageIds.delete(data.messageId);
     }
   };
   function errorHandler(data) {
-    const functions = messageIds.get(data.id);
+    const functions = messageIds.get(data.messageId);
     if (functions !== undefined) {
       functions.reject(data.reason);
+      messageIds.delete(data.messageId);
     }
   };
   return obj;
