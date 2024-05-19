@@ -4,7 +4,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 // async Iterable Iterator
-function createSignal(initFunc) {
+export function createSignal(initFunc) {
   const obj = {};
   let resolveArray = [];
   let rejectArray = [];
@@ -43,7 +43,7 @@ function createSignal(initFunc) {
   return obj;
 }
 
-function AbortablePromise({
+export function AbortablePromise({
   initFunc,
   abortFunc,
 }) {
@@ -148,11 +148,17 @@ export function createMessageSourceForWindow({
 }) {
   const obj = {};
   obj.message = createSignal(function (resolve, reject) {
-    windowHandlers.set(window, resolve);
+    let handlers = windowHandlers.get(window);
+    if (handlers === undefined) {
+      handlers = new Set();
+      windowHandlers.set(window, handlers);
+    }
+    handlers.add(resolve);
   });
   obj.kill = createSignal(function (resolve, reject) {
     obj.message = null;
-    windowHandlers.delete(window);
+    let handlers = windowHandlers.get(window);
+    handlers.delete(resolve);
   });
   return obj;
 }
