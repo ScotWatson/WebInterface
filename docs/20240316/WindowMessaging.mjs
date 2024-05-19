@@ -126,6 +126,21 @@ export const serviceWorkerMessageSource = (function () {
   return obj;
 })();
 
+export function createMessageSourceForWindowOrigin({
+  window,
+  origin,
+}) {
+  return {
+    message: createSignal(async function (resolve, reject) {
+      for await (const info of trustedOrigin) {
+        if ((info.source === window) && (info.origin === origin)) {
+          resolve(info.data);
+        }
+      }
+    }),
+  };
+}
+
 export function createMessageSinkForWindowOrigin({
   window,
   origin,
