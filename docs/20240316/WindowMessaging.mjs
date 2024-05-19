@@ -107,6 +107,7 @@ function messageHandler(evt) {
 }
 
 export function enqueueWindowMessage(info) {
+  console.log(info);
   console.log(info.source.constructor.name);
   if (trustedOrigins.has(info.origin)) {
     trustedOriginHandler(info);
