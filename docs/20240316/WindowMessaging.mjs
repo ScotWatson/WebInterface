@@ -262,7 +262,9 @@ export function createRemoteCallManager({
     }
   }
   function responseHandler(data) {
+    console.log(data);
     const functions = messageIds.get(data.messageId);
+    console.log(functions);
     if (functions !== undefined) {
       functions.resolve(data.value);
       messageIds.delete(data.messageId);
