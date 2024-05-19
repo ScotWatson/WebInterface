@@ -76,6 +76,10 @@ export function removeTrustedOrigin(origin) {
 export function isTrustedOrigin(origin) {
   return trustedOrigins.has(origin);
 }
+let trustedOriginHandler;
+export const trustedOrigin = createSignal(function (resolve, reject) {
+  trustedOriginHandler = resolve;
+});
 let untrustedOriginHandler;
 export const untrustedOrigin = createSignal(function (resolve, reject) {
   untrustedOriginHandler = resolve;
@@ -111,16 +115,6 @@ export function enqueueWindowMessage(info) {
   }
 }
 
-const windowHandlers = new Map();
-function trustedOriginHandler(info) {
-  const handlers = windowHandlers.get(info.source);
-  if (handlers !== undefined) {
-    for (const handler of handlers) {
-      handler(info);
-    }
-  }
-}
-
 export const serviceWorkerMessageSource = (function () {
   const obj = {};
   obj.message = createSignal(function (resolve, reject) {
@@ -133,35 +127,6 @@ export const serviceWorkerMessageSource = (function () {
   });
   return obj;
 })();
-
-export function createMessageSourceForOrigin({
-  origin,
-}) {
-  const obj = {};
-  obj.message = createSignal(function (resolve, reject) {
-  });
-  return obj;
-}
-
-export function createMessageSourceForWindow({
-  window,
-}) {
-  const obj = {};
-  obj.message = createSignal(function (resolve, reject) {
-    let handlers = windowHandlers.get(window);
-    if (handlers === undefined) {
-      handlers = new Set();
-      windowHandlers.set(window, handlers);
-    }
-    handlers.add(resolve);
-  });
-  obj.kill = function (resolve, reject) {
-    obj.message = null;
-    let handlers = windowHandlers.get(window);
-    handlers.delete(resolve);
-  };
-  return obj;
-}
 
 export function createMessageSinkForWindowOrigin({
   window,
