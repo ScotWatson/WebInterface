@@ -193,7 +193,6 @@ export function createRemoteCallManager({
   };
   (async function () {
     for await (const data of messageSource.message) {
-      console.log(data);
       if (!data || !data.id || !data.action) {
         messageSink.send({
           data: {
@@ -262,9 +261,7 @@ export function createRemoteCallManager({
     }
   }
   function responseHandler(data) {
-    console.log(data);
     const functions = messageIds.get(data.id);
-    console.log(functions);
     if (functions !== undefined) {
       functions.resolve(data.value);
       messageIds.delete(data.id);
