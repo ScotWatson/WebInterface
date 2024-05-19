@@ -182,7 +182,7 @@ export function createRemoteCallManager({
       messageIds.set(messageId, { resolve, reject });
       messageSink.send({
         data: {
-          messageId: messageId,
+          id: messageId,
           action: "request",
           functionName: functionName,
           args: args,
@@ -194,10 +194,10 @@ export function createRemoteCallManager({
   (async function () {
     for await (const data of messageSource.message) {
       console.log(data);
-      if (!data || !data.action) {
+      if (!data || !data.id || !data.action) {
         messageSink.send({
           data: {
-            id: data.messageId,
+            id: data.id,
             action: "error",
             error: "Invalid Message",
           },
@@ -220,7 +220,7 @@ export function createRemoteCallManager({
         default:
           messageSink.send({
             data: {
-              id: data.messageId,
+              id: data.id,
               action: "error",
               error: "Invalid Message",
             },
@@ -233,7 +233,7 @@ export function createRemoteCallManager({
     if (typeof thisFunction !== "function") {
       messageSink.send({
         data: {
-          id: data.messageId,
+          id: data.id,
           action: "error",
           reason: "Unregistered function: " + data.functionName,
         },
@@ -245,7 +245,7 @@ export function createRemoteCallManager({
       const ret = await thisFunction(data.args);
       messageSink.send({
         data: {
-          id: data.messageId,
+          id: data.id,
           action: "response",
           value: ret,
         },
@@ -254,7 +254,7 @@ export function createRemoteCallManager({
     } catch (e) {
       messageSink.send({
         data: {
-          id: data.messageId,
+          id: data.id,
           action: "error",
           error: e,
         },
@@ -263,18 +263,18 @@ export function createRemoteCallManager({
   }
   function responseHandler(data) {
     console.log(data);
-    const functions = messageIds.get(data.messageId);
+    const functions = messageIds.get(data.id);
     console.log(functions);
     if (functions !== undefined) {
       functions.resolve(data.value);
-      messageIds.delete(data.messageId);
+      messageIds.delete(data.id);
     }
   };
   function errorHandler(data) {
-    const functions = messageIds.get(data.messageId);
+    const functions = messageIds.get(data.id);
     if (functions !== undefined) {
       functions.reject(data.reason);
-      messageIds.delete(data.messageId);
+      messageIds.delete(data.id);
     }
   };
   return obj;
