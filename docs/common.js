@@ -3,8 +3,10 @@
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+const Common = {};
+
 // async Iterable Iterator
-export function createSignal(initFunc) {
+Common.createSignal = function createSignal(initFunc) {
   const obj = {};
   let resolveArray = [];
   let rejectArray = [];
@@ -41,9 +43,9 @@ export function createSignal(initFunc) {
   resolve = null;
   reject = null;
   return obj;
-}
+};
 
-export function AbortablePromise({
+Common.createAbortablePromise = function createAbortablePromise({
   initFunc,
   abortFunc,
 }) {
@@ -63,21 +65,23 @@ export function AbortablePromise({
     rejectFunc(reason);
   };
   return ret;
-}
+};
 
-export async function base64Decode(str) {
+Common.base64Decode =  async function base64Decode(str) {
   return await (new self.Blob([ self.atob(str) ])).arrayBuffer();
-}
-export function base64Encode(view) {
+};
+
+Common.base64Encode = function base64Encode(view) {
   let rawString = "";
   for (const byte of view) {
     rawString += String.fromCharCode(byte);
   }
   return self.btoa(rawString);
-}
+};
+
 // SiteStorage does not provide security, all variables are still accessible through the underlying storage object
 // If using SiteStorage, do not manipulate keys that start with an underscore or match RFC3986 syntax.
-export class SiteStorage {
+Common.SiteStorage = class SiteStorage {
   #uri;
   #storage;
   constructor(args) {
@@ -119,4 +123,4 @@ export class SiteStorage {
     const prefix = this.#storage.getItem(this.#uri);
     this.#storage.removeItem(prefix + key);
   }
-}
+};
