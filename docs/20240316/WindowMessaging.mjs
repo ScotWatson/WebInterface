@@ -155,6 +155,7 @@ export function createMessageSourceForWindow({
     }
     handlers.add(resolve);
   });
+  console.log(obj.message);
   obj.kill = createSignal(function (resolve, reject) {
     obj.message = null;
     let handlers = windowHandlers.get(window);
