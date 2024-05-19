@@ -182,7 +182,7 @@ export function createRemoteCallManager({
       messageIds.set(messageId, { resolve, reject });
       messageSink.send({
         data: {
-          id: messageId,
+          messageId: messageId,
           action: "request",
           functionName: functionName,
           args: args,
