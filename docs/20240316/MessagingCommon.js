@@ -5,7 +5,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 importScripts("https://scotwatson.github.io/WebInterface/common.js");
 
-export function createRemoteProcedureSocket({
+const MessagingCommon = {};
+
+MessagingCommon.createRemoteProcedureSocket =  function createRemoteProcedureSocket({
   messageSource,
   messageSink,
 }) {
