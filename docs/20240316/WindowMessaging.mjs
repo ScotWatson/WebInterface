@@ -3,67 +3,7 @@
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-// async Iterable Iterator
-export function createSignal(initFunc) {
-  const obj = {};
-  let resolveArray = [];
-  let rejectArray = [];
-  let resolve = function (value, done) {
-    for (const resolve of resolveArray) {
-      resolve({
-        value: value,
-        done: !!done,
-      });
-    }
-    resolveArray = [];
-    rejectArray = [];
-  };
-  let reject = function (error) {
-    for (const reject of rejectArray) {
-      reject({
-        value: value,
-        done: true,
-      });
-    }
-    resolveArray = [];
-    rejectArray = [];
-  };
-  obj.next = function () {
-    return new Promise(function (resolve, reject) {
-      resolveArray.push(resolve);
-      rejectArray.push(reject);
-    });
-  };
-  obj[Symbol.asyncIterator] = function () {
-    return obj;
-  };
-  initFunc(resolve, reject);
-  resolve = null;
-  reject = null;
-  return obj;
-}
-
-export function AbortablePromise({
-  initFunc,
-  abortFunc,
-}) {
-  let resolveFunc;
-  let rejectFunc;
-  const ret = new Promise(function (resolve, reject) {
-    resolveFunc = resolve;
-    rejectFunc = reject;
-    initFunc(resolve, reject);
-  });
-  ret.resolve = function (value) {
-    abortFunc();
-    resolveFunc(value);
-  };
-  ret.reject = function (reason) {
-    abortFunc();
-    rejectFunc(reason);
-  };
-  return ret;
-}
+const Common = await import("https://scotwatson.github.io/WebInterface/common.mjs");
 
 window.addEventListener("message", messageHandler);
 const trustedOrigins = new Set();
@@ -77,11 +17,11 @@ export function isTrustedOrigin(origin) {
   return trustedOrigins.has(origin);
 }
 let trustedOriginHandler;
-export const trustedOrigin = createSignal(function (resolve, reject) {
+export const trustedOrigin = Common.createSignal(function (resolve, reject) {
   trustedOriginHandler = resolve;
 });
 let untrustedOriginHandler;
-export const untrustedOrigin = createSignal(function (resolve, reject) {
+export const untrustedOrigin = Common.createSignal(function (resolve, reject) {
   untrustedOriginHandler = resolve;
 });
 
@@ -115,7 +55,7 @@ export function enqueueWindowMessage(info) {
 
 export const serviceWorkerMessageSource = (function () {
   const obj = {};
-  obj.message = createSignal(function (resolve, reject) {
+  obj.message = Common.createSignal(function (resolve, reject) {
     window.navigator.serviceWorker.addEventListener("message", function (evt) {
       resolve(evt);
     });
@@ -131,7 +71,7 @@ export function createMessageSourceForWindowOrigin({
   origin,
 }) {
   return {
-    message: createSignal(async function (resolve, reject) {
+    message: Common.createSignal(async function (resolve, reject) {
       for await (const info of trustedOrigin) {
         if ((info.source === window) && (info.origin === origin)) {
           resolve(info.data);
@@ -168,7 +108,7 @@ export function createMessageSinkForWorker({
   return obj;
 }
 
-export function createRemoteCallManager({
+export function createRemoteProcedureSocket({
   messageSource,
   messageSink,
 }) {
