@@ -194,7 +194,7 @@ export function createRemoteCallManager({
   (async function () {
     for await (const data of messageSource.message) {
       console.log(data);
-      if (!data || !data.messageId || !data.action) {
+      if (!data || !data.action) {
         messageSink.send({
           data: {
             id: data.messageId,
