@@ -110,8 +110,10 @@ export function enqueueWindowMessage(info) {
   console.log(info);
   console.log(info.source.constructor.name);
   if (trustedOrigins.has(info.origin)) {
+    console.log("trusted");
     trustedOriginHandler(info);
   } else {
+    console.log("untrusted");
     untrustedOriginHandler(info);
   }
 }
