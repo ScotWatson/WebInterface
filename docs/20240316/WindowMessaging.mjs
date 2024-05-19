@@ -86,7 +86,6 @@ export const untrustedOrigin = createSignal(function (resolve, reject) {
 });
 
 function messageHandler(evt) {
-  console.log(evt);
   if (evt.source === null) {
     // Should only occur on MessagePorts and Workers
     throw "Internal Logic Error";
@@ -107,16 +106,9 @@ function messageHandler(evt) {
 }
 
 export function enqueueWindowMessage(info) {
-  console.log(info);
-  console.log(info.source.constructor.name);
-  for (const origin of trustedOrigins) {
-    console.log(origin);
-  }
   if (trustedOrigins.has(info.origin)) {
-    console.log("trusted");
     trustedOriginHandler(info);
   } else {
-    console.log("untrusted");
     untrustedOriginHandler(info);
   }
 }
@@ -235,7 +227,6 @@ export function createRemoteCallManager({
     }
   })();
   async function requestHandler(data) {
-    console.log(data);
     const thisFunction = responseFunctions.get(data.functionName);
     if (typeof thisFunction !== "function") {
       messageSink.send({
