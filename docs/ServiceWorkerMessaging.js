@@ -5,7 +5,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 importScripts("https://scotwatson.github.io/WebInterface/common.js");
 
-const ServiceWorkerMessaging = {};
+const Messaging = {};
 const registeredClients = new Map();
 let unregisteredClientHandler;
 
@@ -25,17 +25,17 @@ const newClientMessage = Common.createSignal(function (resolve, reject) {
   unregisteredClientHandler = resolve;
 }),
 
-ServiceWorkerMessaging.createClientSource = function createClientSource({
+Messaging.createClientSource = function createClientSource({
   client,
 }) {
   return {
     message: Common.createSignal(function (resolve, reject) {
       registeredClients.set(client, resolve);
     }),
-  }
-}
+  };
+};
 
-ServiceWorkerMessaging.createClientSink = function createClientSink({
+Messaging.createClientSink = function createClientSink({
   client,
 }) {
   return {
@@ -46,4 +46,4 @@ ServiceWorkerMessaging.createClientSink = function createClientSink({
       client.postMessage(data, transfer);
     },
   }
-}
+};
