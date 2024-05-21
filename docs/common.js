@@ -3,10 +3,9 @@
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-const Common = {};
-
+const export = {};
 // async Iterable Iterator
-Common.createSignal = function createSignal(initFunc) {
+export.createSignal = function createSignal(initFunc) {
   const obj = {};
   let resolveArray = [];
   let rejectArray = [];
@@ -44,8 +43,7 @@ Common.createSignal = function createSignal(initFunc) {
   reject = null;
   return obj;
 };
-
-Common.createAbortablePromise = function createAbortablePromise({
+export.createAbortablePromise = function createAbortablePromise({
   initFunc,
   abortFunc,
 }) {
@@ -66,22 +64,19 @@ Common.createAbortablePromise = function createAbortablePromise({
   };
   return ret;
 };
-
-Common.base64Decode =  async function base64Decode(str) {
+export.base64Decode =  async function base64Decode(str) {
   return await (new self.Blob([ self.atob(str) ])).arrayBuffer();
 };
-
-Common.base64Encode = function base64Encode(view) {
+export.base64Encode = function base64Encode(view) {
   let rawString = "";
   for (const byte of view) {
     rawString += String.fromCharCode(byte);
   }
   return self.btoa(rawString);
 };
-
 // SiteStorage does not provide security, all variables are still accessible through the underlying storage object
 // If using SiteStorage, do not manipulate keys that start with an underscore or match RFC3986 syntax.
-Common.SiteStorage = class SiteStorage {
+export.SiteStorage = class SiteStorage {
   #uri;
   #storage;
   constructor(args) {
