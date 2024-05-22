@@ -3,11 +3,11 @@
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-const export = {};
+const exports = {};
 
 const Common = (function () {
   importScripts("https://scotwatson.github.io/WebInterface/common.js");
-  return export;
+  return exports;
 })();
 
 const registeredClients = new Map();
@@ -29,7 +29,7 @@ const newClientMessage = Common.createSignal(function (resolve, reject) {
   unregisteredClientHandler = resolve;
 }),
 
-export.createClientSource = function createClientSource({
+exports.createClientSource = function createClientSource({
   client,
 }) {
   return {
@@ -39,7 +39,7 @@ export.createClientSource = function createClientSource({
   };
 };
 
-export.createClientSink = function createClientSink({
+exports.createClientSink = function createClientSink({
   client,
 }) {
   return {
