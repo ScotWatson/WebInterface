@@ -4,7 +4,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 // async Iterable Iterator
-export createSignal = function createSignal(initFunc) {
+export function createSignal(initFunc) {
   const obj = {};
   let resolveArray = [];
   let rejectArray = [];
@@ -42,7 +42,7 @@ export createSignal = function createSignal(initFunc) {
   reject = null;
   return obj;
 };
-export createAbortablePromise = function createAbortablePromise({
+export function createAbortablePromise({
   initFunc,
   abortFunc,
 }) {
@@ -63,10 +63,10 @@ export createAbortablePromise = function createAbortablePromise({
   };
   return ret;
 };
-export base64Decode =  async function base64Decode(str) {
+export async function base64Decode(str) {
   return await (new self.Blob([ self.atob(str) ])).arrayBuffer();
 };
-export base64Encode = function base64Encode(view) {
+export function base64Encode(view) {
   let rawString = "";
   for (const byte of view) {
     rawString += String.fromCharCode(byte);
@@ -75,7 +75,7 @@ export base64Encode = function base64Encode(view) {
 };
 // SiteStorage does not provide security, all variables are still accessible through the underlying storage object
 // If using SiteStorage, do not manipulate keys that start with an underscore or match RFC3986 syntax.
-export SiteStorage = class SiteStorage {
+export class SiteStorage {
   #uri;
   #storage;
   constructor(args) {
