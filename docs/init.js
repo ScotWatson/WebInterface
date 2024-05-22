@@ -8,7 +8,7 @@ const loadWindow = new Promise(function (resolve, reject) {
 
 const moduleCommon = (function () {
   importScripts("./common.js");
-  return export;
+  return exports;
 })();
 
 self.init = function init({
