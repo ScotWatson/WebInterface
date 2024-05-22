@@ -6,7 +6,10 @@ const loadWindow = new Promise(function (resolve, reject) {
   });
 });
 
-const moduleCommon = import("./common.mjs");
+const moduleCommon = (function () {
+  importScripts("./common.js");
+  return export;
+})();
 
 self.init = function init({
   latestVersion,
