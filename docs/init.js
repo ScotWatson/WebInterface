@@ -1,17 +1,14 @@
 "use strict";
 
-const loadWindow = new Promise(function (resolve, reject) {
+const Common = await import("./common.js");
+
+export const loadWindow = new Promise(function (resolve, reject) {
   window.addEventListener("load", function (evt) {
     resolve(evt);
   });
 });
 
-const moduleCommon = (function () {
-  importScripts("./common.js");
-  return exports;
-})();
-
-self.init = function init({
+export function init({
   latestVersion,
   siteURI
 }) {
