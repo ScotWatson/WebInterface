@@ -26,8 +26,8 @@ document.currentScript.exports = (function () {
   });
   // Obtain initialization info
   exports.selfUrl = new URL(self.location);
-  exports.serviceWorkerUrl = new URL("./sw.js", selfUrl);
-  exports.serviceWorkerScopeUrl = new URL("./", selfUrl);
+  exports.serviceWorkerUrl = new URL("./sw.js", exports.selfUrl);
+  exports.serviceWorkerScopeUrl = new URL("./", exports.selfUrl);
   // Register the service worker.
   exports.registrationPromise = window.navigator.serviceWorker.register(serviceWorkerUrl.href, {
     scope: serviceWorkerScopeUrl.href,
