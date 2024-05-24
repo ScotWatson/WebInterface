@@ -45,9 +45,7 @@ export function createRemoteProcedureSocket({
   };
   (async function () {
     for await (const data of messageSource.message) {
-      console.log("messageSource.message data:", data);
       if (!data || !data.id || !data.action) {
-        /*
         messageSink.send({
           data: {
             id: data.id,
@@ -55,7 +53,6 @@ export function createRemoteProcedureSocket({
             error: "Invalid Message",
           },
         });
-        */
         continue;
       }
       switch (data.action) {
@@ -83,7 +80,6 @@ export function createRemoteProcedureSocket({
     }
   })();
   async function requestHandler(data) {
-    console.log("request data:", data);
     const thisFunction = responseFunctions.get(data.functionName);
     if (typeof thisFunction !== "function") {
       messageSink.send({
@@ -117,7 +113,6 @@ export function createRemoteProcedureSocket({
     }
   }
   function responseHandler(data) {
-    console.log("response data:", data);
     const functions = messageIds.get(data.id);
     if (functions !== undefined) {
       functions.resolve(data.value);
@@ -125,7 +120,6 @@ export function createRemoteProcedureSocket({
     }
   };
   function errorHandler(data) {
-    console.log("error data:", data);
     const functions = messageIds.get(data.id);
     if (functions !== undefined) {
       functions.reject(data.reason);
