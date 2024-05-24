@@ -33,9 +33,7 @@ export function createRemoteProcedureSocket({
     return new Promise(function (resolve, reject) {
       const packetId = self.crypto.randomUUID();
       packetIds.set(packetId, { resolve, reject });
-      console.log(packetId, "Sending Request Packet");
       if (timeout) {
-        console.log(packetId, "Setting Timeout");
         self.setTimeout(rejectOnTimeout, timeout);
         function rejectOnTimeout() {
           reject("Request Timed out");
