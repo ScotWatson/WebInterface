@@ -20,6 +20,7 @@ export const parentSink = {
     data,
     transfer,
   }) {
+    console.log(data, transfer);
     self.postMessage(data, transfer);
   },
 }
