@@ -66,4 +66,5 @@ document.currentScript.exports = (function () {
       document.head.appendChild(scriptElem);
     });
   }
+  return exports;
 })();
