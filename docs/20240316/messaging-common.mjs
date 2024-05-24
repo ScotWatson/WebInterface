@@ -1,6 +1,6 @@
 /*
 (c) 2024 Scot Watson  All Rights Reserved
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+THE SOFTWARE IS PROVpacketIdED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 const Common = await import("https://scotwatson.github.io/WebInterface/common.mjs");
@@ -10,7 +10,7 @@ export function createRemoteProcedureSocket({
   messageSink,
 }) {
   const obj = {};
-  const messageIds = new Map();
+  const messagepacketIds = new Map();
   const responseFunctions = new Map();
   obj.register = function ({
     functionName,
@@ -30,11 +30,11 @@ export function createRemoteProcedureSocket({
     transferable,
   }) {
     return new Promise(function (resolve, reject) {
-      const messageId = self.crypto.randomUUID();
-      messageIds.set(messageId, { resolve, reject });
+      const messagepacketId = self.crypto.randomUUpacketId();
+      messagepacketIds.set(messagepacketId, { resolve, reject });
       messageSink.send({
         data: {
-          id: messageId,
+          packetId: messagepacketId,
           action: "request",
           functionName: functionName,
           args: args,
@@ -45,14 +45,8 @@ export function createRemoteProcedureSocket({
   };
   (async function () {
     for await (const data of messageSource.message) {
-      if (!data || !data.id || !data.action) {
-        messageSink.send({
-          data: {
-            id: data.id,
-            action: "error",
-            error: "Invalid Message",
-          },
-        });
+      if (!data || !data.packetId) {
+        // This is not a packet message
         continue;
       }
       switch (data.action) {
@@ -71,9 +65,9 @@ export function createRemoteProcedureSocket({
         default:
           messageSink.send({
             data: {
-              id: data.id,
+              packetId: data.packetId,
               action: "error",
-              error: "Invalid Message",
+              error: "Invalid Packet",
             },
           });
       }
@@ -84,7 +78,7 @@ export function createRemoteProcedureSocket({
     if (typeof thisFunction !== "function") {
       messageSink.send({
         data: {
-          id: data.id,
+          packetId: data.packetId,
           action: "error",
           reason: "Unregistered function: " + data.functionName,
         },
@@ -96,7 +90,7 @@ export function createRemoteProcedureSocket({
       const ret = await thisFunction(data.args);
       messageSink.send({
         data: {
-          id: data.id,
+          packetId: data.packetId,
           action: "response",
           value: ret,
         },
@@ -105,7 +99,7 @@ export function createRemoteProcedureSocket({
     } catch (e) {
       messageSink.send({
         data: {
-          id: data.id,
+          packetId: data.packetId,
           action: "error",
           error: e,
         },
@@ -113,17 +107,17 @@ export function createRemoteProcedureSocket({
     }
   }
   function responseHandler(data) {
-    const functions = messageIds.get(data.id);
+    const functions = messagepacketIds.get(data.packetId);
     if (functions !== undefined) {
       functions.resolve(data.value);
-      messageIds.delete(data.id);
+      messagepacketIds.delete(data.packetId);
     }
   };
   function errorHandler(data) {
-    const functions = messageIds.get(data.id);
+    const functions = messagepacketIds.get(data.packetId);
     if (functions !== undefined) {
       functions.reject(data.reason);
-      messageIds.delete(data.id);
+      messagepacketIds.delete(data.packetId);
     }
   };
   return obj;
