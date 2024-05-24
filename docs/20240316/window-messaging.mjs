@@ -104,7 +104,9 @@ export function createMessageSourceForWorker({
 }) {
   const obj = {};
   obj.message = Common.createSignal(function (resolve, reject) {
-    worker.addEventListener("message", resolve);
+    worker.addEventListener("message", function (evt) {
+      resolve(evt.data);
+    });
     worker.addEventListener("messageerror", reject);
   });
   return obj;
