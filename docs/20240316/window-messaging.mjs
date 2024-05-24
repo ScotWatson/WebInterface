@@ -98,6 +98,17 @@ export function createMessageSinkForWindowOrigin({
   return obj;
 }
 
+export function createMessageSourceForWorker({
+  worker,
+}) {
+  const obj = {};
+  obj.message = Common.createSignal(function (resolve, reject) {
+    worker.addEventListener("message", resolve);
+    worker.addEventListener("messageerror", reject);
+  });
+  return obj;
+}
+
 export function createMessageSinkForWorker({
   worker,
 }) {
