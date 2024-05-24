@@ -1,6 +1,6 @@
 /*
 (c) 2024 Scot Watson  All Rights Reserved
-THE SOFTWARE IS PROVpacketIdED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 const Common = await import("https://scotwatson.github.io/WebInterface/common.mjs");
@@ -10,7 +10,7 @@ export function createRemoteProcedureSocket({
   messageSink,
 }) {
   const obj = {};
-  const messagepacketIds = new Map();
+  const packetIds = new Map();
   const responseFunctions = new Map();
   obj.register = function ({
     functionName,
@@ -30,11 +30,11 @@ export function createRemoteProcedureSocket({
     transferable,
   }) {
     return new Promise(function (resolve, reject) {
-      const messagepacketId = self.crypto.randomUUpacketId();
-      messagepacketIds.set(messagepacketId, { resolve, reject });
+      const packetId = self.crypto.randomUUID();
+      packetIds.set(packetId, { resolve, reject });
       messageSink.send({
         data: {
-          packetId: messagepacketId,
+          packetId: packetId,
           action: "request",
           functionName: functionName,
           args: args,
@@ -107,17 +107,17 @@ export function createRemoteProcedureSocket({
     }
   }
   function responseHandler(data) {
-    const functions = messagepacketIds.get(data.packetId);
+    const functions = packetIds.get(data.packetId);
     if (functions !== undefined) {
       functions.resolve(data.value);
-      messagepacketIds.delete(data.packetId);
+      packetIds.delete(data.packetId);
     }
   };
   function errorHandler(data) {
-    const functions = messagepacketIds.get(data.packetId);
+    const functions = packetIds.get(data.packetId);
     if (functions !== undefined) {
       functions.reject(data.reason);
-      messagepacketIds.delete(data.packetId);
+      packetIds.delete(data.packetId);
     }
   };
   return obj;
