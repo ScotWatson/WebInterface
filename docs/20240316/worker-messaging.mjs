@@ -10,7 +10,9 @@ export const createRemoteProcedureSocket = MessagingCommon.createRemoteProcedure
 
 export const parentSource = {
   message: Common.createSignal(function (resolve, reject) {
-    self.addEventListener("message", resolve);
+    self.addEventListener("message", function (evt) {
+      resolve(evt.data);
+    });
     self.addEventListener("messageerror", reject);
   }),
 };
