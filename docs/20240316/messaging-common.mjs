@@ -46,6 +46,7 @@ export function createRemoteProcedureSocket({
   (async function () {
     for await (const data of messageSource.message) {
       if (!data || !data.id || !data.action) {
+        /*
         messageSink.send({
           data: {
             id: data.id,
@@ -53,6 +54,7 @@ export function createRemoteProcedureSocket({
             error: "Invalid Message",
           },
         });
+        */
         continue;
       }
       switch (data.action) {
