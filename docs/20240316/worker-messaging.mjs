@@ -8,10 +8,12 @@ const MessagingCommon = await import("https://scotwatson.github.io/WebInterface/
 
 export const createRemoteProcedureSocket = MessagingCommon.createRemoteProcedureSocket;
 
-export const parentSource = Common.createSignal(function (resolve, reject) {
-  self.addEventListener("message", resolve);
-  self.addEventListener("messageerror", reject);
-});
+export const parentSource = {
+  message: Common.createSignal(function (resolve, reject) {
+    self.addEventListener("message", resolve);
+    self.addEventListener("messageerror", reject);
+  });
+};
 
 export const parentSink = {
   send: function ({
