@@ -12,7 +12,7 @@ export const parentSource = {
   message: Common.createSignal(function (resolve, reject) {
     self.addEventListener("message", resolve);
     self.addEventListener("messageerror", reject);
-  });
+  }),
 };
 
 export const parentSink = {
