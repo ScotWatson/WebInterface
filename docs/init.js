@@ -1,14 +1,33 @@
 "use strict";
 
-const Common = await import("./common.js");
-
-export const loadWindow = new Promise(function (resolve, reject) {
+window.$.load = new Promise(function (resolve, reject) {
   window.addEventListener("load", function (evt) {
     resolve(evt);
   });
 });
 
-export function init({
+//If there is no controller, wait for one before proceeding
+window.$.controller = new Promise(function (resolve, reject) {
+  if (navigator.serviceWorker.controller !== null) {
+    resolve();
+    return;
+  }
+  navigator.serviceWorker.addEventListener("controllerchange", function (evt) {
+    resolve();
+    return;
+  });
+});
+
+// Obtain initialization info
+window.$.selfUrl = new URL(self.location);
+window.$.serviceWorkerUrl = new URL("./sw.js", urlSelf);
+window.$.serviceWorkerScopeUrl = new URL("./", urlSelf);
+// Register the service worker.
+window.$.registrationPromise = window.navigator.serviceWorker.register(serviceWorkerUrl.href, {
+  scope: serviceWorkerScopeUrl.href,
+});
+
+window.$.init = function({
   latestVersion,
   siteURI
 }) {
