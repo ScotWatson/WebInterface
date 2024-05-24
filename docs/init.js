@@ -29,8 +29,8 @@ document.currentScript.exports = (function () {
   exports.serviceWorkerUrl = new URL("./sw.js", exports.selfUrl);
   exports.serviceWorkerScopeUrl = new URL("./", exports.selfUrl);
   // Register the service worker.
-  exports.registrationPromise = window.navigator.serviceWorker.register(serviceWorkerUrl.href, {
-    scope: serviceWorkerScopeUrl.href,
+  exports.registrationPromise = window.navigator.serviceWorker.register(exports.serviceWorkerUrl.href, {
+    scope: exports.serviceWorkerScopeUrl.href,
   });
   exports.init = function({
     latestVersion,
