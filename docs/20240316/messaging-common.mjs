@@ -8,6 +8,7 @@ const Common = await import("https://scotwatson.github.io/WebInterface/common.mj
 export function createRemoteProcedureSocket({
   messageSource,
   messageSink,
+  timeout, // in ms
 }) {
   const obj = {};
   const packetIds = new Map();
@@ -32,12 +33,19 @@ export function createRemoteProcedureSocket({
     return new Promise(function (resolve, reject) {
       const packetId = self.crypto.randomUUID();
       packetIds.set(packetId, { resolve, reject });
+      if (timeout) {
+        self.setTimeout(rejectOnTimeout, timeout);
+        function rejectOnTimeout() {
+          reject("Request Timed out");
+        }
+      }
       messageSink.send({
         data: {
           packetId: packetId,
           action: "request",
           functionName: functionName,
           args: args,
+          timeout: Date.now() + timeout,
         },
         transferable: transferable,
       });
@@ -75,6 +83,12 @@ export function createRemoteProcedureSocket({
   })();
   async function requestHandler(data) {
     const thisFunction = responseFunctions.get(data.functionName);
+    if (data.timeout) {
+      if (Date.now() > data.timeout) {
+        // ignore packet if expired
+        return;
+      }
+    }
     if (typeof thisFunction !== "function") {
       messageSink.send({
         data: {
