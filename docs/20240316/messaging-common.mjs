@@ -45,6 +45,7 @@ export function createRemoteProcedureSocket({
   };
   (async function () {
     for await (const data of messageSource.message) {
+      console.log(messageSource.message data:, data);
       if (!data || !data.id || !data.action) {
         /*
         messageSink.send({
