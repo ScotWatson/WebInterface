@@ -9,6 +9,7 @@ export function createRemoteProcedureSocket({
   messageSource,
   messageSink,
 }) {
+  console.log(messageSource, messageSink);
   const obj = {};
   const messageIds = new Map();
   const responseFunctions = new Map();
