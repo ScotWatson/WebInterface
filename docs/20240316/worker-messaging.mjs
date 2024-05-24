@@ -12,6 +12,7 @@ export const parentSource = {
   message: Common.createSignal(function (resolve, reject) {
     self.addEventListener("message", function (evt) {
       console.log(evt);
+      console.log(evt.data);
       resolve(evt.data);
     });
     self.addEventListener("messageerror", reject);
