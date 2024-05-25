@@ -4,11 +4,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 const exports = {};
-/*
+
 const Common = (function () {
   importScripts("https://scotwatson.github.io/WebInterface/common.js");
   return exports;
 })();
+
+console.log(self);
+
+/*
 
 const registeredClients = new Map();
 let unregisteredClientHandler;
