@@ -30,9 +30,8 @@ export function createRemoteProcedureSocket({
     args,
     transferable,
   }) {
-    return new Promise(function (resolve, reject) {
-      const packetId = self.crypto.randomUUID();
-      console.log(packetId);
+    const packetId = self.crypto.randomUUID();
+    const requesting = new Promise(function (resolve, reject) {
       packetIds.set(packetId, { resolve, reject });
       if (timeout) {
         self.setTimeout(rejectOnTimeout, timeout);
@@ -51,6 +50,8 @@ export function createRemoteProcedureSocket({
         transferable: transferable,
       });
     });
+    requesting.packetId = packetId;
+    return requesting;
   };
   (async function () {
     for await (const data of messageSource.message) {
