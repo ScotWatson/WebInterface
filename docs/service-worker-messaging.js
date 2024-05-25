@@ -10,7 +10,7 @@ const Common = (function () {
   return exports;
 })();
 
-console.log(self);
+console.log(self.Common);
 
 /*
 
