@@ -9,9 +9,10 @@ self.currentScript.exports = (function () {
   exports.createRemoteProcedureSocket =  function createRemoteProcedureSocket({
     messageSource,
     messageSink,
+    timeout, // in ms
   }) {
     const obj = {};
-    const messageIds = new Map();
+    const packetIds = new Map();
     const responseFunctions = new Map();
     obj.register = function ({
       functionName,
@@ -30,30 +31,33 @@ self.currentScript.exports = (function () {
       args,
       transferable,
     }) {
-      return new Promise(function (resolve, reject) {
-        const messageId = self.crypto.randomUUID();
-        messageIds.set(messageId, { resolve, reject });
+      const packetId = self.crypto.randomUUID();
+      const requesting = new Promise(function (resolve, reject) {
+        packetIds.set(packetId, { resolve, reject });
+        if (timeout) {
+          self.setTimeout(rejectOnTimeout, timeout);
+          function rejectOnTimeout() {
+            reject("Request Timed Out: " + packetId);
+          }
+        }
         messageSink.send({
           data: {
-            id: messageId,
+            packetId: packetId,
             action: "request",
             functionName: functionName,
             args: args,
+            timeout: Date.now() + timeout,
           },
           transferable: transferable,
         });
       });
+      requesting.packetId = packetId;
+      return requesting;
     };
     (async function () {
       for await (const data of messageSource.message) {
-        if (!data || !data.id || !data.action) {
-          messageSink.send({
-            data: {
-              id: data.id,
-              action: "error",
-              error: "Invalid Message",
-            },
-          });
+        if (!data || !data.packetId) {
+          // This is not a packet message
           continue;
         }
         switch (data.action) {
@@ -72,9 +76,9 @@ self.currentScript.exports = (function () {
           default:
             messageSink.send({
               data: {
-                id: data.id,
+                packetId: data.packetId,
                 action: "error",
-                error: "Invalid Message",
+                error: "Invalid Packet",
               },
             });
         }
@@ -82,10 +86,16 @@ self.currentScript.exports = (function () {
     })();
     async function requestHandler(data) {
       const thisFunction = responseFunctions.get(data.functionName);
+      if (data.timeout) {
+        if (Date.now() > data.timeout) {
+          // ignore packet if expired
+          return;
+        }
+      }
       if (typeof thisFunction !== "function") {
         messageSink.send({
           data: {
-            id: data.id,
+            packetId: data.packetId,
             action: "error",
             reason: "Unregistered function: " + data.functionName,
           },
@@ -97,7 +107,7 @@ self.currentScript.exports = (function () {
         const ret = await thisFunction(data.args);
         messageSink.send({
           data: {
-            id: data.id,
+            packetId: data.packetId,
             action: "response",
             value: ret,
           },
@@ -106,7 +116,7 @@ self.currentScript.exports = (function () {
       } catch (e) {
         messageSink.send({
           data: {
-            id: data.id,
+            packetId: data.packetId,
             action: "error",
             error: e,
           },
@@ -114,17 +124,17 @@ self.currentScript.exports = (function () {
       }
     }
     function responseHandler(data) {
-      const functions = messageIds.get(data.id);
+      const functions = packetIds.get(data.packetId);
       if (functions !== undefined) {
         functions.resolve(data.value);
-        messageIds.delete(data.id);
+        packetIds.delete(data.packetId);
       }
     };
     function errorHandler(data) {
-      const functions = messageIds.get(data.id);
+      const functions = packetIds.get(data.packetId);
       if (functions !== undefined) {
         functions.reject(data.reason);
-        messageIds.delete(data.id);
+        packetIds.delete(data.packetId);
       }
     };
     return obj;
