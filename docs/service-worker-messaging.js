@@ -19,7 +19,7 @@ self.currentScript.exports = (function () {
     }
   });
   self.addEventListener("messageerror", console.error);
-  const newClientMessage = Common.createSignal(function (resolve, reject) {
+  exports.newClientMessage = Common.createSignal(function (resolve, reject) {
     unregisteredClientHandler = resolve;
   });
   exports.createClientSource = function createClientSource({
