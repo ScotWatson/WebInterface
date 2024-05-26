@@ -154,6 +154,7 @@ export const controllerSink = {
     data,
     transferable,
   }) {
+    console.log(currentController);
     if (currentController !== null) {
       currentController.postMessage(data, transferable);
     }
