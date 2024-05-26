@@ -154,9 +154,7 @@ export const controllerSink = {
     data,
     transferable,
   }) {
-    console.log(currentController);
-    if (currentController !== null) {
-      currentController.postMessage(data, transferable);
-    }
+    console.log(navigator.serviceWorker.controller);
+    navigator.serviceWorker.controller?.postMessage(data, transferable);
   },
 };
