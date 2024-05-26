@@ -4,7 +4,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 const Common = await import("https://scotwatson.github.io/WebInterface/common.mjs");
-const MessagingCommon = await import("https://scotwatson.github.io/WebInterface/20240316/messaging-common.mjs");
+const MessagingCommon = await import("https://scotwatson.github.io/WebInterface/messaging-common.mjs");
 
 export const createRemoteProcedureSocket = MessagingCommon.createRemoteProcedureSocket;
 
