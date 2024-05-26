@@ -32,7 +32,7 @@ self.currentScript.exports = (function () {
         thisClient = registeredClients.get(client);
         if (!thisClient) {
           thisClient = {
-            sources = new Set(),
+            sources: new Set(),
           };
           registeredClients.set(client, thisClient);
         }
