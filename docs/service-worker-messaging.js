@@ -14,7 +14,7 @@ self.currentScript.exports = (function () {
     const thisClient = registeredClients.get(evt.source.id);
     if (thisClient) {
       for (const source of thisClient.sources) {
-        source(evt);
+        source(evt.data);
       }
     } else {
       unregisteredClientHandler(evt);
