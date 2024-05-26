@@ -6,10 +6,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 // Use importScripts to load this file in order to allow loading scripts as modules inside workers
 
 self.importScript = function (url) {
+  const stack = self.currentScript;
   self.currentScript = {
     src: url,
   };
   self.importScripts(url);
   const ret = self.currentScript.exports;
+  self.currentScript = stack;
   return ret;
 };
