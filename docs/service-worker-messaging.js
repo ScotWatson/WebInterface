@@ -48,7 +48,6 @@ self.currentScript.exports = (function () {
         data,
         transfer,
       }) {
-        console.log(data, transfer);
         client.postMessage(data, transfer);
       },
     }
