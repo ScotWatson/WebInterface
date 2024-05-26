@@ -12,6 +12,9 @@ self.currentScript.exports = (function () {
   let unregisteredClientHandler;
   self.addEventListener("message", function (evt) {
     const thisClient = registeredClients.get(evt.source);
+    console.log(registeredClients);
+    console.log(registeredClients.size);
+    console.log(thisClient);
     if (thisClient) {
       for (const source of thisClient.sources) {
         source(evt);
