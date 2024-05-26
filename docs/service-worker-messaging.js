@@ -5,7 +5,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 self.currentScript.exports = (function () {
   const exports = {};
+  console.log(self.currentScript, exports);
   const Common = self.importScript("https://scotwatson.github.io/WebInterface/common.js");
+  console.log(self.currentScript, exports);
   const registeredClients = new Map();
   let unregisteredClientHandler;
   self.addEventListener("message", function (evt) {
@@ -43,5 +45,6 @@ self.currentScript.exports = (function () {
       },
     }
   };
+  console.log(self.currentScript, exports);
   return exports;
 })();
