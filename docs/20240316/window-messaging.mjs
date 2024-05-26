@@ -136,9 +136,11 @@ const controller = Common.createSignal(function (resolve, reject) {
 });
 
 let currentController = null;
-for await (const x of controller) {
-  currentController = x;
-}
+(async function () {
+  for await (const x of controller) {
+    currentController = x;
+  }
+})();
 
 export const controllerSource = {
   message: Common.createSignal(function (resolve, reject) {
