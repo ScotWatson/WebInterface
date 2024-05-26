@@ -123,3 +123,37 @@ export function createMessageSinkForWorker({
   };
   return obj;
 }
+
+const controller = Common.createSignal(function (resolve, reject) {
+  if (navigator.serviceWorker.controller !== null) {
+    resolve();
+    return;
+  }
+  navigator.serviceWorker.addEventListener("controllerchange", function (evt) {
+    resolve();
+    return;
+  });
+});
+
+let currentController = null;
+for await (const x of controller) {
+  currentController = x;
+}
+
+export const controllerSource = {
+  message: Common.createSignal(function (resolve, reject) {
+    window.navigator.serviceWorker.addEventListener("message", function (evt) {
+      resolve(evt.data);
+    });
+  }),
+};
+export const controllerSink = {
+  send: function ({
+    data,
+    transferable,
+  }) {
+    if (currentController !== null) {
+      currentController.postMessage(data, transferable);
+    }
+  },
+};
