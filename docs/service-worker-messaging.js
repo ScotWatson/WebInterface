@@ -6,6 +6,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 self.currentScript.exports = (function () {
   const exports = {};
   const Common = self.importScript("https://scotwatson.github.io/WebInterface/common.js");
+  const MessagingCommon = self.importScript("https://scotwatson.github.io/WebInterface/messaging-common.js");
+  exports.createRemoteProcedureSocket = MessagingCommon.createRemoteProcedureSocket;
   const registeredClients = new Map();
   let unregisteredClientHandler;
   self.addEventListener("message", function (evt) {
