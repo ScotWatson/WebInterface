@@ -29,7 +29,7 @@ self.currentScript.exports = (function () {
         throw "Internal Logic Error";
     }
   });
-  exports.enqueueMessage = function enqueueMessage(evt) {
+  function enqueueMessage(evt) {
     const thisClient = registeredClients.get(evt.source.id);
     if (thisClient) {
       for (const source of thisClient.sources) {
@@ -39,6 +39,7 @@ self.currentScript.exports = (function () {
       unregisteredClientHandler(evt);
     }
   };
+  exports.enqueueMessage = enqueueMessage;
   self.addEventListener("messageerror", console.error);
   exports.newClientMessage = Common.createSignal(function (resolve, reject) {
     unregisteredClientHandler = resolve;
