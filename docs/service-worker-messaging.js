@@ -11,10 +11,7 @@ self.currentScript.exports = (function () {
   const registeredClients = new Map();
   let unregisteredClientHandler;
   self.addEventListener("message", function (evt) {
-    const thisClient = registeredClients.get(evt.source);
-    console.log(registeredClients);
-    console.log(registeredClients.size);
-    console.log(thisClient);
+    const thisClient = registeredClients.get(evt.source.id);
     if (thisClient) {
       for (const source of thisClient.sources) {
         source(evt);
@@ -32,12 +29,12 @@ self.currentScript.exports = (function () {
   }) {
     return {
       message: Common.createSignal(function (resolve, reject) {
-        thisClient = registeredClients.get(client);
+        thisClient = registeredClients.get(client.id);
         if (!thisClient) {
           thisClient = {
             sources: new Set(),
           };
-          registeredClients.set(client, thisClient);
+          registeredClients.set(client.id, thisClient);
         }
         thisClient.sources.add(resolve);
       }),
