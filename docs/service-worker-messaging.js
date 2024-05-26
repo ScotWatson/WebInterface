@@ -29,7 +29,14 @@ self.currentScript.exports = (function () {
   }) {
     return {
       message: Common.createSignal(function (resolve, reject) {
-        registeredClients.set(client, resolve);
+        thisClient = registeredClients.get(client);
+        if (!thisClient) {
+          thisClient = {
+            sources = new Set(),
+          };
+          registeredClients.set(client, thisClient);
+        }
+        thisClient.sources.add(resolve);
       }),
     };
   };
