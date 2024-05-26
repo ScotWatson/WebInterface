@@ -154,7 +154,6 @@ export const controllerSink = {
     data,
     transferable,
   }) {
-    console.log(navigator.serviceWorker.controller);
     navigator.serviceWorker.controller?.postMessage(data, transferable);
   },
 };
