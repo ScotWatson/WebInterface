@@ -38,7 +38,7 @@ self.currentScript.exports = (function () {
     } else {
       unregisteredClientHandler(evt);
     }
-  });
+  };
   self.addEventListener("messageerror", console.error);
   exports.newClientMessage = Common.createSignal(function (resolve, reject) {
     unregisteredClientHandler = resolve;
