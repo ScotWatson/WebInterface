@@ -11,6 +11,25 @@ self.currentScript.exports = (function () {
   const registeredClients = new Map();
   let unregisteredClientHandler;
   self.addEventListener("message", function (evt) {
+    if (evt.source === null) {
+      // Should only occur on MessagePorts and Workers
+      throw "Internal Logic Error";
+    }
+    switch (evt.source.constructor.name) {
+      case "WindowClient":
+      case "WorkerClient":
+        enqueueMessage({
+          origin: evt.origin,
+          source: evt.source,
+          data: evt.data,
+        });
+        break;
+      default:
+        // This should not occur for Windows
+        throw "Internal Logic Error";
+    }
+  });
+  exports.enqueueMessage = function enqueueMessage(evt) {
     const thisClient = registeredClients.get(evt.source.id);
     if (thisClient) {
       for (const source of thisClient.sources) {
