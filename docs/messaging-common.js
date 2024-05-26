@@ -128,5 +128,6 @@ self.currentScript.exports = (function () {
       }
     };
     return obj;
-  }
+  };
+  return exports;
 })();
