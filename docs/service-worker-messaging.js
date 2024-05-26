@@ -11,6 +11,8 @@ self.currentScript.exports = (function () {
   const registeredClients = new Map();
   let unregisteredClientHandler;
   self.addEventListener("message", function (evt) {
+    console.log(evt);
+    console.log(evt.data);
     const thisClient = registeredClients.get(evt.source.id);
     if (thisClient) {
       for (const source of thisClient.sources) {
