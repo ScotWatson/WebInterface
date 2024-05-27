@@ -48,6 +48,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       return enabled;
     }
   }
-  exports.MessageQueue = MessageQueue;
+  exports.default = MessageQueue;
   return exports;
 });
