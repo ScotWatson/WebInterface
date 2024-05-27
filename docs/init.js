@@ -3,73 +3,123 @@
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-// Intended to be included as a script tag in an HTML file
+// Intended to be included as the first script tag in an HTML file
+// Provides functions useful for initializing a web page
 
 "use strict";
 
-document.currentScript.exports = (function () {
+(self.document === undefined ? self : self.document).currentScript.exports = (function () {
   const exports = {};
-  exports.load = new Promise(function (resolve, reject) {
+  function addShortcutIcon() {
+    const link = document.createElement("link");
+    link.rel = "shortcut icon";
+    link.href = "./favicon.ico";
+    link.type = "image/x-icon";
+    document.head.appendChild(link);
+  }
+  exports.addShortcutIcon = addShortcutIcon;
+  function addIcon() {
+    const link = document.createElement("link");
+    link.rel = "icon";
+    link.href = "./favicon.ico";
+    link.type = "image/x-icon";
+    document.head.appendChild(link);
+  }
+  exports.addIcon = addIcon;
+  function addStyleSheet(url) {
+    const style = document.createElement("link");
+    style.href = url;
+    style.rel = "stylesheet";
+  }
+  exports.addStyleSheet = addStyleSheet;
+  function addSyncScript(url) {
+    const script = document.createElement("script");
+    script.src = url;
+    document.head.appendChild(scriptElem);
+  }
+  exports.addSyncScript = addSyncScript;
+  function addDeferScript(url) {
+    const script = document.createElement("script");
+    script.src = url;
+    script.defer = true;
+    document.head.appendChild(scriptElem);
+  }
+  exports.addDeferScript = addDeferScript;
+  function addAsyncScript(url) {
+    const script = document.createElement("script");
+    script.src = url;
+    script.async = true;
+    document.head.appendChild(scriptElem);
+  }
+  exports.addAsyncScript = addAsyncScript;
+  function addModuleScript(url) {
+    const script = document.createElement("script");
+    script.src = url;
+    script.type = "module";
+    document.head.appendChild(scriptElem);
+  }
+  exports.addModuleScript = addModuleScript;
+  function addAsyncModuleScript(url) {
+    const script = document.createElement("script");
+    script.src = url;
+    script.type = "module";
+    script.async = true;
+    document.head.appendChild(scriptElem);
+  }
+  exports.addAsyncModuleScript = addAsyncModuleScript;
+  // Resolves once the DOM is fully parsed
+  exports.interactive = new Promise(function (resolve, reject) {
+    if ((document.readyState === "interactive") || (document.readyState === "complete")) {
+      resolve(evt);
+    }
+    document.addEventListener("readystatechange", function (evt) {
+      if (document.readyState === "interactive") {
+        resolve(evt);
+      }
+    });
+  });
+  // Resolves once the DOM is fully parsed and all scripts have finish execution
+  exports.contentLoaded = new Promise(function (resolve, reject) {
+    if ((document.readyState === "loaded") || (document.readyState === "complete")) {
+      resolve(evt);
+    }
+    document.addEventListener("DOMContentLoaded", function (evt) {
+      resolve(evt);
+    });
+    // This is a fallback in case the browser does not support readyState === "loaded" and the promise is created between the end of script execution and the loading all resources.
     window.addEventListener("load", function (evt) {
       resolve(evt);
     });
   });
+  // Resolves once all resources have been fully loaded
+  exports.load = new Promise(function (resolve, reject) {
+    if (document.readyState === "complete") {
+      resolve(evt);
+    }
+    window.addEventListener("load", function (evt) {
+      resolve(evt);
+    });
+  });
+  // Resolves once the page is under the control of a ServiceWorker
   exports.controller = new Promise(function (resolve, reject) {
-    if (navigator.serviceWorker.controller !== null) {
+    if (self.navigator.serviceWorker.controller !== null) {
       resolve();
       return;
     }
-    navigator.serviceWorker.addEventListener("controllerchange", function (evt) {
+    self.navigator.serviceWorker.addEventListener("controllerchange", function (evt) {
       resolve();
       return;
     });
   });
   // Obtain initialization info
-  exports.selfUrl = new URL(self.location);
-  exports.serviceWorkerUrl = new URL("./sw.js", exports.selfUrl);
-  exports.serviceWorkerScopeUrl = new URL("./", exports.selfUrl);
-  // Register the service worker.
-  exports.registrationPromise = window.navigator.serviceWorker.register(exports.serviceWorkerUrl.href, {
-    scope: exports.serviceWorkerScopeUrl.href,
-  });
-  exports.init = function({
-    latestVersion,
-    siteURI
+  exports.selfUrl = self.location;
+  // Async function: Register the service worker.
+  function registerServiceWorker({
+    url: new URL("./sw.js", selfUrl),
+    scope: new URL("./sw.js", selfUrl),
   }) {
-    const requestedVersion = exports.selfUrl.searchParams.get("version");
-    self._siteURI = siteURI;
-    import("./common.mjs").then(function (Common) {
-      window.siteSessionStorage = new Common.SiteStorage({
-        uri: self._siteURI(),
-        storage: window.sessionStorage,
-      });
-      window.siteLocalStorage = new Common.SiteStorage({
-        uri: self._siteURI(),
-        storage: window.localStorage,
-      });
-      const storedVersion = window.siteSessionStorage.get("version");
-      if (requestedVersion !== null) {
-        window.siteSessionStorage.set("version", requestedVersion);
-        const newSearchParams = new self.URLSearchParams(exports.selfUrl.searchParams.toString());
-        newSearchParams.delete("version");
-        const newURL = new self.URL(exports.selfUrl.protocol + "//" + exports.selfUrl.host + exports.selfUrl.pathname + ((newSearchParams.size === 0) ? "" : "?" + newSearchParams.toString()) + exports.selfUrl.hash);
-        window.history.replaceState(null, "", newURL.toString());
-      } else if (storedVersion !== null) {
-        window.siteSessionStorage.set("version", storedVersion);
-      } else {
-        window.siteSessionStorage.set("version", latestVersion);
-      }
-      self._version = function () {
-        return window.siteSessionStorage.get("version");
-      }
-      const styleElem = document.createElement("link");
-      styleElem.href = "./" + self._version() + "/style.css";
-      styleElem.rel = "stylesheet";
-      document.head.appendChild(styleElem);
-      const scriptElem = document.createElement("script");
-      scriptElem.src = "./" + self._version() + "/index.js";
-      document.head.appendChild(scriptElem);
-    });
+    return self.navigator.serviceWorker.register(url, { scope });
   }
+  exports.registerServiceWorker = registerServiceWorker;
   return exports;
 })();
