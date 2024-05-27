@@ -141,8 +141,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   exports.selfUrl = self.location;
   // Async function: Register the service worker.
   function registerServiceWorker({
-    url: new URL("./sw.js", selfUrl),
-    scope: new URL("./sw.js", selfUrl),
+    url,
+    scope,
   }) {
     return self.navigator.serviceWorker.register(url, { scope });
   }
