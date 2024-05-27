@@ -3,13 +3,15 @@
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import "SiteStorage.mjs"
+import * from "https://scotwatson.github.io/WebInterface/SiteStorage.mjs"
+
+const selfUrl = new URL(self.location);
 
 export function getVersionBaseUrl({
   latestVersion,
   siteURI
 }) {
-  const requestedVersion = exports.selfUrl.searchParams.get("version");
+  const requestedVersion = selfUrl.searchParams.get("version");
   self._siteURI = siteURI;
   window.siteSessionStorage = new SiteStorage({
     uri: self._siteURI(),
@@ -24,7 +26,7 @@ export function getVersionBaseUrl({
     window.siteSessionStorage.set("version", requestedVersion);
     const newSearchParams = new self.URLSearchParams(exports.selfUrl.searchParams.toString());
     newSearchParams.delete("version");
-    const newURL = new self.URL(exports.selfUrl.protocol + "//" + exports.selfUrl.host + exports.selfUrl.pathname + ((newSearchParams.size === 0) ? "" : "?" + newSearchParams.toString()) + exports.selfUrl.hash);
+    const newURL = new self.URL(selfUrl.protocol + "//" + selfUrl.host + selfUrl.pathname + ((newSearchParams.size === 0) ? "" : "?" + newSearchParams.toString()) + selfUrl.hash);
     window.history.replaceState(null, "", newURL.toString());
   } else if (storedVersion !== null) {
     window.siteSessionStorage.set("version", storedVersion);
