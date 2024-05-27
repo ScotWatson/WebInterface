@@ -26,47 +26,73 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     document.head.appendChild(link);
   }
   exports.addIcon = addIcon;
+  // Adds a stylesheet
   function addStyleSheet(url) {
     const style = document.createElement("link");
     style.href = url;
     style.rel = "stylesheet";
   }
   exports.addStyleSheet = addStyleSheet;
+  // Blocks HTML parsing until script is fetched and parsed
   function addSyncScript(url) {
     const script = document.createElement("script");
     script.src = url;
-    document.head.appendChild(scriptElem);
+    document.head.appendChild(script);
+    return {
+      url,
+      loading: new Promise(function (resolve, reject) {
+        script.addEventListener("load", load);
+        script.addEventListener("error", error);
+        function load(evt) {
+          script.removeEventListener("load", load);
+          script.removeEventListener("error", error);
+          resolve();
+        }
+        function error(evt) {
+          script.removeEventListener("load", load);
+          script.removeEventListener("error", error);
+          reject();
+        }
+      }),
+    };
   }
   exports.addSyncScript = addSyncScript;
-  function addDeferScript(url) {
+  // Fetches script with blocking HTML parser
+  function addScript({
+    url,  // location of script
+    defer,  // does script execution wait until after HTML is parsed
+    asModule,  // is script executed as a module
+  }) {
     const script = document.createElement("script");
     script.src = url;
-    script.defer = true;
-    document.head.appendChild(scriptElem);
+    if (asModule) {
+      script.type = "module";
+      if (!defer) {
+        script.async = "true";
+      }
+    } else {
+      script.defer = !!defer;
+    }
+    document.head.appendChild(script);
+    return {
+      url,
+      loading: new Promise(function (resolve, reject) {
+        script.addEventListener("load", load);
+        script.addEventListener("error", error);
+        function load(evt) {
+          script.removeEventListener("load", load);
+          script.removeEventListener("error", error);
+          resolve();
+        }
+        function error(evt) {
+          script.removeEventListener("load", load);
+          script.removeEventListener("error", error);
+          reject();
+        }
+      }),
+    };
   }
-  exports.addDeferScript = addDeferScript;
-  function addAsyncScript(url) {
-    const script = document.createElement("script");
-    script.src = url;
-    script.async = true;
-    document.head.appendChild(scriptElem);
-  }
-  exports.addAsyncScript = addAsyncScript;
-  function addModuleScript(url) {
-    const script = document.createElement("script");
-    script.src = url;
-    script.type = "module";
-    document.head.appendChild(scriptElem);
-  }
-  exports.addModuleScript = addModuleScript;
-  function addAsyncModuleScript(url) {
-    const script = document.createElement("script");
-    script.src = url;
-    script.type = "module";
-    script.async = true;
-    document.head.appendChild(scriptElem);
-  }
-  exports.addAsyncModuleScript = addAsyncModuleScript;
+  exports.addScript = addScript;
   // Resolves once the DOM is fully parsed
   exports.interactive = new Promise(function (resolve, reject) {
     if ((document.readyState === "interactive") || (document.readyState === "complete")) {
