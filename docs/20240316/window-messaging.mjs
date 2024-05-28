@@ -47,7 +47,7 @@ export function messageHandler(evt) {
       // This should not occur for Windows
       throw "Internal Logic Error";
   }
-});
+}
 
 export function enqueueMessage(info) {
   if (trustedOrigins.has(info.origin)) {
