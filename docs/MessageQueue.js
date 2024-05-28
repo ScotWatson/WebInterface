@@ -17,6 +17,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     #messageEvts;
     #messagePort;
     constructor(messagePort) {
+      super();
       this.#enabled = false;
       this.#messageEvts = new Set();
       this.#messagePort = messagePort;
