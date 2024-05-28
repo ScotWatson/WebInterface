@@ -19,7 +19,7 @@ export default class SiteStorage {
       const view = new Uint8Array(12);
       self.crypto.getRandomValues(view);
       // 17-char prefix
-      prefix = "_" + base64Encode(view);
+      prefix = "_" + Common.base64Encode(view);
       // unlikely, but check to make sure
       if (this.#storage.getItem(prefix) !== null) {
         prefix = null;
