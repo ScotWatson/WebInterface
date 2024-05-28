@@ -36,5 +36,5 @@ export function getVersionBaseUrl({
   self._version = function () {
     return window.siteSessionStorage.get("version");
   }
-  return "./" + self._version() + "/";
+  return new URL("./" + self._version() + "/", selfUrl);
 }
