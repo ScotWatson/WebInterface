@@ -46,12 +46,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         function load(evt) {
           script.removeEventListener("load", load);
           script.removeEventListener("error", error);
-          resolve();
+          resolve(script);
         }
         function error(evt) {
           script.removeEventListener("load", load);
           script.removeEventListener("error", error);
-          reject();
+          reject(evt);
         }
       }),
     };
@@ -82,12 +82,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         function load(evt) {
           script.removeEventListener("load", load);
           script.removeEventListener("error", error);
-          resolve();
+          resolve(script);
         }
         function error(evt) {
           script.removeEventListener("load", load);
           script.removeEventListener("error", error);
-          reject();
+          reject(evt);
         }
       }),
     };
