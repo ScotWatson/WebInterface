@@ -22,6 +22,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       this.#messageEvts = [];
       this.#messagePort = messagePort;
       const routeEvent = (evt) => {
+        const thisEvt = evt.constructor("message", {
+          data: evt.data,
+          origin: evt.origin,
+          lastEventId: evt.lastEventId,
+          source: evt.source,
+          ports: evt.ports,
+        });
         console.log(this);
         if (typeof this === "object" && this !== null) {
           for (const x in this) {
@@ -29,13 +36,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
           }
         }
         if (this.#enabled) {
-          this.dispatchEvent(evt);
+          this.dispatchEvent(thisEvt);
         } else {
-          this.#messageEvts.push(evt);
+          this.#messageEvts.push(thisEvt);
         }
       };
       this.#messagePort.addEventListener("message", routeEvent);
-      this.#messagePort.addEventListener("messageerror", routeEvent);
+      this.#messagePort.addEventListener("messageerror", console.error);
     }
     postMessage(...args) {
       messagePort.postMessage.call(messagePort, ...args);
