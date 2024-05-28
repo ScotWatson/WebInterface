@@ -40,7 +40,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         // Using setTimeout to place each event on its own task in the event loop to prevent blocking
         setTimeout(() => this.dispatchEvent(messageEvt), 0);
       }
-      messageEvts = [];
+      this.#messageEvts = [];
     }
     stop() {
       this.#enabled = false;
