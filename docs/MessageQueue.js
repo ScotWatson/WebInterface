@@ -45,9 +45,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       this.#enabled = false;
     }
     get isEnabled() {
-      return enabled;
+      return this.#enabled;
     }
   }
   exports.default = MessageQueue;
   return exports;
-});
+})();
