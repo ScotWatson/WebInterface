@@ -19,7 +19,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     constructor(messagePort) {
       super();
       this.#enabled = false;
-      this.#messageEvts = new Set();
+      this.#messageEvts = [];
       this.#messagePort = messagePort;
       const routeEvent = (evt) => {
         if (this.#enabled) {
@@ -40,7 +40,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         // Using setTimeout to place each event on its own task in the event loop to prevent blocking
         setTimeout(() => this.dispatchEvent(messageEvt), 0);
       }
-      messageEvts.clear();
+      messageEvts = [];
     }
     stop() {
       this.#enabled = false;
