@@ -22,8 +22,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       this.#messageEvts = [];
       this.#messagePort = messagePort;
       const routeEvent = (evt) => {
-        for (const x of this) {
-          console.log(x, this[x]);
+        console.log(this);
+        if (typeof this === "object" && this !== null) {
+          for (const x in this) {
+            console.log(x, this[x]);
+          }
         }
         if (this.#enabled) {
           this.dispatchEvent(evt);
