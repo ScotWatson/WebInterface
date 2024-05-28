@@ -5,6 +5,25 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 const Common = await import("https://scotwatson.github.io/WebInterface/common.mjs");
 
+export function createMessageSourceForMessagePort(messageQueue) {
+  return {
+    message: Common.createSignal(function (resolve, reject) {
+      messageQueue.addEventListener("message", () => resolve);
+    }),
+  };
+}
+
+export function createMessageSinkForMessagePort(messagePort) {
+  return {
+    send: function ({
+      data,
+      transferable,
+    }) {
+      messageQueue.addEventListener("message", () => resolve);
+    },
+  };
+}
+
 export function createRemoteProcedureSocket({
   messageSource,
   messageSink,
