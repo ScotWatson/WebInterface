@@ -21,7 +21,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       this.#enabled = false;
       this.#messageEvts = [];
       this.#messagePort = messagePort;
-      const routeEvent = (evt) => {
+      const routeMessageEvent = (evt) => {
         const thisEvt = new evt.constructor("message", {
           data: evt.data,
           origin: evt.origin,
@@ -29,20 +29,27 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
           source: evt.source,
           ports: evt.ports,
         });
-        console.log(this);
-        if (typeof this === "object" && this !== null) {
-          for (const x in this) {
-            console.log(x, this[x]);
-          }
-        }
         if (this.#enabled) {
           this.dispatchEvent(thisEvt);
         } else {
           this.#messageEvts.push(thisEvt);
         }
       };
-      this.#messagePort.addEventListener("message", routeEvent);
-      this.#messagePort.addEventListener("messageerror", console.error);
+      const routeMessageErrorEvent = (evt) => {
+        const thisEvt = new evt.constructor('messageerror', {
+          error: evt.error,
+          message: evt.message,
+          lineno: evt.lineno,
+          filename: evt.filename,
+        });
+        if (this.#enabled) {
+          this.dispatchEvent(thisEvt);
+        } else {
+          this.#messageEvts.push(thisEvt);
+        }
+      };
+      this.#messagePort.addEventListener("message", routeMessageEvent);
+      this.#messagePort.addEventListener("messageerror", routeMessageErrorEvent);
     }
     postMessage(...args) {
       messagePort.postMessage.call(messagePort, ...args);
