@@ -36,7 +36,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     }
     start() {
       this.#enabled = true;
-      for (const messageEvt of messageEvts) {
+      for (const messageEvt of this.#messageEvts) {
         // Using setTimeout to place each event on its own task in the event loop to prevent blocking
         setTimeout(() => this.dispatchEvent(messageEvt), 0);
       }
