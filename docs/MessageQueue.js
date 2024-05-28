@@ -22,7 +22,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       this.#messageEvts = [];
       this.#messagePort = messagePort;
       const routeEvent = (evt) => {
-        const thisEvt = evt.constructor("message", {
+        const thisEvt = new evt.constructor("message", {
           data: evt.data,
           origin: evt.origin,
           lastEventId: evt.lastEventId,
