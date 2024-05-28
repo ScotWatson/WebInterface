@@ -3,8 +3,8 @@
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-const Common = await import("https://scotwatson.github.io/WebInterface/common.mjs");
-const MessagingCommon = await import("https://scotwatson.github.io/WebInterface/messaging-common.mjs");
+import * as Common from "https://scotwatson.github.io/WebInterface/common.mjs";
+import * as MessagingCommon from "https://scotwatson.github.io/WebInterface/messaging-common.mjs";
 
 export const createRemoteProcedureSocket = MessagingCommon.createRemoteProcedureSocket;
 export const createMessageSourceForMessagePort = MessagingCommon.createMessageSourceForMessagePort;
@@ -76,40 +76,40 @@ export function createMessageSinkForWindowOrigin({
   window,
   origin,
 }) {
-  const obj = {};
-  obj.send = function ({
-    data,
-    transfer,
-  }) {
-    window.postMessage(data, origin, transfer);
+  return {
+    send({
+      data,
+      transfer,
+    }) {
+      window.postMessage(data, origin, transfer);
+    },
   };
-  return obj;
 }
 
 export function createMessageSourceForWorker({
   worker,
 }) {
-  const obj = {};
-  obj.message = Common.createSignal(function (resolve, reject) {
-    worker.addEventListener("message", function (evt) {
-      resolve(evt.data);
-    });
-    worker.addEventListener("messageerror", reject);
-  });
-  return obj;
+  return {
+    message: Common.createSignal(function (resolve, reject) {
+      worker.addEventListener("message", function (evt) {
+        resolve(evt.data);
+      });
+      worker.addEventListener("messageerror", reject);
+    }),
+  };
 }
 
 export function createMessageSinkForWorker({
   worker,
 }) {
-  const obj = {};
-  obj.send = function ({
-    data,
-    transferable,
-  }) {
-    worker.postMessage(data, transferable);
+  return {
+    send({
+      data,
+      transferable,
+    }) {
+      worker.postMessage(data, transferable);
+    },
   };
-  return obj;
 }
 
 const controller = Common.createSignal(function (resolve, reject) {
@@ -122,13 +122,6 @@ const controller = Common.createSignal(function (resolve, reject) {
     return;
   });
 });
-
-let currentController = null;
-(async function () {
-  for await (const x of controller) {
-    currentController = x;
-  }
-})();
 
 export const controllerSource = {
   message: Common.createSignal(function (resolve, reject) {
