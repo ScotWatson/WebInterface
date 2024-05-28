@@ -7,6 +7,8 @@ const Common = await import("https://scotwatson.github.io/WebInterface/common.mj
 const MessagingCommon = await import("https://scotwatson.github.io/WebInterface/messaging-common.mjs");
 
 export const createRemoteProcedureSocket = MessagingCommon.createRemoteProcedureSocket;
+export const createMessageSourceForMessagePort = MessagingCommon.createMessageSourceForMessagePort;
+export const createMessageSinkForMessagePort = MessagingCommon.createMessageSinkForMessagePort;
 
 const trustedOrigins = new Set();
 export function addTrustedOrigin(origin) {
