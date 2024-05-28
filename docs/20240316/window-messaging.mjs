@@ -27,7 +27,7 @@ export const untrustedOrigin = Common.createSignal(function (resolve, reject) {
   untrustedOriginHandler = resolve;
 });
 
-window.addEventListener("message", function (evt) {
+export function messageHandler(evt) {
   if (evt.source === null) {
     // Should only occur on MessagePorts and Workers
     throw "Internal Logic Error";
