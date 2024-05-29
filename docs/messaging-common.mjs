@@ -19,7 +19,7 @@ export function createMessageSinkForMessagePort(messagePort) {
       data,
       transferable,
     }) {
-      messageQueue.addEventListener("message", (evt) => resolve(evt) );
+      messagePort.postMessage(data, transferable);
     },
   };
 }
