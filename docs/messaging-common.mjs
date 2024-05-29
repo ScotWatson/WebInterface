@@ -19,7 +19,6 @@ export function createMessageSinkForMessagePort(messagePort) {
       data,
       transferable,
     }) {
-      console.log(messagePort, data, transferable);
       messagePort.postMessage(data, transferable);
     },
   };
@@ -75,7 +74,6 @@ export function createRemoteProcedureSocket({
   };
   (async function () {
     for await (const data of messageSource.message) {
-      console.log(data);
       if (!data || !data.packetId) {
         // This is not a packet message
         continue;
@@ -105,7 +103,6 @@ export function createRemoteProcedureSocket({
     }
   })();
   async function requestHandler(data) {
-    console.log(data);
     const thisFunction = responseFunctions.get(data.functionName);
     if (data.timeout) {
       if (Date.now() > data.timeout) {
