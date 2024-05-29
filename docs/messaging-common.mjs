@@ -3,7 +3,7 @@
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-const Common = await import("https://scotwatson.github.io/WebInterface/common.mjs");
+import * as Common from import("https://scotwatson.github.io/WebInterface/common.mjs");
 
 export function createMessageSourceForMessagePort(messageQueue) {
   return {
@@ -75,6 +75,7 @@ export function createRemoteProcedureSocket({
   };
   (async function () {
     for await (const data of messageSource.message) {
+      console.log(data);
       if (!data || !data.packetId) {
         // This is not a packet message
         continue;
