@@ -8,7 +8,7 @@ import * as Common from "https://scotwatson.github.io/WebInterface/common.mjs";
 export function createMessageSourceForMessagePort(messageQueue) {
   return {
     message: Common.createSignal(function (resolve, reject) {
-      messageQueue.addEventListener("message", (evt) => resolve(evt) );
+      messageQueue.addEventListener("message", (evt) => resolve(evt.data) );
     }),
   };
 }
