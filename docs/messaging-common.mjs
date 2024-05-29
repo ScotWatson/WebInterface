@@ -104,6 +104,7 @@ export function createRemoteProcedureSocket({
     }
   })();
   async function requestHandler(data) {
+    console.log(data);
     const thisFunction = responseFunctions.get(data.functionName);
     if (data.timeout) {
       if (Date.now() > data.timeout) {
