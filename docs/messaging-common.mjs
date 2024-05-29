@@ -19,6 +19,7 @@ export function createMessageSinkForMessagePort(messagePort) {
       data,
       transferable,
     }) {
+      console.log(messagePort, data, transferable);
       messagePort.postMessage(data, transferable);
     },
   };
