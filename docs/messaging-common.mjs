@@ -8,7 +8,7 @@ const Common = await import("https://scotwatson.github.io/WebInterface/common.mj
 export function createMessageSourceForMessagePort(messageQueue) {
   return {
     message: Common.createSignal(function (resolve, reject) {
-      messageQueue.addEventListener("message", () => resolve);
+      messageQueue.addEventListener("message", (evt) => resolve(evt) );
     }),
   };
 }
@@ -19,7 +19,7 @@ export function createMessageSinkForMessagePort(messagePort) {
       data,
       transferable,
     }) {
-      messageQueue.addEventListener("message", () => resolve);
+      messageQueue.addEventListener("message", (evt) => resolve(evt) );
     },
   };
 }
