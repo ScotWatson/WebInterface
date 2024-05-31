@@ -139,7 +139,7 @@ export function createMessageSinkForServiceWorker(serviceWorker) {
       data,
       transferable,
     }) {
-      serviceWorker.controller?.postMessage(data, transferable);
+      serviceWorker.postMessage(data, transferable);
     },
   };
 }
