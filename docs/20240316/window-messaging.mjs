@@ -133,11 +133,11 @@ export const controllerSource = {
     });
   }),
 };
-export const controllerSink = {
+export function createMessageSinkForServiceWorker(serviceWorker) {
   send: function ({
     data,
     transferable,
   }) {
-    navigator.serviceWorker.controller?.postMessage(data, transferable);
+    serviceWorker.controller?.postMessage(data, transferable);
   },
 };
