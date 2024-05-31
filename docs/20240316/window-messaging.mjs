@@ -134,10 +134,12 @@ export const controllerSource = {
   }),
 };
 export function createMessageSinkForServiceWorker(serviceWorker) {
-  send: function ({
-    data,
-    transferable,
-  }) {
-    serviceWorker.controller?.postMessage(data, transferable);
-  },
-};
+  return {
+    send: function ({
+      data,
+      transferable,
+    }) {
+      serviceWorker.controller?.postMessage(data, transferable);
+    },
+  };
+}
