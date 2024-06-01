@@ -178,15 +178,15 @@ export const controllerchange = Common.createSignal((resolve, reject) => {
   navigator.serviceWorker.addEventListener("controllerchange", (evt) => {
     resolve({
       serviceWorker: self.navigator.serviceWorker.controller,
-      messageSource: Messaging.controllerSource,
-      messageSink: Messaging.createMessageSinkForServiceWorker(self.navigator.serviceWorker.controller),
+      messageSource: controllerSource,
+      messageSink: createMessageSinkForServiceWorker(self.navigator.serviceWorker.controller),
     });
   });
   if (navigator.serviceWorker.controller !== null) {
     resolve({
       serviceWorker: self.navigator.serviceWorker.controller,
-      messageSource: Messaging.controllerSource,
-      messageSink: Messaging.createMessageSinkForServiceWorker(self.navigator.serviceWorker.controller),
+      messageSource: controllerSource,
+      messageSink: createMessageSinkForServiceWorker(self.navigator.serviceWorker.controller),
     });
   }
 });
