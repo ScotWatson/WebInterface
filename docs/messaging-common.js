@@ -148,6 +148,7 @@ self.currentScript.exports = (function () {
       }
     };
     function errorHandler(data) {
+      console.log(data);
       const functions = packetIds.get(data.packetId);
       if (functions !== undefined) {
         functions.reject(data.reason);
