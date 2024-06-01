@@ -168,7 +168,7 @@ export function setServiceWorkerHeartbeat({
   }
   if (interval !== 0) {
     intervalID = setInterval(() => {
-      serviceWorker.postMessage({ action: "ping" });
+      serviceWorker.postMessage("heartbeat");
     }, interval);
     serviceWorkerHeartbeats.set(serviceWorker, intervalID);
   }
