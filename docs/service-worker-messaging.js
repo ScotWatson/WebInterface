@@ -7,6 +7,7 @@ self.currentScript.exports = (function () {
   const exports = {};
   const Common = self.importScript("https://scotwatson.github.io/WebInterface/common.js");
   const MessagingCommon = self.importScript("https://scotwatson.github.io/WebInterface/messaging-common.js");
+  Object.assign(exports, MessagingCommon);
   exports.createRemoteProcedureSocket = MessagingCommon.createRemoteProcedureSocket;
   const registeredClients = new Map();
   let unregisteredClientHandler;
