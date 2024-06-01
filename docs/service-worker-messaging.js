@@ -26,8 +26,8 @@ self.currentScript.exports = (function () {
         });
         break;
       default:
-        // This should not occur for Windows
-        throw "Internal Logic Error";
+        // This should not occur for Service Workers
+        throw "Internal Logic Error: " + evt.source.constructor.name;
     }
   });
   function enqueueMessage(evt) {
