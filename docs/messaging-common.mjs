@@ -121,6 +121,9 @@ export function createRemoteProcedureSocket({
       return;
     }
     try {
+      if (typeof data.args !== "object") {
+        data.args = { default: data.args };
+      }
       data.args.transferable = [];
       const ret = await thisFunction(data.args);
       messageSink.send({
@@ -136,7 +139,7 @@ export function createRemoteProcedureSocket({
         data: {
           packetId: data.packetId,
           action: "error",
-          error: e,
+          error: e.message,
         },
       });
     }
