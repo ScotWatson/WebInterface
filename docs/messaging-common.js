@@ -6,7 +6,24 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 self.currentScript.exports = (function () {
   const exports = {};
   const Common = importScript("https://scotwatson.github.io/WebInterface/common.js");
-  exports.createRemoteProcedureSocket =  function createRemoteProcedureSocket({
+  exports.createMessageSourceForMessagePort = function createMessageSourceForMessagePort(messageQueue) {
+    return {
+      message: Common.createSignal(function (resolve, reject) {
+        messageQueue.addEventListener("message", (evt) => resolve(evt.data) );
+      }),
+    };
+  }
+  exports.createMessageSinkForMessagePort = function createMessageSinkForMessagePort(messagePort) {
+    return {
+      send: function ({
+        data,
+        transferable,
+      }) {
+        messagePort.postMessage(data, transferable);
+      },
+    };
+  }
+  exports.createRemoteProcedureSocket = function createRemoteProcedureSocket({
     messageSource,
     messageSink,
     timeout, // in ms
