@@ -13,12 +13,13 @@ self.currentScript.exports = (function () {
   let unregisteredClientHandler;
   self.addEventListener("message", function (evt) {
     if (evt.source === null) {
-      // Should only occur on MessagePorts and Workers
+      // Should only occur on MessagePorts and DedicatedWorkers
       throw "Internal Logic Error";
     }
     switch (evt.source.constructor.name) {
       case "WindowClient":
       case "WorkerClient":
+      case "ServiceWorker":
         enqueueMessage({
           origin: evt.origin,
           source: evt.source,
