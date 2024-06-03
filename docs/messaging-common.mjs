@@ -5,6 +5,25 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 import * as Common from "https://scotwatson.github.io/WebInterface/common.mjs";
 
+export class MessageSocket {
+  constructor() {
+    throw "No nullary constructor";
+  }
+  static forMessagePort() {
+    return {
+      message: Common.createSignal(function (resolve, reject) {
+        messageQueue.addEventListener("message", (evt) => resolve(evt.data) );
+      }),
+      send: function ({
+        data,
+        transfer,
+      }) {
+        messagePort.postMessage(data, transfer);
+      },
+    };
+  }
+}
+
 export function createMessageSourceForMessagePort(messageQueue) {
   return {
     message: Common.createSignal(function (resolve, reject) {
