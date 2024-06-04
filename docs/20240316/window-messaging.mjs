@@ -18,6 +18,7 @@ import * as MessagingCommon from "https://scotwatson.github.io/WebInterface/mess
 export const createRemoteProcedureSocket = MessagingCommon.createRemoteProcedureSocket;
 export const createMessageSourceForMessagePort = MessagingCommon.createMessageSourceForMessagePort;
 export const createMessageSinkForMessagePort = MessagingCommon.createMessageSinkForMessagePort;
+export const MessageSocket = MessagingCommon.MessageSocket;
 
 const trustedOrigins = new Set();
 export function addTrustedOrigin(origin) {
