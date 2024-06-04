@@ -7,12 +7,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 // https://www.w3.org/TR/2022/CRD-service-workers-20220712/
 // W3C "Service Workers" also has an Editor's Draft, published 30 April 2024
 // https://w3c.github.io/ServiceWorker/
-// According to section 2.1.1 of W3C "Service Workers":
-// A user agent may terminate service workers at any time it:
-//  - Has no event to handle.
-//  - Detects abnormal operation: such as infinite loops and tasks exceeding imposed time limits (if any) while handling the events.
-//
-// Despite this, Firefox terminates the service worker, even when sending messages to itself (therefore handling message events), with a short handler routine.
+// According to section 4.1.3 of W3C "Service Workers", ServiceWorkerGlobalScope.serviceWorker is supposed to get the ServiceWorker object. On Firefox, this property is missing.
+// According to section 4.1.3 of W3C "Service Workers", ServiceWorkerGlobalScope.serviceWorker is supposed to get the ServiceWorker object. On Firefox, this property is missing.
+// Together, on Firefox, this makes it impossible for service workers to message each other (& themselves). Therefore, they cannot keeps themselves from terminating.
 // However, message events received from a Window do prevent the service worker from terminating.
 
 import * as Common from "https://scotwatson.github.io/WebInterface/common.mjs";
@@ -70,6 +67,27 @@ export function enqueueMessage(info) {
   }
 }
 
+MessagingCommon.MessageSocket.forWindowOrigin = function ({
+  window,
+  origin,
+}) {
+  return {
+    message: Common.createSignal(async function (resolve, reject) {
+      for await (const info of trustedOrigin) {
+        if ((info.source === window) && (info.origin === origin)) {
+          resolve(info.data);
+        }
+      }
+    }),
+    send({
+      data,
+      transfer,
+    }) {
+      window.postMessage(data, origin, transfer);
+    },
+  };
+}
+
 export function createMessageSourceForWindowOrigin({
   window,
   origin,
@@ -98,6 +116,25 @@ export function createMessageSinkForWindowOrigin({
     },
   };
 }
+
+MessagingCommon.MessageSocket.forWorker = function ({
+  worker,
+}) {
+  return {
+    message: Common.createSignal(function (resolve, reject) {
+      worker.addEventListener("message", function (evt) {
+        resolve(evt.data);
+      });
+      worker.addEventListener("messageerror", reject);
+    }),
+    send({
+      data,
+      transferable,
+    }) {
+      worker.postMessage(data, transferable);
+    },
+  };
+};
 
 export function createMessageSourceForWorker({
   worker,
@@ -135,6 +172,22 @@ const controller = Common.createSignal(function (resolve, reject) {
     return;
   });
 });
+
+MessagingCommon.MessageSocket.forServiceWorker = function ({
+  worker,
+}) {
+  return {
+    message: Common.createSignal(function (resolve, reject) {
+      reject();
+    }),
+    send: function ({
+      data,
+      transfer,
+    }) {
+      serviceWorker.postMessage(data, transfer);
+    },
+  };
+}
 
 export const controllerSource = {
   message: Common.createSignal(function (resolve, reject) {
