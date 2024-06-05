@@ -10,10 +10,10 @@ self.currentScript.exports = (function () {
     constructor() {
       throw "No nullary constructor";
     }
-    static forMessagePort() {
+    static forMessagePort(messagePort) {
       return {
         message: Common.createSignal(function (resolve, reject) {
-          messageQueue.addEventListener("message", (evt) => resolve(evt.data) );
+          messagePort.addEventListener("message", (evt) => resolve(evt.data) );
         }),
         send: function ({
           data,
