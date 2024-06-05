@@ -6,11 +6,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 self.currentScript.exports = (function () {
   const exports = {};
   const Common = importScript("https://scotwatson.github.io/WebInterface/common.js");
+  const MessageQueue = importScript("https://scotwatson.github.io/WebInterface/MessageQueue.js").default;
   exports.MessageSocket = class MessageSocket {
     constructor() {
       throw "No nullary constructor";
     }
     static forMessagePort(messagePort) {
+      const queue = new MessageQueue(messagePort);
+      messagePort.start();
       return {
         message: Common.createSignal(function (resolve, reject) {
           messagePort.addEventListener("message", (evt) => resolve(evt.data) );
@@ -20,6 +23,12 @@ self.currentScript.exports = (function () {
           transfer,
         }) {
           messagePort.postMessage(data, transfer);
+        },
+        start() {
+          queue.start();
+        },
+        stop() {
+          queue.stop();
         },
       };
     }
