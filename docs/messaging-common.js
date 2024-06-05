@@ -6,6 +6,24 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 self.currentScript.exports = (function () {
   const exports = {};
   const Common = importScript("https://scotwatson.github.io/WebInterface/common.js");
+  exports.MessageSocket = class MessageSocket {
+    constructor() {
+      throw "No nullary constructor";
+    }
+    static forMessagePort() {
+      return {
+        message: Common.createSignal(function (resolve, reject) {
+          messageQueue.addEventListener("message", (evt) => resolve(evt.data) );
+        }),
+        send: function ({
+          data,
+          transfer,
+        }) {
+          messagePort.postMessage(data, transfer);
+        },
+      };
+    }
+  }
   exports.createMessageSourceForMessagePort = function createMessageSourceForMessagePort(messageQueue) {
     return {
       message: Common.createSignal(function (resolve, reject) {
