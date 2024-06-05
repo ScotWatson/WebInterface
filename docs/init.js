@@ -145,7 +145,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     scope,
   }) {
     const registering = self.navigator.serviceWorker.register(url, { scope });
-    registering.then((registration) => {
+    return registering.then((registration) => {
       const channel = new MessageChannel();
       registration.installing.portMessage(channel.port2, [ channel.port2 ]);
       return {
