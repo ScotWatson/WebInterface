@@ -3,27 +3,6 @@
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import * as Common from "https://scotwatson.github.io/WebInterface/common.mjs";
-import * as MessagingCommon from "https://scotwatson.github.io/WebInterface/messaging-common.mjs";
+import * MessageSocket from "https://scotwatson.github.io/WebInterface/MessageQueue.mjs";
 
-export const createRemoteProcedureSocket = MessagingCommon.createRemoteProcedureSocket;
-export const createMessageSourceForMessagePort = MessagingCommon.createMessageSourceForMessagePort;
-export const createMessageSinkForMessagePort = MessagingCommon.createMessageSinkForMessagePort;
-
-export const parentSource = {
-  message: Common.createSignal(function (resolve, reject) {
-    self.addEventListener("message", function (evt) {
-      resolve(evt.data);
-    });
-    self.addEventListener("messageerror", reject);
-  }),
-};
-
-export const parentSink = {
-  send: function ({
-    data,
-    transfer,
-  }) {
-    self.postMessage(data, transfer);
-  },
-}
+export const parentSocket = MessageSocket.forMessagePort(self);
