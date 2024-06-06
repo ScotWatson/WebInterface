@@ -15,6 +15,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 import * as Common from "https://scotwatson.github.io/WebInterface/common.mjs";
 import * as MessagingSocket from "https://scotwatson.github.io/WebInterface/message-socket.mjs";
 
+export const forWorker = MessagingSocket.forWorker;
+
 const trustedOrigins = new Set();
 export function addTrustedOrigin(origin) {
   trustedOrigins.add(origin);
