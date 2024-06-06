@@ -8,7 +8,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 // W3C "Service Workers" also has an Editor's Draft, published 30 April 2024
 // https://w3c.github.io/ServiceWorker/
 // According to section 4.1.3 of W3C "Service Workers", ServiceWorkerGlobalScope.serviceWorker is supposed to get the ServiceWorker object. On Firefox, this property is missing.
-// According to section 4.1.3 of W3C "Service Workers", ServiceWorkerGlobalScope.serviceWorker is supposed to get the ServiceWorker object. On Firefox, this property is missing.
+// According to section 4.1.3 of W3C "Service Workers", ServiceWorkerGlobalScope.registration.installing, ServiceWorkerGlobalScope.registration.waiting, & ServiceWorkerGlobalScope.registration.active is supposed to get the installing, waiting, & active ServiceWorker objects. On Firefox, these property are null.
 // Together, on Firefox, this makes it impossible for service workers to message each other (& themselves). Therefore, they cannot keeps themselves from terminating.
 // However, message events received from a Window do prevent the service worker from terminating.
 
@@ -63,7 +63,7 @@ export function enqueueMessage(info) {
   }
 }
 
-export forWindowOrigin = function ({
+export function forWindowOrigin({
   window,
   origin,
 }) {
