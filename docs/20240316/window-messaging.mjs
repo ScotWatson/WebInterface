@@ -13,12 +13,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 // However, message events received from a Window do prevent the service worker from terminating.
 
 import * as Common from "https://scotwatson.github.io/WebInterface/common.mjs";
-import * as MessagingCommon from "https://scotwatson.github.io/WebInterface/messaging-common.mjs";
-
-export const createRemoteProcedureSocket = MessagingCommon.createRemoteProcedureSocket;
-export const createMessageSourceForMessagePort = MessagingCommon.createMessageSourceForMessagePort;
-export const createMessageSinkForMessagePort = MessagingCommon.createMessageSinkForMessagePort;
-export const MessageSocket = MessagingCommon.MessageSocket;
+import * as MessagingSocket from "https://scotwatson.github.io/WebInterface/message-socket.mjs";
 
 const trustedOrigins = new Set();
 export function addTrustedOrigin(origin) {
@@ -68,7 +63,7 @@ export function enqueueMessage(info) {
   }
 }
 
-MessagingCommon.MessageSocket.forWindowOrigin = function ({
+export forWindowOrigin = function ({
   window,
   origin,
 }) {
@@ -85,80 +80,6 @@ MessagingCommon.MessageSocket.forWindowOrigin = function ({
       transfer,
     }) {
       window.postMessage(data, origin, transfer);
-    },
-  };
-}
-
-export function createMessageSourceForWindowOrigin({
-  window,
-  origin,
-}) {
-  return {
-    message: Common.createSignal(async function (resolve, reject) {
-      for await (const info of trustedOrigin) {
-        if ((info.source === window) && (info.origin === origin)) {
-          resolve(info.data);
-        }
-      }
-    }),
-  };
-}
-
-export function createMessageSinkForWindowOrigin({
-  window,
-  origin,
-}) {
-  return {
-    send({
-      data,
-      transfer,
-    }) {
-      window.postMessage(data, origin, transfer);
-    },
-  };
-}
-
-MessagingCommon.MessageSocket.forWorker = function ({
-  worker,
-}) {
-  return {
-    message: Common.createSignal(function (resolve, reject) {
-      worker.addEventListener("message", function (evt) {
-        resolve(evt.data);
-      });
-      worker.addEventListener("messageerror", reject);
-    }),
-    send({
-      data,
-      transferable,
-    }) {
-      worker.postMessage(data, transferable);
-    },
-  };
-};
-
-export function createMessageSourceForWorker({
-  worker,
-}) {
-  return {
-    message: Common.createSignal(function (resolve, reject) {
-      worker.addEventListener("message", function (evt) {
-        resolve(evt.data);
-      });
-      worker.addEventListener("messageerror", reject);
-    }),
-  };
-}
-
-export function createMessageSinkForWorker({
-  worker,
-}) {
-  return {
-    send({
-      data,
-      transferable,
-    }) {
-      worker.postMessage(data, transferable);
     },
   };
 }
@@ -174,11 +95,12 @@ const controller = Common.createSignal(function (resolve, reject) {
   });
 });
 
-MessagingCommon.MessageSocket.forServiceWorker = function ({
+export function forServiceWorker({
   worker,
 }) {
   return {
     message: Common.createSignal(function (resolve, reject) {
+      // Messages cannot be received directly from ServiceWorkers
       reject();
     }),
     send: function ({
@@ -200,16 +122,6 @@ export const controllerSource = {
     });
   }),
 };
-export function createMessageSinkForServiceWorker(serviceWorker) {
-  return {
-    send: function ({
-      data,
-      transferable,
-    }) {
-      serviceWorker.postMessage(data, transferable);
-    },
-  };
-}
 
 const serviceWorkerHeartbeats = new Map();
 export function setServiceWorkerHeartbeat({
