@@ -148,14 +148,14 @@ export const controllerchange = Common.createSignal((resolve, reject) => {
     resolve({
       serviceWorker: self.navigator.serviceWorker.controller,
       messageSource: controllerSource,
-      messageSink: createMessageSinkForServiceWorker(self.navigator.serviceWorker.controller),
+      messageSink: forServiceWorker(self.navigator.serviceWorker.controller),
     });
   });
   if (navigator.serviceWorker.controller !== null) {
     resolve({
       serviceWorker: self.navigator.serviceWorker.controller,
       messageSource: controllerSource,
-      messageSink: createMessageSinkForServiceWorker(self.navigator.serviceWorker.controller),
+      messageSink: forServiceWorker(self.navigator.serviceWorker.controller),
     });
   }
 });
