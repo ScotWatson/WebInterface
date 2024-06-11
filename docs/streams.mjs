@@ -59,9 +59,8 @@ export class ActiveSource {
 };
 
 export class ActiveSink {
-  // initFunc is expected to be a function that takes three arguments (resolve, reject, return), which each are functions that take a single argument.
-  // Each time resolve is called, every iterator instance resolves with a structured clone of the value passed (therefore, the value must be clonable).
-  // Each time reject is called, every iterator instance resolves with the error passed.
+  // initFunc is expected to be a function that takes one argument (dispatch), which is a function that takes a single argument.
+  // Each time dispatch is called, every iterator instance resolves with a structured clone of the value passed (therefore, the value must be clonable).
   #inputRequest;
   #nextRequest;
   constructor(init) {
@@ -106,7 +105,11 @@ class OperationSource {  // Passive Source
   *[Symbol.iterator]() {
     try {
       while (!done) {
-        yield operation[Operations.execute](this.#state);
+        const output = operation[Operations.execute](this.#state);
+        if (output === undefined) {
+          return;
+        }
+        yield output;
       }
       return value;
     } catch (e) {
@@ -195,20 +198,142 @@ function connectPump() {
     }
   }
 }
-(async () => {
-  let input;
-  let output;
-  while (input = async iterator.next(output)) {
-    output = func(input);
-  }
+function waitResolve(value, ms) {
+  return new Promise((resolve) => { setTimeout(() => { resolve(value); }, ms); });
+}
+(() => {
+  const asyncIterator = (async *() {
+    const init = 1;
+    let input;
+    let output = init;
+    while (true) {
+      input = yield waitResolve(output, 1000);
+      if (input > 10) {
+        return waitResolve(input - 1, 1000);
+      }
+      output = input * 2;
+    }
+  })();
+  const activeProcess = asyncIterator.next;
+  const passiveProcess = (input) => {
+    return { value: input + 2, done: false, };
+  };
+  const pipe = (async () => {
+    let input = await activeProcess();
+    while (true) {
+      if (!!input.done) { break; }
+      const output = passiveProcess(input.value);
+      if (!!output.done) { break; }
+      input = await activeProcess(output.value);
+    }
+  })();
+  pipe.then(() => { console.log("pipe closed"); });
+  const pipeActiveToPassive = (async () => {
+    let forward = await activeProcess();
+    while (true) {
+      if (!!forward.done) { break; }
+      const reverse = passiveProcess(input.value);
+      if (!!reverse.done) { break; }
+      forward = await activeProcess();
+    }
+  })();
+  const pipePassiveToActive = (async () => {
+    let reverse = await activeProcess();
+    while (true) {
+      if (!!reverse.done) { break; }
+      const forward = passiveProcess();
+      if (!!forward.done) { break; }
+      reverse = await activeProcess(forward.value);
+    }
+  })();
 })();
 (() => {
-  let input;
-  let output;
-  while (input = iterator.next(output)) {
-    output = func(input);
-  }
+  const iterator = (*() {
+    const init = 1;
+    let input;
+    let output = init;
+    while (true) {
+      input = yield output;
+      if (input > 10) {
+        return input - 1;
+      }
+      output = input * 2;
+    }
+  })();
+  const passiveProcess = iterator.next;
+  const activeProcess = async (input) => {
+    return await waitResolve({ value: input + 2, done: false, });
+  };
+  const pipe = (async () => {
+    let input = passiveProcess();
+    while (true) {
+      if (!!input.done) { break; }
+      const output = await activeProcess(input.value);
+      if (!!output.done) { break; }
+      input = passiveProcess(output.value);
+    }
+  })();
+  pipe.then(() => { console.log("pipe closed"); });
+  const pipePassiveToActive = (async () => {
+    let forward = passiveProcess();
+    while (true) {
+      if (!!forward.done) { break; }
+      const reverse = await activeProcess(forward.value);
+      if (!!reverse.done) { break; }
+      forward = passiveProcess();
+    }
+  })();
+  const pipeActiveToPassive = (async () => {
+    let reverse = passiveProcess();
+    while (true) {
+      if (!!reverse.done) { break; }
+      const forward = await activeProcess();
+      if (!!forward.done) { break; }
+      reverse = passiveProcess(forward.value);
+    }
+  })();
 })();
+
+  const pipeActiveToPassive = (async () => {
+    let forward = await activeProcess();
+    while (true) {
+      if (!!forward.done) { break; }
+      const reverse = passiveProcess(forward.value);
+      if (!!reverse.done) { break; }
+      forward = await activeProcess();
+    }
+  })();
+/*
+  const pipeActiveToPassive = (async () => {
+    let reverse = passiveProcess();
+    while (true) {
+      if (!!reverse.done) { break; }
+      const forward = await activeProcess();
+      if (!!forward.done) { break; }
+      reverse = passiveProcess(forward.value);
+    }
+  })();
+  */
+  const pipePassiveToActive = (async () => {
+    let reverse = await activeProcess();
+    while (true) {
+      if (!!reverse.done) { break; }
+      const forward = passiveProcess();
+      if (!!forward.done) { break; }
+      reverse = await activeProcess(forward.value);
+    }
+  })();
+/*
+  const pipePassiveToActive = (async () => {
+    let forward = passiveProcess();
+    while (true) {
+      if (!!forward.done) { break; }
+      const reverse = await activeProcess(forward.value);
+      if (!!reverse.done) { break; }
+      forward = passiveProcess();
+    }
+  })();
+  */
 
 export function pipeActiveToPassive(source, sink) {
   const sourceObj = (function () {
