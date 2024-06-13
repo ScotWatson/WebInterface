@@ -63,6 +63,25 @@ export class ActiveSource {
   }
 };
 
+class Sink {
+  #callback;
+  #locked;
+  constructor(callback) {
+    this.#callback = callback;
+    this.#locked = false;
+  }
+  get callback() {
+    if (this.locked) {
+      throw "sink is locked";
+    }
+    this.#locked = true;
+    return (obj) => { callback(obj); };
+  }
+  get locked() {
+    return this.#locked;
+  }
+}
+
 class OperationSource {  // Passive Source
   #state;
   constructor(operation) {
