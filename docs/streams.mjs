@@ -7,6 +7,90 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 // A passive source is implemented as an iterator
 // A passive sink is implemeted as a function that takes a single parameter and returns undefined
 // There is no implemetation of an active sink. Active sinks are given a queue of their own and get implemented as passive sinks
+// null = information not available at the moment
+// undefined = no more information available, will return undefined indefinately
+
+export class Source {  // Passive Source
+  #callback;
+  #iterator;
+  constructor(args) {
+    if (typeof args === "object" && next in args) {  // is iterator
+      this.#callback = iteratorCallback(args);
+    } else if (typeof args === "function") {
+      this.#callback = args;
+    } else {
+      throw "Invalid Args";
+    }
+    function iteratorCallback(iterator) {
+      return () => {
+        let item = iterator.next();
+        while (!item.done) {
+          if (item.value !== undefined) {
+            return item.value;
+          }
+          // iterator returned undefined, but did not set the done flag
+          // attempt to get the next item
+          item = iterator.next();
+        }
+        // iterator has set the done flag, return undefined forever
+        return undefined;
+      };
+    }
+  }
+  *#getIterator() {
+    try {
+      while (true) {
+        const value = callback();
+        if (value === undefined) {
+          // no more information available, set the done flag
+          return;
+        }
+        // pass value to consumer, even if the value is null (which would indicate no information available at this time)
+        yield value;
+      }
+    } finally {
+      this.#iterator = null;
+    }
+  };
+  [Symbol.iterator]() {
+    if (this.#iterator) {
+      throw "This source is locked.";
+    }
+    this.#iterator = this.#getIterator();
+    return this.#iterator;
+  }
+  get locked() {
+    return !!this.#iterator;
+  }
+}
+
+export class Sink {  // Passive Sink
+  #callback;
+  #locked;
+  constructor(callback) {
+    this.#callback = callback;
+    this.#locked = "";
+  }
+  get callback() {
+    if (this.locked) {
+      throw "sink is locked";
+    }
+    const myId = self.crypto.randomUUID();
+    this.#locked = myId;
+    return (obj) => {
+      this.#invoke(obj, myId);
+    };
+  }
+  #invoke(obj, id) {
+    if (id !== this.#locked) {
+      throw "Invalidated Callback";
+    }
+    this.#callback(obj);
+  }
+  get locked() {
+    return (this.#locked !== "");
+  }
+}
 
 export class ActiveSource {
   // function init is expected to be a function that takes three arguments (resolve, reject, return), which each are functions that take a single argument.
@@ -63,95 +147,119 @@ export class ActiveSource {
   }
 };
 
-class Source {
-  #callback;
-  #iterator;
-  constructor(callback) {
-    if (typeof getFunction !== "function") {
-      throw "getFunction must be a function";
+export class Pump extends ActiveSource {
+  #source;
+  #resolve;
+  #reject;
+  #return;
+  constructor(passiveSource) {
+    const source = getPassiveSource(passiveSource);
+    super((resolve, reject, return) => {
+      this.#resolve = resolve;
+      this.#reject = reject;
+      this.#return = return;
+    });
+    this.#source = source;
+  }
+  cycle() {
+    const value = this.#source();
+    if (value === undefined) {
+      return(value);
+    } else {
+      resolve(value);
     }
   }
-  *#getIterator() {
-    try {
-      const value = callback();
-      if (value === undefined) {
-        return value;
+}
+
+export class Pipe {
+  #source;
+  #sink;
+  constructor(activeSource, passiveSink) {
+    const source = getActiveSource(activeSource);
+    const sink = getPassiveSink(passiveSink);
+    this.#source = source;
+    this.#sink = sink;
+    this.done = (async () => {
+      forward = await source();
+      while (!forward.done) {
+        sink(forward.value);
+        forward = await source();
       }
-      yield value;
-    } finally {
-      this.#iterator = null;
-    }
-  };
-  [Symbol.iterator]() {
-    if (this.#iterator) {
-      throw "This source is locked.";
-    }
-    this.#iterator = this.#getIterator();
-    return this.#iterator;
+    })();
   }
 }
 
-class Sink {
-  #callback;
-  #locked;
-  constructor(callback) {
-    this.#callback = callback;
-    this.#locked = "";
-  }
-  get callback() {
-    if (this.locked) {
-      throw "sink is locked";
-    }
-    const myId = self.crypto.randomUUID();
-    this.#locked = myId;
-    return (obj) => {
-      this.#invoke(obj, myId);
-    };
-  }
-  #invoke(obj, id) {
-    if (id !== this.#locked) {
-      throw "Invalidated Callback";
-    }
-    this.#callback(obj);
-  }
-  get locked() {
-    return (this.#locked !== "");
-  }
-}
-
-class OperationSource {  // Passive Source
-  #state;
+class OperationSource extends Source {  // Passive Source
   constructor(operation) {
-    if (typeof operation[Operations.initialize] === "function") {
-      this.#state = operation[Operations.initialize]();
+    let state = operation[Operations.initialize]();
+    let flushing = false;
+    if ((Operations.initialize in operation) && (typeof operation[Operations.initialize] === "function")) {
+      state = operation[Operations.initialize]();
+    } else {
+      state = {};
     }
-  }
-  *[Symbol.iterator]() {
-    try {
-      while (!done) {
-        const output = operation[Operations.execute](this.#state);
-        if (output === undefined) {
-          return;
+    super(() => {
+      flushOutput = () => {
+        const output = operation[Operations.flush](state);
+        if ((output === null) || (output === undefined)) {
+          // The operation takes no input, therefore information not available at this time is equivalent to no more information available.
+          return undefined;
         }
-        yield output;
+        return output;
       }
-      return value;
-    } catch (e) {
-      // Error has been thrown
-      throw e;
-    } finally {
-      // Perform any cleanup
-    }
+      normalOutput = () => {
+        const output = operation[Operations.execute](state);
+        if ((output === null) || (output === undefined)) {
+          // The operation takes no input, therefore information not available at this time is equivalent to no more information available.
+          flushing = true;
+          return flushOutput();
+        }
+        return output;
+      };
+      if (flushing) {
+        flushOutput();
+      } else {
+        normalOutput();
+      }
+    });
   }
 }
 
-class OperationSink extends sink {  // Passive Sink
+class OperationSink extends Sink {
   constructor(operation) {
-    super();
+    let state = operation[Operations.initialize]();
+    let flushing = false;
+    if ((Operations.initialize in operation) && (typeof operation[Operations.initialize] === "function")) {
+      state = operation[Operations.initialize]();
+    } else {
+      state = {};
+    }
+    super((input) => {
+      flushOutput = () => {
+        const output = operation[Operations.flush](state, input);
+        if ((output === null) || (output === undefined)) {
+          return undefined;
+        }
+        return output;
+      }
+      normalOutput = () => {
+        const output = operation[Operations.execute](state, input);
+        if ((output === null) || (output === undefined)) {
+          flushing = true;
+          return flushOutput();
+        }
+        return output;
+      };
+      if (flushing) {
+        flushOutput();
+      } else {
+        normalOutput();
+      }
+    });
   }
 }
 
-export class SourceTransform {
+export class OperationTransform {
   #source;
   #operation;
   #state;
@@ -175,46 +283,10 @@ export class SourceTransform {
     }
   }
 }
-export class SourcePump {
-  #source;
-  constructor(passiveSource) {
-    this.#source = getPassiveSource(passiveSource);
-    
-    setInterval(() => {
-      const forward = this.#source.next();
-      send(forward.value);
-    }, 100);
-  }
-  async *[Symbol.asyncIterator]() {
-    
-  }
-}
+
 
 function waitResolve(value, ms) {
   return new Promise((resolve) => { setTimeout(() => { resolve(value); }, ms); });
-}
-
-export class TransformOperation {
-  constructor(operation) {
-    
-  }
-}
-export class Pipe {
-  #source;
-  #sink;
-  constructor(activeSource, passiveSink) {
-    const source = getActiveSource(activeSource);
-    const sink = getPassiveSink(passiveSink);
-    this.#source = source;
-    this.#sink = sink;
-    this.done = (async () => {
-      forward = await source();
-      while (!forward.done) {
-        sink(forward.value);
-        forward = await source();
-      }
-    })();
-  }
 }
 
 function getActiveSource(obj) {
