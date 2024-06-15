@@ -9,6 +9,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 // There is no implemetation of an active sink. Active sinks are given a queue of their own and get implemented as passive sinks
 // null = information not available at the moment
 // undefined = no more information available, will return undefined indefinately
+// All operation objects have an Operations.execute property, which is a function that takes the current state object and the current input and returns the next output.
+// If the state object represents a normal state, [Operations.execute](state, input) may be dependent on input.
+// If the state object represents a flushing state, the result of [Operations.execute](state, input) and the resulting state is independent of input.
+// If the state object represents a normal state, the resulting state of [Operations.execute](state, input) is flushing iff input === undefined.
+// If the state object represents a flushing state, the resulting state of [Operations.execute](state, input) is flushing.
 
 export class Source {  // Passive Source
   #callback;
@@ -92,8 +97,31 @@ export class Sink {  // Passive Sink
   }
 }
 
+export class Queue {
+  #data;
+  constructor() {
+    this.#data = [];
+    this.input = new Sink(this.#enqueue);
+    this.output = new Source(this.#dequeue);
+  }
+  #enqueue(obj) {
+    this.#data.push(obj);
+  }
+  #dequeue() {
+    if (this.#data.length === 0) {
+      // Just because the queue is empty at the moment, does not indicate that it will never have data.
+      return null;
+    } else {
+      return this.#data.shift();
+    }
+  }
+  get used() {
+    return this.#data.length;
+  }
+}
+
 export class ActiveSource {
-  // function init is expected to be a function that takes three arguments (resolve, reject, return), which each are functions that take a single argument.
+  // function init is expected to be a function that takes two arguments (resolve, reject), which each are functions that take a single argument.
   // Each time resolve is called, every iterator instance resolves with a structured clone of the value passed (therefore, the value must be clonable).
   // Each time reject is called, every iterator instance resolves with the error passed.
   #inputResolve;
@@ -111,19 +139,12 @@ export class ActiveSource {
       /* resolve */(value) => {
         internal.inputResolve({
           value: value,
-          done: false,
+          done: (value === undefined),
         });
         nextInput();
       },
       /* reject */(error) => {
         internal.inputReject(error);
-        nextInput();
-      },
-      /* return */(value) => {
-        internal.inputResolve({
-          value: value,
-          done: true,
-        });
         nextInput();
       },
     );
@@ -134,7 +155,9 @@ export class ActiveSource {
       let done = false;
       ({ value, done } = await this.#nextInput);
       while (!done) {
-        yield self.structuredClone(value);
+        if (value !== null) {
+          yield self.structuredClone(value);
+        }
         ({ value, done } = await this.#nextInput);
       }
       return value;
@@ -154,31 +177,26 @@ export class Pump extends ActiveSource {
   #return;
   constructor(passiveSource) {
     const source = getPassiveSource(passiveSource);
-    super((resolve, reject, return) => {
+    super((resolve, reject) => {
       this.#resolve = resolve;
       this.#reject = reject;
-      this.#return = return;
     });
     this.#source = source;
   }
   cycle() {
+    try {
     const value = this.#source();
-    if (value === undefined) {
-      return(value);
-    } else {
-      resolve(value);
+      this.#resolve(value);
+    } catch (e) {
+      this.#reject(e);
     }
   }
 }
 
 export class Pipe {
-  #source;
-  #sink;
   constructor(activeSource, passiveSink) {
     const source = getActiveSource(activeSource);
     const sink = getPassiveSink(passiveSink);
-    this.#source = source;
-    this.#sink = sink;
     this.done = (async () => {
       forward = await source();
       while (!forward.done) {
@@ -191,6 +209,9 @@ export class Pipe {
 
 class OperationSource extends Source {  // Passive Source
   constructor(operation) {
+    if (!(Operations.execute in operation)) {
+      throw "Argument must be an operation";
+    }
     let state = operation[Operations.initialize]();
     let flushing = false;
     if ((Operations.initialize in operation) && (typeof operation[Operations.initialize] === "function")) {
@@ -199,88 +220,50 @@ class OperationSource extends Source {  // Passive Source
       state = {};
     }
     super(() => {
-      flushOutput = () => {
-        const output = operation[Operations.flush](state);
-        if ((output === null) || (output === undefined)) {
-          // The operation takes no input, therefore information not available at this time is equivalent to no more information available.
-          return undefined;
-        }
-        return output;
+      const output = operation[Operations.execute](state);
+      if ((output === null) || (output === undefined)) {
+        // The operation takes no input, therefore information not available at this time is equivalent to no more information available.
+        return undefined;
       }
-      normalOutput = () => {
-        const output = operation[Operations.execute](state);
-        if ((output === null) || (output === undefined)) {
-          // The operation takes no input, therefore information not available at this time is equivalent to no more information available.
-          flushing = true;
-          return flushOutput();
-        }
-        return output;
-      };
-      if (flushing) {
-        flushOutput();
-      } else {
-        normalOutput();
-      }
+      return output;
     });
   }
 }
 
-class OperationSink extends Sink {
-  constructor(operation) {
-    let state = operation[Operations.initialize]();
-    let flushing = false;
-    if ((Operations.initialize in operation) && (typeof operation[Operations.initialize] === "function")) {
-      state = operation[Operations.initialize]();
-    } else {
-      state = {};
-    }
-    super((input) => {
-      flushOutput = () => {
-        const output = operation[Operations.flush](state, input);
-        if ((output === null) || (output === undefined)) {
-          return undefined;
-        }
-        return output;
-      }
-      normalOutput = () => {
-        const output = operation[Operations.execute](state, input);
-        if ((output === null) || (output === undefined)) {
-          flushing = true;
-          return flushOutput();
-        }
-        return output;
-      };
-      if (flushing) {
-        flushOutput();
-      } else {
-        normalOutput();
-      }
-    });
-  }
-}
+// Operations are not to have side effects, therefore there is no OperationSink
 
-export class OperationTransform {
-  #source;
-  #operation;
+// Derived from Source, therefore it is an passive source
+// Iterates over a passive source, therefore it is an active sink
+export class OperationTransform extends Source {
   #state;
   constructor(passiveSource, operation) {
-    this.#source = getPassiveSource(passiveSource);
-    this.#operation = operation;
+    const execute = operation[Operations.execute];
     if (Operations.initialize in operation) {
       this.#state = operation[Operations.initialize]();
     } else {
       this.#state = {};
     }
-  }
-  *[Symbol.iterator]() {
-    let output;
-    while (true) {
-      while (output === undefined) {
-        const item = this.#source.next();
-        output = operation[Operations.execute](item.value, this.#state);
+    const source = getPassiveSource(passiveSource);
+    super(() => {
+      const value = execute(state, null);
+      if (value === undefined) {
+        return;
+      } else if (value === null) {
+        // needs input
+        const item = source();
+        if (item === undefined) {
+          // no more input available, switch to flushing
+          return execute(state);
+        } else if (item === null) {
+          // no input availble at this time, therefore no output available at this time
+          return null;
+        } else {
+          return execute(state, input);
+        }
+      } else {
+        return value;
       }
-      yield output;
-    }
+    });
   }
 }
 
