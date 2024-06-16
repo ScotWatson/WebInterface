@@ -381,7 +381,7 @@ class Transform {
     } else {
       this.#initialize = () => ({});
     }
-    if (execute in args)) {
+    if (execute in args) {
       if (typeof args.execute !== "function") {
         throw Error("execute must be a function.");
       }
@@ -390,8 +390,41 @@ class Transform {
       this.#execute = () => { return; };
     }
   }
-  *[Symbol.iterator](args) {
-    let state = this.#initialize(args);
+  static fromTransforms(transforms) {
+    const callbacks = [];
+    for (const transform of transforms) {
+      createExecute(getSourceCallback(transform))
+    }
+    const initialize = () => {
+      const state = {};
+      const initialCallback = (input) => { return input; }
+      let currentCallback = createCallback(initialCallback, getSourceCallback(transform));
+      state.callback = () => {};
+      return state;
+    };
+    const execute = (state, input) => {
+      return state.callback(input);
+    };
+    function createSourceCallback(sourceCallback, transformCallback) {
+      return (input) => {
+        return transformCallback(input);
+      };
+    }
+    execute = () => {
+      // The first input provided to the execute function is always null, to allow any initial outputs to be generated.
+      let input = null;
+      let output = null;
+      while (true) {
+        output = this.#execute(state, input);
+        if (output === undefined) {
+          return;
+        }
+        input = yield output;
+      }
+    };
+  }
+  *[Symbol.iterator]() {
+    let state = this.#initialize();
     if (!(typeof state === "object" && state !== null)) {
       throw Error("state must be an object");
     }
