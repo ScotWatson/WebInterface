@@ -363,9 +363,10 @@ export class Pipe {
 }
 
 // Conforms to the iterator interface
-// If it is intended to be a source operation, use Source to create a passive source.
-// If it is intended to be a transform operation, use OperationTransform to create a lazy transform.
-class Operation {
+// If it is intended to be a source, use Source to create a passive source.
+// If it is intended to be a transform, use LazyTransform or EagerTransform to create a stream node.
+// Transforms are not to have side effects, therefore there is no TransformSink
+class Transform {
   #initialize;
   #execute;
   constructor(args) {
@@ -407,42 +408,10 @@ class Operation {
   }
 }
 
-// Derives from Source, therefore it is a passive source
-class OperationSource extends Source {
-  constructor(operation) {
-    if (!isNamedArguments(args)) {
-      throw "Invalid arguments";
-    }
-    if (!(operation in args)) {
-      throw Error("operation is a required parameter.");
-    }
-    if (!(Symbol.iterator in args.operation)) {
-      throw "Argument must be an operation";
-    }
-    let iterator = operation[Symbol.iterator]();
-    if (!conformsToInteratorInterface(iterator)) {
-      throw "[Symbol.iterator]() must conform to iterator interface.";
-    }
-    super(() => {
-      let output;
-      while (output === null) {
-        output = iterator.next();
-        if (output === undefined) {
-          // The operation takes no input, therefore information not available at this time is equivalent to no more information available.
-          return undefined;
-        }
-      }
-      return output;
-    });
-  }
-}
-
-// Operations are not to have side effects, therefore there is no OperationSink
-
 // Derived from Source, therefore it is an passive source
 // Iterates over a passive source, therefore it is an active sink
 // Lazy Transform
-export class OperationTransform extends Source {
+export class LazyTransform extends Source {
   constructor(args) {
     if (!isNamedArguments(args)) {
       throw "Invalid arguments";
@@ -451,110 +420,94 @@ export class OperationTransform extends Source {
       throw Error("source is a required parameter.");
     }
     const source = getSourceCallback(args.source);
-    if (!(operation in args)) {
-      throw Error("operation is a required parameter.");
+    if (typeof source !== "function") {
+      throw "source is not a valid source.";
     }
-    const operation = args.operation;
-    if (!(initArgs in args)) {
-      throw Error("initArgs is a required parameter.");
+    if (!(transform in args)) {
+      throw Error("transform is a required parameter.");
     }
-    const iterator = operation[Symbol.iterator](initArgs);
+    const callback = getSourceCallback(args.transform);
+    if (typeof callback !== "function") {
+      throw "transform is not a valid transform.";
+    }
     super(() => {
-      const value = iterator.next(null);
-      if (value === undefined) {
+      const output = callback(null);
+      if (output === undefined) {
         return;
-      } else if (value === null) {
+      } else if (output === null) {
+        // operation is in a waiting state
         // needs input
-        const item = source();
-        if (item === undefined) {
-          // no more input available, switch to flushing
-          return execute(state);
-        } else if (item === null) {
-          // no input availble at this time, therefore no output available at this time
-          return null;
-        } else {
-          return iterator.next(input);
-        }
+        const input = source();
+        return callback(input);
       } else {
-        return value;
+        return output;
       }
     });
   }
 }
 
-function waitResolve(value, ms) {
-  return new Promise((resolve) => { setTimeout(() => { resolve(value); }, ms); });
+// Extends pump, therefore it is an active source
+// Provides a sink function, therefore it is a passive sink
+// active source & passive sink, therefore Eager Transform
+export class EagerTransform extends Pump {
+  #queue;
+  constructor(args) {
+    if (!isNamedArguments(args)) {
+      throw "Invalid arguments";
+    }
+    if (!(transforms in args)) {
+      throw Error("transforms is a required parameter.");
+    }
+    if (!(Symbol.iterator in args.transforms)) {
+      throw Error("transforms must be iterable.");
+    }
+    const queue = new Queue();
+    let prevSource = queue.output;
+    for (const transform of args.transforms) {
+      prevSource = new LazyTransform({
+        source: prevSource,
+        transform,
+      });
+    }
+    super({
+      source: prevSource,
+    });
+    this.#queue = queue;
+  }
+  get callback() {
+    return this.#queue.input.callback;
+  }
+  get used() {
+    return this.#queue.used;
+  }
 }
 
-function getActiveSource(obj) {
-  if (isAsyncGenerator(obj)) {
-    return obj();
-  } else if (typeof obj === "object" && obj !== null && isAsyncGenerator(obj[Symbol.asyncIterator])) {
-    return obj[Symbol.asyncIterator]();
-  } else {
-    throw "Not an active source";
+// synchronously evaluates a transform, taking values from a source and sending the output to a sink
+export function syncEvaluate(transform, source, sink) {
+  const sourceCallback = getSourceFunction(source);
+  if (typeof sourceCallback !== "function") {
+    throw Error("source is not a valid source.");
   }
-  function isAsyncGenerator(obj) {
-    return (typeof obj === "function") && (obj[Symbol.toStringTag] === "AsyncGeneratorFunction");
+  const transformCallback = getSourceFunction(transform);
+  if (typeof transformCallback !== "function") {
+    throw Error("transform is not a valid transform.");
   }
-}
-function getPassiveSource(obj) {
-  if (isGeneratorFunction(obj)) {
-    return obj();
-  } else if (typeof obj === "object" && obj !== null && typeof obj[Symbol.iterator] === "function") {
-    const ret = obj[Symbol.iterator]();
-    if (!isGenerator(ret)) {
-      throw;
+  const sinkCallback = getSinkFunction(sink);
+  if (typeof sinkCallback !== "function") {
+    throw Error("sink is not a valid sink.");
+  }
+  let input = null;
+  let output;
+  while (true) {
+    output = transformCallback(input);
+    if (output === undefined) {
+      // end of output, end of function
+      return;
+    } else if (output === null) {
+      // transform is in a waiting state
+      input = sourceCallback();
+    } else {
+      sinkCallback(output);
     }
-    return ret;
-  } else {
-    throw "Not a passive source";
   }
-  function isGeneratorFunction(obj) {
-    return (typeof obj === "function") && (obj[Symbol.toStringTag] === "GeneratorFunction");
-  }
-  function isGenerator(obj) {  // An iterator produced by a GeneratorFunction
-    return (typeof obj === "function") && (obj[Symbol.toStringTag] === "Generator");
-  }
-}
-function getPassiveSink(obj) {
-  if (obj === null) {
-    throw;
-  }
-  if (callback in obj) {
-    return obj.callback;
-  } else if (typeof obj === "function") {
-    return obj;
-  } else {
-    throw "sink is not a passive sink.";
-  }
-  return obj;
-}
-
-export function pipePassiveToActive(source, sink) {
-  if (typeof source[Symbol.iterator] !== "function") {
-    throw "source is not a passive source.";
-  }
-  if (typeof sink[Symbol.asyncIterator] !== "function") {
-    throw "sink is not an active sink.";
-  }
-  const sourceIterator = source[Symbol.iterator]();
-  const sinkIterator = sink[Symbol.asyncIterator]();
-  (async () => {
-    let input = {};
-    while (!(await sinkIterator.next(input.value).done)) {
-      input = source.next();
-      if (input.done) {
-        break;
-      }
-    }
-  })();
-  const obj = {
-    source,
-    sink,
-    close() {
-      sinkIterator.return();
-    },
-  };
-  return obj;
 }
