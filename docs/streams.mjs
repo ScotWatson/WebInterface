@@ -391,23 +391,59 @@ class Transform {
     }
   }
   static fromTransforms(transforms) {
-    const callbacks = [];
-    for (const transform of transforms) {
-      createExecute(getSourceCallback(transform))
-    }
     const initialize = () => {
       const state = {};
-      const initialCallback = (input) => { return input; }
-      let currentCallback = createCallback(initialCallback, getSourceCallback(transform));
-      state.callback = () => {};
+      let currentCallback = (input) => (input);
+      for (const transform of transforms) {
+        currentCallback = createCallback(currentCallback, transform.callback);
+      }
+      state.callback = currentCallback;
       return state;
     };
     const execute = (state, input) => {
       return state.callback(input);
     };
-    function createSourceCallback(sourceCallback, transformCallback) {
+    return new Transform({
+      initialize,
+      execute,
+    });
+    function createCallback(transform1Callback, transform2Callback) {
       return (input) => {
-        return transformCallback(input);
+        let output;
+        if (input === undefined) {
+          const input2 = transform1Callback(undefined);
+          // input2 !== null, due to receiving undefined
+          if (input2 === undefined) {
+            // transform 1 is in a finished state
+          } else {
+            // transform 1 may or may not be in a waiting state
+          }
+          output = transform2Callback(null);
+          output = transform2Callback(input2);
+        } else {
+          output = transform2Callback(null);
+          if (output === null) {
+            // transform 2 was & is in a waiting state, needs input
+            const input2 = transform1Callback(null);
+            if (input2 === null) {
+              // transform 1 was & is in a waiting state, needs input
+              input2 = transform1Callback(input);
+            } else {
+              // transform 1 was in a flushing state, input must be null
+              if (input !== null) {
+                throw Error("Attempt to send input to a transform in a flushing state.");
+              }
+              output = transform2Callback(input2);
+              return output;
+            }
+          } else {
+            // transform 2 was in a flushing state, input must be null
+            if (input !== null) {
+              throw Error("Attempt to send input to a transform in a flushing state.");
+            }
+            return output;
+          }
+        }
       };
     }
     execute = () => {
@@ -439,6 +475,10 @@ class Transform {
       input = yield output;
     }
   }
+  get callback() {
+    const state = this.#initialize();
+    return (input) => { return this.#execute(state, input); };
+  }
 }
 
 // Derived from Source, therefore it is an passive source
@@ -459,7 +499,7 @@ export class LazyTransform extends Source {
     if (!(transform in args)) {
       throw Error("transform is a required parameter.");
     }
-    const callback = getSourceCallback(args.transform);
+    const callback = transform.callback;
     if (typeof callback !== "function") {
       throw "transform is not a valid transform.";
     }
