@@ -393,7 +393,7 @@ class Transform {
   static fromTransforms(transforms) {
     const initialize = () => {
       const state = {};
-      let currentCallback = (input) => (input);
+      let currentCallback = (source) => ( return source(); );
       for (const transform of transforms) {
         currentCallback = createCallback(currentCallback, transform.callback);
       }
@@ -408,42 +408,10 @@ class Transform {
       execute,
     });
     function createCallback(transform1Callback, transform2Callback) {
-      return (input) => {
-        let output;
-        if (input === undefined) {
-          const input2 = transform1Callback(undefined);
-          // input2 !== null, due to receiving undefined
-          if (input2 === undefined) {
-            // transform 1 is in a finished state
-          } else {
-            // transform 1 may or may not be in a waiting state
-          }
-          output = transform2Callback(null);
-          output = transform2Callback(input2);
-        } else {
-          output = transform2Callback(null);
-          if (output === null) {
-            // transform 2 was & is in a waiting state, needs input
-            const input2 = transform1Callback(null);
-            if (input2 === null) {
-              // transform 1 was & is in a waiting state, needs input
-              input2 = transform1Callback(input);
-            } else {
-              // transform 1 was in a flushing state, input must be null
-              if (input !== null) {
-                throw Error("Attempt to send input to a transform in a flushing state.");
-              }
-              output = transform2Callback(input2);
-              return output;
-            }
-          } else {
-            // transform 2 was in a flushing state, input must be null
-            if (input !== null) {
-              throw Error("Attempt to send input to a transform in a flushing state.");
-            }
-            return output;
-          }
-        }
+      return (source) => {
+        transform2Callback(() => {
+          transform1Callback(source);
+        });
       };
     }
     execute = () => {
@@ -477,7 +445,28 @@ class Transform {
   }
   get callback() {
     const state = this.#initialize();
-    return (input) => { return this.#execute(state, input); };
+    let waitingState = false;
+    let finishedState = false;
+    return (source) => {
+      if (finishedState) {
+        return;
+      }
+      if (waitingState) {
+        const input = source();
+        output = this.#execute(state, input);
+      } else {
+        let output = this.#execute(state, null);
+        if (output === null) {
+          // operation is in a waiting state
+          // needs input
+          const input = source();
+          output = this.#execute(state, input);
+        }
+      }
+      waitingState = (output === null);
+      finishedState = (output === undefined);
+      return output;
+    };
   }
 }
 
@@ -504,17 +493,7 @@ export class LazyTransform extends Source {
       throw "transform is not a valid transform.";
     }
     super(() => {
-      const output = callback(null);
-      if (output === undefined) {
-        return;
-      } else if (output === null) {
-        // operation is in a waiting state
-        // needs input
-        const input = source();
-        return callback(input);
-      } else {
-        return output;
-      }
+      return callback(source);
     });
   }
 }
