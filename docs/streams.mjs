@@ -55,9 +55,9 @@ function getSourceCallback(obj) {
     }
   } else if (typeof obj === "function") {
     // obj is to be treated as a callback function
-    this.#internalCallback = rawCallback(obj);
+    return callbackWrapper(obj);
   } else {
-    throw Error("Invalid Args");
+    return null;
   }
   function iteratorCallback(iterator) {
     return () => {
@@ -72,6 +72,15 @@ function getSourceCallback(obj) {
       }
       // iterator has set the done flag, return undefined forever
       return undefined;
+    };
+  }
+  function callbackWrapper(callback) {
+    return () => {
+      const value = this.#internalCallback();
+      if (value !== undefined) {
+        this.#internalCallback = () => {};
+      }
+      return value;
     };
   }
 }
@@ -92,35 +101,10 @@ function getSinkCallback(obj) {
 // Conforms to the iterable interface, therefore it is a passive source.
 // This class provides the guarantee that at most one iterator will be active.
 // It also provides the guarentee that once the returned value is undefined, it is always undefined.
-export class Source {
+export class PassiveSource {
   #internalCallback;
   #validIterator;
   constructor(args) {
-    let callback = getSourceCallback(args);
-    if (typeof callback === "function") {
-      this.#internalCallback = callbackWrapper(callback);
-    } else if (isNamedArguments(args)) {
-      // args is a named arguments object
-      if (!(source in args)) {
-        throw Error("source is a required parameter");
-      }
-      callback = getSourceCallback(args);
-      if (typeof callback !== "function") {
-        throw Error("source is not a valid source");
-      }
-      this.#internalCallback = callbackWrapper(callback);
-    } else {
-      throw Error("Invalid Args");
-    }
-    function callbackWrapper(callback) {
-      return () => {
-        const value = this.#internalCallback();
-        if (value !== undefined) {
-          this.#internalCallback = () => {};
-        }
-        return value;
-      };
-    }
   }
   *#getIterator() {
     try {
@@ -203,28 +187,6 @@ export class Sink {
   }
   unlock() {
     this.#validCallback = undefined;
-  }
-}
-
-export class Queue {
-  #data;
-  constructor() {
-    this.#data = [];
-    this.input = new Sink((obj) {
-      // (obj !== undefined) && (obj !== null) guaranteed
-      this.#data.push(obj);
-    });
-    this.output = new Source(() {
-      if (this.#data.length === 0) {
-        // Just because the queue is empty at the moment, does not indicate that it will never have data.
-        return null;
-      } else {
-        return this.#data.shift();
-      }
-    });
-  }
-  get used() {
-    return this.#data.length;
   }
 }
 
@@ -391,6 +353,9 @@ class Transform {
     }
   }
   static fromTransforms(transforms) {
+    if (!(Symbol.iterator in transforms)) {
+      throw Error("transforms must be iterable");
+    }
     const initialize = () => {
       const state = {};
       let currentCallback = (source) => ( return source(); );
@@ -414,18 +379,6 @@ class Transform {
         });
       };
     }
-    execute = () => {
-      // The first input provided to the execute function is always null, to allow any initial outputs to be generated.
-      let input = null;
-      let output = null;
-      while (true) {
-        output = this.#execute(state, input);
-        if (output === undefined) {
-          return;
-        }
-        input = yield output;
-      }
-    };
   }
   *[Symbol.iterator]() {
     let state = this.#initialize();
@@ -470,67 +423,92 @@ class Transform {
   }
 }
 
-// Derived from Source, therefore it is an passive source
-// Iterates over a passive source, therefore it is an active sink
-// Lazy Transform
-export class LazyTransform extends Source {
+// Extends ActiveSource, therefore it is an active source
+export class CallbackActiveSource extends ActiveSource {
+  #resolve;
+  #reject;
+  #source;
   constructor(args) {
     if (!isNamedArguments(args)) {
-      throw "Invalid arguments";
+      throw Error("Invalid arguments");
     }
-    if (!(source in args)) {
+    if (!(sourceCallback in args)) {
       throw Error("source is a required parameter.");
     }
-    const source = getSourceCallback(args.source);
-    if (typeof source !== "function") {
-      throw "source is not a valid source.";
+    if (typeof args.sourceCallback === "function") {
+      throw Error("source must be a function.");
+    }
+    if (!(transform in args)) {
+      args.transform = Transform.fromTransforms([]);
+    }
+    if (typeof args.transform.callback !== "function")) {
+      throw Error("transform is not a valid transform.");
+    }
+    super((resolve, reject) => {
+      this.#resolve = resolve;
+      this.#reject = reject;
+    });
+    this.#source = () => { return args.transform.callback(sourceCallback); };
+  }
+  // This function must be called repeatedly to drive the source
+  cycle() {
+    try {
+      const value = this.#source();
+      this.#resolve(value);
+    } catch (e) {
+      this.#reject(e);
+    }
+  }
+}
+
+// Extends ActiveSource, therefore it is an active source
+// Provides a sink function, therefore it is a passive sink
+// active source & passive sink, therefore eager transform
+export class EagerTransform extends ActiveSource {
+  #buffer;
+  #resolve;
+  #reject;
+  #source;
+  constructor(args) {
+    if (!isNamedArguments(args)) {
+      throw Error("Invalid arguments");
     }
     if (!(transform in args)) {
       throw Error("transform is a required parameter.");
     }
-    const callback = transform.callback;
-    if (typeof callback !== "function") {
-      throw "transform is not a valid transform.";
+    if (typeof args.transform.callback !== "function") {
+      throw Error("transform must be a valid transform.");
     }
-    super(() => {
-      return callback(source);
+    super((resolve, reject) => {
+      this.#resolve = resolve;
+      this.#reject = reject;
     });
-  }
-}
-
-// Extends pump, therefore it is an active source
-// Provides a sink function, therefore it is a passive sink
-// active source & passive sink, therefore Eager Transform
-export class EagerTransform extends Pump {
-  #queue;
-  constructor(args) {
-    if (!isNamedArguments(args)) {
-      throw "Invalid arguments";
-    }
-    if (!(transforms in args)) {
-      throw Error("transforms is a required parameter.");
-    }
-    if (!(Symbol.iterator in args.transforms)) {
-      throw Error("transforms must be iterable.");
-    }
-    const queue = new Queue();
-    let prevSource = queue.output;
-    for (const transform of args.transforms) {
-      prevSource = new LazyTransform({
-        source: prevSource,
-        transform,
-      });
-    }
-    super({
-      source: prevSource,
+    this.#buffer = [];
+    this.input = new Sink((obj) {
+      // (obj !== undefined) && (obj !== null) guaranteed
+      this.#buffer.push(obj);
     });
-    this.#queue = queue;
+    const dequeue = getSourceCallback(() {
+      if (this.#data.length === 0) {
+        // Just because the queue is empty at the moment, does not indicate that it will never have data.
+        return null;
+      } else {
+        return this.#buffer.shift();
+      }
+    });
+    this.#source = () => { return args.transform.callback(dequeue); };
   }
-  get callback() {
-    return this.#queue.input.callback;
+  // This function must be called repeatedly to drive the transform
+  cycle() {
+    try {
+      const value = this.#source();
+      this.#resolve(value);
+    } catch (e) {
+      this.#reject(e);
+    }
   }
   get used() {
-    return this.#queue.used;
+    return this.#buffer.length;
   }
 }
 
@@ -540,7 +518,7 @@ export function syncEvaluate(transform, source, sink) {
   if (typeof sourceCallback !== "function") {
     throw Error("source is not a valid source.");
   }
-  const transformCallback = getSourceFunction(transform);
+  const transformCallback = transform.callback;
   if (typeof transformCallback !== "function") {
     throw Error("transform is not a valid transform.");
   }
@@ -551,15 +529,11 @@ export function syncEvaluate(transform, source, sink) {
   let input = null;
   let output;
   while (true) {
-    output = transformCallback(input);
+    output = transformCallback(source);
     if (output === undefined) {
       // end of output, end of function
       return;
-    } else if (output === null) {
-      // transform is in a waiting state
-      input = sourceCallback();
-    } else {
-      sinkCallback(output);
     }
+    sinkCallback(output);
   }
 }
