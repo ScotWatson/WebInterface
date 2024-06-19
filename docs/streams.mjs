@@ -3,11 +3,11 @@
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-// An active source is an async iterable, an async iterator, or an async function.
-// A passive source is an iterable, an iterator, or a function.
-// A passive sink is a function.
-// An active sink is any object that iterates over a passive source.
-// There is no implemetation of an active sink. Active sinks are given a queue of their own and get implemented as passive sinks
+// A source is an iterable, an iterator, or a function; it takes no parameters and returns the next value.
+// A sink is a function; it takes one parameter and returns undefined.
+// Use ActiveSource when the values are arriving via callback (e.g. event listeners)
+// Use SourceNode when the source is a function.
+
 // null = information not available at the moment
 // undefined = no more information available, will return undefined indefinately
 // An operation is a generator. The operation is initialized by parameters passed to the generator when obtaining its iterator.
@@ -84,111 +84,6 @@ function getSourceCallback(obj) {
     };
   }
 }
-function getSinkCallback(obj) {
-  if (typeof args === "object") {
-    const callback = args[Streams.callback];
-    if (typeof callback !== "function") {
-      throw Error("callback property must return a function");
-    }
-    return callback;
-  } else if (typeof args === "function") {
-    return args;
-  } else {
-    return null;
-  }
-}
-
-// Conforms to the iterable interface, therefore it is a passive source.
-// This class provides the guarantee that at most one iterator will be active.
-// It also provides the guarentee that once the returned value is undefined, it is always undefined.
-export class PassiveSource {
-  #internalCallback;
-  #validIterator;
-  constructor(args) {
-  }
-  *#getIterator() {
-    try {
-      while (true) {
-        const value = this.internalCallback();
-        if (value === undefined) {
-          // no more information available, set the done flag
-          return;
-        }
-        // pass value to sink, even if the value is null (which would indicate no information available at this time)
-        yield value;
-      }
-    } finally {
-      this.#validIterator = null;
-    }
-  };
-  [Symbol.iterator]() {
-    if (this.#validIterator) {
-      throw "This source is locked.";
-    }
-    this.#validIterator = this.#getIterator();
-    return this.#validIterator;
-  }
-  get locked() {
-    return !!this.#validIterator;
-  }
-  unlock() {
-    this.#validIterator.return();
-    this.#validIterator = undefined;
-  }
-}
-
-// Implements [Streams.callback], therefore it is a passive sink.
-// [Streams.callback] takes only one argument, all other arguments are ignored.
-export class Sink {
-  #internalCallback;
-  #validCallback;
-  constructor(args) {
-    const callback = getSinkCallback(args);
-    if (typeof callback === "function") {
-      this.#internalCallback = callback;
-    } else if (isNamedArguments(args)) {
-      // args is a named arguments object
-      if (!(sink in args)) {
-        throw Error("sink is a required argument.");
-      }
-      const callback = getSinkCallback(args.sink);
-      if (typeof callback !== "function") {
-        throw Error("sink is not a valid sink.");
-      }
-      this.#internalCallback = callback;
-    } else {
-      throw Error("Invalid Args");
-    }
-  }
-  get [Streams.callback]() {
-    if (this.locked) {
-      throw "sink is locked";
-    }
-    const myId = self.crypto.randomUUID();
-    this.#locked = myId;
-    const thisCallback = (obj) => {
-      // Check to ensure the callback has not been invalidated
-      if (thisCallback !== this.#validCallback) {
-        throw "Attempt to send data to invalidated callback.";
-      }
-      // The return value from the internal callback is ignored.
-      if (obj === undefined) {
-        // If undefined is received, there is no more input
-        this.unlock();
-      } else if (obj !== null) {
-        this.#internalCallback(obj);
-      }
-      // The sink always returns undefined.
-    };
-    this.#validCallback = thisCallback;
-  }
-  get locked() {
-    return !!this.#validCallback;
-  }
-  unlock() {
-    this.#validCallback = undefined;
-  }
-}
 
 // Conforms to the async iterable protocol, therefore it is an active source
 export class ActiveSource {
@@ -241,34 +136,34 @@ export class ActiveSource {
   }
 };
 
-// Derives from ActiveSource, therefore it is an active source.
-// Iterates a passive source, therefore it is an active sink.
-export class Pump extends ActiveSource {
-  #source;
+// Extends ActiveSource, therefore it is an active source
+export class SourceNode extends ActiveSource {
   #resolve;
   #reject;
+  #source;
   constructor(args) {
-    const source = (() => {
-      let source = getSourceCallback(args);
-      if (typeof source === "function") {
-        return source;
-      } else if (isNamedArguments(args)) {
-        source = getSourceCallback(args);
-        if (typeof source !== "function") {
-          throw Error("source is not a valid source");
-        }
-        return source;
-      } else {
-        throw Error("Invalid Arguments");
-      }
-    })();
+    if (!isNamedArguments(args)) {
+      throw Error("Invalid arguments");
+    }
+    if (!(source in args)) {
+      throw Error("source is a required parameter.");
+    }
+    if (typeof args.source === "function") {
+      throw Error("source must be a function.");
+    }
+    if (!(transform in args)) {
+      args.transform = Transform.fromTransforms([]);
+    }
+    if (typeof args.transform.callback !== "function")) {
+      throw Error("transform is not a valid transform.");
+    }
     super((resolve, reject) => {
       this.#resolve = resolve;
       this.#reject = reject;
     });
-    this.#source = source;
+    this.#source = () => { return args.transform.callback(sourceCallback); };
   }
-  // This function must be called repeatedly to drive the pump
+  // This function must be called repeatedly to drive the source
   cycle() {
     try {
       const value = this.#source();
@@ -276,6 +171,53 @@ export class Pump extends ActiveSource {
     } catch (e) {
       this.#reject(e);
     }
+  }
+}
+
+export class SinkNode {
+  #internalCallback;
+  #validCallback;
+  constructor(args) {
+    if (typeof args === "function") {
+      this.#internalCallback = getSinkCallback(args);
+    } else if (isNamedArguments(args)) {
+      // args is a named arguments object
+      if (!(sink in args)) {
+        throw Error("sink is a required argument.");
+      }
+      if (typeof args.sink !== "function") {
+        throw Error("sink is not a valid sink.");
+      }
+      this.#internalCallback = args.sink;
+    } else {
+      throw Error("Invalid Args");
+    }
+  }
+  get callback() {
+    if (this.locked) {
+      throw "sink is locked";
+    }
+    const thisCallback = (obj) => {
+      // Check to ensure the callback has not been invalidated
+      if (thisCallback !== this.#validCallback) {
+        throw "Attempt to send data to invalidated callback.";
+      }
+      // The return value from the internal callback is ignored.
+      if (obj === undefined) {
+        // If undefined is received, there is no more input
+        this.unlock();
+      } else if (obj !== null) {
+        this.#internalCallback(obj);
+      }
+      // The sink always returns undefined.
+    };
+    this.#validCallback = thisCallback;
+  }
+  get locked() {
+    return !!this.#validCallback;
+  }
+  unlock() {
+    this.#validCallback = undefined;
   }
 }
 
@@ -423,51 +365,8 @@ class Transform {
   }
 }
 
-// Extends ActiveSource, therefore it is an active source
-export class CallbackActiveSource extends ActiveSource {
-  #resolve;
-  #reject;
-  #source;
-  constructor(args) {
-    if (!isNamedArguments(args)) {
-      throw Error("Invalid arguments");
-    }
-    if (!(sourceCallback in args)) {
-      throw Error("source is a required parameter.");
-    }
-    if (typeof args.sourceCallback === "function") {
-      throw Error("source must be a function.");
-    }
-    if (!(transform in args)) {
-      args.transform = Transform.fromTransforms([]);
-    }
-    if (typeof args.transform.callback !== "function")) {
-      throw Error("transform is not a valid transform.");
-    }
-    super((resolve, reject) => {
-      this.#resolve = resolve;
-      this.#reject = reject;
-    });
-    this.#source = () => { return args.transform.callback(sourceCallback); };
-  }
-  // This function must be called repeatedly to drive the source
-  cycle() {
-    try {
-      const value = this.#source();
-      this.#resolve(value);
-    } catch (e) {
-      this.#reject(e);
-    }
-  }
-}
-
-// Extends ActiveSource, therefore it is an active source
-// Provides a sink function, therefore it is a passive sink
-// active source & passive sink, therefore eager transform
-export class EagerTransform extends ActiveSource {
+export class TransformNode {
   #buffer;
-  #resolve;
-  #reject;
   #source;
   constructor(args) {
     if (!isNamedArguments(args)) {
@@ -479,15 +378,7 @@ export class EagerTransform extends ActiveSource {
     if (typeof args.transform.callback !== "function") {
       throw Error("transform must be a valid transform.");
     }
-    super((resolve, reject) => {
-      this.#resolve = resolve;
-      this.#reject = reject;
-    });
     this.#buffer = [];
-    this.input = new Sink((obj) {
-      // (obj !== undefined) && (obj !== null) guaranteed
-      this.#buffer.push(obj);
-    });
     const dequeue = getSourceCallback(() {
       if (this.#data.length === 0) {
         // Just because the queue is empty at the moment, does not indicate that it will never have data.
@@ -496,16 +387,13 @@ export class EagerTransform extends ActiveSource {
         return this.#buffer.shift();
       }
     });
-    this.#source = () => { return args.transform.callback(dequeue); };
+    // (obj !== undefined) && (obj !== null) guaranteed
+    this.input = new SinkNode((obj) => { this.#buffer.push(obj); });
+    this.output = new SourceNode(() => { return args.transform.callback(dequeue); });
   }
   // This function must be called repeatedly to drive the transform
   cycle() {
-    try {
-      const value = this.#source();
-      this.#resolve(value);
-    } catch (e) {
-      this.#reject(e);
-    }
+    return this.output.cycle();
   }
   get used() {
     return this.#buffer.length;
