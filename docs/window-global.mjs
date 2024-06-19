@@ -18,6 +18,12 @@ import * as Streams from "https://scotwatson.github.io/WebInterface/streams.mjs"
 
 export const forWorker = MessagingSocket.forWorker;
 
+export const loadWindow = new Promise(function (resolve, reject) {
+  window.addEventListener("load", function (evt) {
+    resolve(evt);
+  });
+});
+
 const trustedOrigins = new Set();
 export function addTrustedOrigin(origin) {
   trustedOrigins.add(origin);
