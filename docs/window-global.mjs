@@ -14,6 +14,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 import * as Common from "https://scotwatson.github.io/WebInterface/common.mjs";
 import * as MessagingSocket from "https://scotwatson.github.io/WebInterface/message-socket.mjs";
+import * as Streams from "https://scotwatson.github.io/WebInterface/streams.mjs";
 
 export const forWorker = MessagingSocket.forWorker;
 
@@ -28,11 +29,11 @@ export function isTrustedOrigin(origin) {
   return trustedOrigins.has(origin);
 }
 let trustedOriginHandler;
-export const trustedOrigin = Common.createSignal(function (resolve, reject) {
+export const trustedOrigin = new Streams.ActiveSource(function (resolve, reject) {
   trustedOriginHandler = resolve;
 });
 let untrustedOriginHandler;
-export const untrustedOrigin = Common.createSignal(function (resolve, reject) {
+export const untrustedOrigin = new Streams.ActiveSource(function (resolve, reject) {
   untrustedOriginHandler = resolve;
 });
 
@@ -70,7 +71,7 @@ export function forWindowOrigin({
   origin,
 }) {
   return {
-    message: Common.createSignal(async function (resolve, reject) {
+    message: new Streams.ActiveSource(async function (resolve, reject) {
       for await (const info of trustedOrigin) {
         if ((info.source === window) && (info.origin === origin)) {
           resolve(info.data);
@@ -86,7 +87,7 @@ export function forWindowOrigin({
   };
 }
 
-const controller = Common.createSignal(function (resolve, reject) {
+const controller = new Streams.ActiveSource(function (resolve, reject) {
   if (navigator.serviceWorker.controller !== null) {
     resolve();
     return;
@@ -101,7 +102,7 @@ export function forServiceWorker({
   worker,
 }) {
   return {
-    message: Common.createSignal(function (resolve, reject) {
+    message: new Streams.ActiveSource(function (resolve, reject) {
       // Messages cannot be received directly from ServiceWorkers
       reject();
     }),
@@ -115,7 +116,7 @@ export function forServiceWorker({
 }
 
 export const controllerSource = {
-  message: Common.createSignal(function (resolve, reject) {
+  message: new Streams.ActiveSource(function (resolve, reject) {
     window.navigator.serviceWorker.addEventListener("message", function (evt) {
       resolve(evt.data);
     });
@@ -143,7 +144,7 @@ export function setServiceWorkerHeartbeat({
   }
 }
 
-export const controllerchange = Common.createSignal((resolve, reject) => {
+export const controllerchange = new Streams.ActiveSource((resolve, reject) => {
   navigator.serviceWorker.addEventListener("controllerchange", (evt) => {
     resolve({
       serviceWorker: self.navigator.serviceWorker.controller,
