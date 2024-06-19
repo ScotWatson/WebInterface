@@ -8,65 +8,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 (self.document === undefined ? self : self.document).currentScript.exports = (function () {
   const exports = {};
   // async Iterable Iterator
-  exports.createSignal = function createSignal(initFunc) {
-    const obj = {};
-    let resolveArray = [];
-    let rejectArray = [];
-    let resolve = function (value, done) {
-      for (const resolve of resolveArray) {
-        resolve({
-          value: value,
-          done: !!done,
-        });
-      }
-      resolveArray = [];
-      rejectArray = [];
-    };
-    let reject = function (error) {
-      for (const reject of rejectArray) {
-        reject({
-          value: value,
-          done: true,
-        });
-      }
-      resolveArray = [];
-      rejectArray = [];
-    };
-    obj.next = function () {
-      return new Promise(function (resolve, reject) {
-        resolveArray.push(resolve);
-        rejectArray.push(reject);
-      });
-    };
-    obj[Symbol.asyncIterator] = function () {
-      return obj;
-    };
-    initFunc(resolve, reject);
-    resolve = null;
-    reject = null;
-    return obj;
-  };
-  exports.createAbortablePromise = function createAbortablePromise({
-    initFunc,
-    abortFunc,
-  }) {
-    let resolveFunc;
-    let rejectFunc;
-    const ret = new Promise(function (resolve, reject) {
-      resolveFunc = resolve;
-      rejectFunc = reject;
-      initFunc(resolve, reject);
-    });
-    ret.resolve = function (value) {
-      abortFunc();
-      resolveFunc(value);
-    };
-    ret.reject = function (reason) {
-      abortFunc();
-      rejectFunc(reason);
-    };
-    return ret;
-  };
   exports.base64Decode =  async function base64Decode(str) {
     return await (new self.Blob([ self.atob(str) ])).arrayBuffer();
   };
