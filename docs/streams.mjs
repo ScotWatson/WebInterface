@@ -86,14 +86,25 @@ function getSourceCallback(obj) {
 }
 
 // Conforms to the async iterable protocol, therefore it is an active source
-export class ActiveSource {
+export class SourceNode {
   // function init is expected to be a function that takes two arguments (resolve, reject), which each are functions that take a single argument.
   // Each time resolve is called, every iterator instance resolves with a structured clone of the value passed (therefore, the value must be clonable).
   // Each time reject is called, every iterator instance resolves with the error passed.
   #inputResolve;
   #inputReject;
   #nextInput;
-  constructor(init) {
+  constructor(args) {
+    let init;
+    if (isNamedArguments(args)) {
+      if (!(init in args)) {
+        throw "source is a required argument.";
+      }
+      init = args.init;
+    } else if (typeof args == "function") {
+      init = args;
+    } else {
+      throw "Invalid args";
+    }
     const nextInput = () => {
       this.#nextInput = new Promise((resolve, reject) => {
         this.#inputResolve = resolve;
@@ -136,42 +147,32 @@ export class ActiveSource {
   }
 };
 
-// Extends ActiveSource, therefore it is an active source
-export class SourceNode extends ActiveSource {
-  #resolve;
-  #reject;
-  #source;
-  constructor(args) {
-    if (!isNamedArguments(args)) {
-      throw Error("Invalid arguments");
-    }
+export function sourceFunctionToNode(args) {
+  let source;
+  if (isNamedArguments(args)) {
     if (!(source in args)) {
-      throw Error("source is a required parameter.");
+      throw "source is a required argument.";
     }
-    if (typeof args.source === "function") {
-      throw Error("source must be a function.");
-    }
-    if (!(transform in args)) {
-      args.transform = Transform.fromTransforms([]);
-    }
-    if (typeof args.transform.callback !== "function")) {
-      throw Error("transform is not a valid transform.");
-    }
-    super((resolve, reject) => {
-      this.#resolve = resolve;
-      this.#reject = reject;
-    });
-    this.#source = () => { return args.transform.callback(sourceCallback); };
+    source = args.source;
+  } else if (typeof args == "function") {
+    source = args;
+  } else {
+    throw "Invalid args";
   }
+  const ret = new SourceNode((resolve, reject) => {
+    thisResolve = resolve;
+    thisReject = reject;
+  });
   // This function must be called repeatedly to drive the source
-  cycle() {
+  ret.cycle = () => {
     try {
-      const value = this.#source();
-      this.#resolve(value);
+      const value = source();
+      thisResolve(value);
     } catch (e) {
-      this.#reject(e);
+      thisReject(e);
     }
-  }
+  };
+  return ret;
 }
 
 export class SinkNode {
