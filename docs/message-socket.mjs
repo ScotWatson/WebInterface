@@ -4,35 +4,30 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 import * as Streams from "https://scotwatson.github.io/WebInterface/streams.mjs";
-import MessageQueue from "https://scotwatson.github.io/WebInterface/MessageQueue.mjs";
 
-function forMessagePort(messagePort) {
-  const queue = new MessageQueue(messagePort);
-  messagePort.start();
+export function forMessagePort(messagePort) {
   return {
-    output: new Streams.ActiveSource(function (resolve, reject) {
-      queue.addEventListener("message", (evt) => resolve(evt.data) );
+    output: new Streams.SourceNode(function (resolve, reject) {
+      messagePort.addEventListener("message", (evt) => resolve(evt.data) );
     }),
-    input: new Streams.Sink((data) {
-      const transfer = getTransfer(data);
-      messagePort.postMessage(data, transfer);
-      function getTransfer(data) {
-        const transfer = [];
-        if ((typeof data === "object") && Object.has(data, "_transfer") && Object.has(data._transfer, Symbol.iterator)) {
-          transfer.push(...data._transfer);
-          delete data._transfer;
-          for (const prop of data) {
-            transfer.push(...getTransfer(data[prop]));
-          }
-        }
-        return transfer;
-      }
+    input: new Streams.SinkNode((data) {
+      postMessage(messagePort, data);
     }),
-    start() {
-      queue.start();
-    },
-    stop() {
-      queue.stop();
-    },
   };
+}
+
+export function postMessage(messagePort, data) {
+  const transfer = getTransfer(data);
+  messagePort.postMessage(data, transfer);
+  function getTransfer(data) {
+    const transfer = [];
+    if ((typeof data === "object") && Object.has(data, "_transfer") && Object.has(data._transfer, Symbol.iterator)) {
+      transfer.push(...data._transfer);
+      delete data._transfer;
+      for (const prop of data) {
+        transfer.push(...getTransfer(data[prop]));
+      }
+    }
+    return transfer;
+  }
 }
