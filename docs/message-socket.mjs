@@ -11,15 +11,21 @@ function forMessagePort(messagePort) {
   messagePort.start();
   return {
     output: new Streams.ActiveSource(function (resolve, reject) {
-      messagePort.addEventListener("message", (evt) => resolve(evt.data) );
+      queue.addEventListener("message", (evt) => resolve(evt.data) );
     }),
-    input: new Sink((data) {
-      if ((typeof data === "object") && Object.has(data, "_transfer")) {
-        const transfer = data._transfer;
-        delete data._transfer;
-        messagePort.postMessage(data, transfer);
-      } else {
-        messagePort.postMessage(data);
+    input: new Streams.Sink((data) {
+      const transfer = getTransfer(data);
+      messagePort.postMessage(data, transfer);
+      function getTransfer(data) {
+        const transfer = [];
+        if ((typeof data === "object") && Object.has(data, "_transfer") && Object.has(data._transfer, Symbol.iterator)) {
+          transfer.push(...data._transfer);
+          delete data._transfer;
+          for (const prop of data) {
+            transfer.push(...getTransfer(data[prop]));
+          }
+        }
+        return transfer;
       }
     }),
     start() {
