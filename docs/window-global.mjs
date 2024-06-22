@@ -77,19 +77,22 @@ export function forWindowOrigin({
   origin,
 }) {
   return {
-    message: new Streams.ActiveSource(async function (resolve, reject) {
+    output: new Streams.ActiveSource(async function (resolve, reject) {
       for await (const info of trustedOrigin) {
         if ((info.source === window) && (info.origin === origin)) {
           resolve(info.data);
         }
       }
     }),
-    send({
-      data,
-      transfer,
-    }) {
-      window.postMessage(data, origin, transfer);
-    },
+    input: new Streams.Sink((data) => {
+      if ((typeof data === "object") && (Object.hasOwn(data, "_transfer"))) {
+        const transfer = data._transfer;
+        delete x._transfer;
+        window.postMessage(data, origin, transfer);
+      } else {
+        window.postMessage(data, origin);
+      }
+    }),
   };
 }
 
