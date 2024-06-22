@@ -15,6 +15,22 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 export * as Common from "https://scotwatson.github.io/WebInterface/common.mjs";
 export { default as SiteStorage } from "https://scotwatson.github.io/WebInterface/SiteStorage.mjs";
 
+function postMessage(messagePort, origin, data) {
+  const transfer = getTransfer(data);
+  messagePort.postMessage(data, origin, transfer);
+  function getTransfer(data) {
+    const transfer = [];
+    if ((typeof data === "object") && Object.has(data, "_transfer") && Object.has(data._transfer, Symbol.iterator)) {
+      transfer.push(...data._transfer);
+      delete data._transfer;
+      for (const prop of data) {
+        transfer.push(...getTransfer(data[prop]));
+      }
+    }
+    return transfer;
+  }
+}
+
 export const loadWindow = new Promise(function (resolve, reject) {
   window.addEventListener("load", function (evt) {
     resolve(evt);
@@ -82,55 +98,24 @@ export function forWindowOrigin({
       }
     }),
     input: new Streams.SinkNode((data) => {
-      if ((typeof data === "object") && (Object.hasOwn(data, "_transfer"))) {
-        const transfer = data._transfer;
-        delete x._transfer;
-        window.postMessage(data, origin, transfer);
-      } else {
-        window.postMessage(data, origin);
-      }
+      postMessage(window, origin, data);
     }),
   };
 }
 
-const controller = new Streams.SourceNode((resolve, reject) => {
-  if (navigator.serviceWorker.controller !== null) {
-    resolve();
-    return;
-  }
-  navigator.serviceWorker.addEventListener("controllerchange", function (evt) {
-    resolve();
-    return;
-  });
-});
-
-export function forServiceWorker({
-  worker,
+export function MessageSocketforServiceWorker({
+  serviceWorker,
 }) {
   return {
-    message: new Streams.SourceNode(function (resolve, reject) {
+    output: new Streams.SourceNode((resolve, reject) => {
       // Messages cannot be received directly from ServiceWorkers
       reject();
     }),
-    send: function ({
-      data,
-      transfer,
-    }) {
-      serviceWorker.postMessage(data, transfer);
-    },
+    input: new Streams.SinkNode((data) => {
+      MessageSocket.postMessage(serviceWorker, data);
+    }),
   };
 }
-
-export const controllerSource = {
-  message: new Streams.SourceNode(function (resolve, reject) {
-    window.navigator.serviceWorker.addEventListener("message", function (evt) {
-      resolve(evt.data);
-    });
-    window.navigator.serviceWorker.addEventListener("messageerror", function (evt) {
-      reject(evt);
-    });
-  }),
-};
 
 const serviceWorkerHeartbeats = new Map();
 export function setServiceWorkerHeartbeat({
@@ -150,19 +135,33 @@ export function setServiceWorkerHeartbeat({
   }
 }
 
-export const controllerchange = new Streams.SourceNode((resolve, reject) => {
-  navigator.serviceWorker.addEventListener("controllerchange", (evt) => {
-    resolve({
-      serviceWorker: self.navigator.serviceWorker.controller,
-      messageSource: controllerSource,
-      messageSink: forServiceWorker(self.navigator.serviceWorker.controller),
-    });
+export let controller = null;
+
+const controllerSource = new Streams.SourceNode((resolve, reject) => {
+  window.navigator.serviceWorker.addEventListener("message", function (evt) {
+    resolve(evt.data);
   });
-  if (navigator.serviceWorker.controller !== null) {
-    resolve({
-      serviceWorker: self.navigator.serviceWorker.controller,
-      messageSource: controllerSource,
-      messageSink: forServiceWorker(self.navigator.serviceWorker.controller),
-    });
+  window.navigator.serviceWorker.addEventListener("messageerror", function (evt) {
+    reject(evt);
+  });
+});
+
+export const controllerchange = new Streams.SourceNode((resolve, reject) => {
+  window.navigator.serviceWorker.addEventListener("controllerchange", (evt) => {
+    newController();
+    resolve();
+  });
+  if (window.navigator.serviceWorker.controller !== null) {
+    newController();
+    resolve();
+  }
+  function newController() {
+    controller = {
+      serviceWorker: window.navigator.serviceWorker.controller,
+      output: controllerSource,
+      input: new Streams.SinkNode((data) => {
+        MessageSocket.postMessage(window.navigator.serviceWorker.controller, data);
+      }),
+    };
   }
 });
