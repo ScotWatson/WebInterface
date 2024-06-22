@@ -225,7 +225,7 @@ export class SinkNode {
 export class Pipe {
   constructor(args, arg2) {
     const { source, sink } = (() => {
-      if (typeof args == "object" && args !== null && args.prototype.constructor.name = "Object") {
+      if (isNamedArguments(args)) {
         // args is a named arguments object
         if (!(source in args)) {
           throw Error("source is a required parameter.");
@@ -234,36 +234,69 @@ export class Pipe {
           throw Error("sink is a required parameter.");
         }
         return {
-          source: getSourceCallback(args.source),
-          sink: getSinkCallback(args.sink),
+          source: args.source,
+          sink: args.sink,
         };
       } else {
-        return {
-          source: getSourceCallback(args),
-          sink: getSinkCallback(arg2),
-        };
-      }
-    })();
-    if (typeof sink !== "function") {
-      throw Error("Invalid sink");
-    }
-    this.done = (async () => {
-      let forwarding = source();
-      if (then in forwarding) {
-        let forward = await forwarding;
-      } else {
-        throw Error("Active source must return a thenable.");
-      }
-      while (forward !== undefined) {
-        sink(forward);
-        forwarding = await source();
-        if (then in forwarding) {
-          let forward = await forwarding;
-        } else {
-          throw Error("Active source must return a thenable.");
+        if (arg2 === "undefined") {
+          throw Error("sink is a required parameter.");
         }
+        return {
+          source: args,
+          sink: arg2,
+        };
       }
     })();
+    if (typeof source !== "object") {
+      throw Error("source must be an object.");
+    }
+    if (!(Symbol.asyncIterator in source)) {
+      throw Error("source must be an async iterable.");
+    }
+    if (typeof sink !== "object") {
+      throw Error("sink must be an object.");
+    }
+    if (callback in sink) {
+      throw Error("sink must provide a callback.");
+    }
+    const connection = source[Symbol.asyncIterator]();
+    const abort = new Promise((resolve, reject) => {
+      abort.return = resolve;
+      abort.throw = reject;
+    })
+    function fetchData() {
+      return Promise.race([ connection.next(), abort ]).then(({ value, done }) => {
+        if (!!done) {
+          return value;
+        } else {
+          if (value === undefined) {
+            return null;
+          } else {
+            return value;
+          }
+        }
+      });
+    }
+    const sendData = sink.callback;
+    const process = (async () => {
+      let data;
+      do {
+        data = await fetchData();
+        if (data !== null) {
+          sendData(data);
+        }
+      } while (data !== undefined);
+    })();
+    // These two functions make the pipe act as a promise
+    this.then = process.then;
+    this.catch = process.catch;
+    // These two functions make the promise abortable
+    this.return = () => {
+      abort.return({ done: true });
+    };
+    this.throw = (error) => {
+      abort.throw(error);
+    };
   }
 }
 
