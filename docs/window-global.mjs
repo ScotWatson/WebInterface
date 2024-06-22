@@ -32,11 +32,11 @@ export function isTrustedOrigin(origin) {
   return trustedOrigins.has(origin);
 }
 let trustedOriginHandler;
-export const trustedOrigin = new Streams.ActiveSource(function (resolve, reject) {
+export const trustedOrigin = new Streams.SourceNode((resolve, reject) => {
   trustedOriginHandler = resolve;
 });
 let untrustedOriginHandler;
-export const untrustedOrigin = new Streams.ActiveSource(function (resolve, reject) {
+export const untrustedOrigin = new Streams.SourceNode((resolve, reject) => {
   untrustedOriginHandler = resolve;
 });
 
@@ -74,14 +74,14 @@ export function forWindowOrigin({
   origin,
 }) {
   return {
-    output: new Streams.ActiveSource(async function (resolve, reject) {
+    output: new Streams.SourceNode(async (resolve, reject) => {
       for await (const info of trustedOrigin) {
         if ((info.source === window) && (info.origin === origin)) {
           resolve(info.data);
         }
       }
     }),
-    input: new Streams.Sink((data) => {
+    input: new Streams.SinkNode((data) => {
       if ((typeof data === "object") && (Object.hasOwn(data, "_transfer"))) {
         const transfer = data._transfer;
         delete x._transfer;
@@ -93,7 +93,7 @@ export function forWindowOrigin({
   };
 }
 
-const controller = new Streams.ActiveSource(function (resolve, reject) {
+const controller = new Streams.SourceNode((resolve, reject) => {
   if (navigator.serviceWorker.controller !== null) {
     resolve();
     return;
@@ -108,7 +108,7 @@ export function forServiceWorker({
   worker,
 }) {
   return {
-    message: new Streams.ActiveSource(function (resolve, reject) {
+    message: new Streams.SourceNode(function (resolve, reject) {
       // Messages cannot be received directly from ServiceWorkers
       reject();
     }),
@@ -122,7 +122,7 @@ export function forServiceWorker({
 }
 
 export const controllerSource = {
-  message: new Streams.ActiveSource(function (resolve, reject) {
+  message: new Streams.SourceNode(function (resolve, reject) {
     window.navigator.serviceWorker.addEventListener("message", function (evt) {
       resolve(evt.data);
     });
@@ -150,7 +150,7 @@ export function setServiceWorkerHeartbeat({
   }
 }
 
-export const controllerchange = new Streams.ActiveSource((resolve, reject) => {
+export const controllerchange = new Streams.SourceNode((resolve, reject) => {
   navigator.serviceWorker.addEventListener("controllerchange", (evt) => {
     resolve({
       serviceWorker: self.navigator.serviceWorker.controller,
