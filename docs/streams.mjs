@@ -34,7 +34,7 @@ function isIterator(obj) {
 }
 
 function isNamedArguments(obj) {
-  return (typeof obj === "object" && obj !== null && obj.prototype.constructor.name === "Object");
+  return (typeof obj === "object" && obj !== null && obj.constructor.name === "Object");
 }
 
 function getSourceCallback(obj) {
