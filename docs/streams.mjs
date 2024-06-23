@@ -76,9 +76,9 @@ function getSourceCallback(obj) {
   }
   function callbackWrapper(callback) {
     return () => {
-      const value = this.#internalCallback();
+      const value = callback();
       if (value !== undefined) {
-        this.#internalCallback = () => {};
+        callback = () => {};
       }
       return value;
     };
