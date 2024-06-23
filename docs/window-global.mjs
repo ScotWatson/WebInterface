@@ -22,7 +22,7 @@ function postMessage(messagePort, origin, data) {
   messagePort.postMessage(data, origin, transfer);
   function getTransfer(data) {
     const transfer = [];
-    if ((typeof data === "object") && Object.has(data, "_transfer") && Object.has(data._transfer, Symbol.iterator)) {
+    if ((typeof data === "object") && Object.hasOwn(data, "_transfer") && Object.hasOwn(data._transfer, Symbol.iterator)) {
       transfer.push(...data._transfer);
       delete data._transfer;
       for (const prop of data) {
