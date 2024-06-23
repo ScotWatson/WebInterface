@@ -13,9 +13,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     #responseFunctions;
     #resolve;
     #reject;
+    #timeout;
     constructor({
       timeout, // in ms
     }) {
+      this.#timeout = timeout;
       this.#packetIds = new Map();
       this.#responseFunctions = new Map();
       this.input = new Streams.SinkNode((data) => {
@@ -72,8 +74,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       const packetId = self.crypto.randomUUID();
       const requesting = new Promise(function (resolve, reject) {
         packetIds.set(packetId, { resolve, reject });
-        if (timeout) {
-          self.setTimeout(rejectOnTimeout, timeout);
+        if (this.#timeout) {
+          self.setTimeout(rejectOnTimeout, this.#timeout);
           function rejectOnTimeout() {
             reject("Request Timed Out: " + packetId);
           }
