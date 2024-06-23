@@ -83,9 +83,9 @@ export default class RemoteProcedureSocket {
           action: "request",
           functionName: functionName,
           args: args,
-          timeout: Date.now() + timeout,
+          timeout: Date.now() + this.#timeout,
+          _transfer: transferable,
         },
-        transferable: transferable,
       });
     });
     requesting.packetId = packetId;
