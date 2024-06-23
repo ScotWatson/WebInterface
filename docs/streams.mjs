@@ -137,6 +137,7 @@ export class SourceNode {
       while (!done) {
         if (value !== null) {
           if (!options.noCopy) {
+            console.log(value);
             yield self.structuredClone(value);
           } else {
             yield value;
