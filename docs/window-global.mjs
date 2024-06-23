@@ -161,7 +161,7 @@ export const controllerchange = new Common.Streams.SourceNode((resolve, reject) 
     controller = {
       serviceWorker: window.navigator.serviceWorker.controller,
       output: controllerSource,
-      input: new Streams.SinkNode((data) => {
+      input: new Common.Streams.SinkNode((data) => {
         Common.MessageNode.postMessage(window.navigator.serviceWorker.controller, data);
       }),
     };
