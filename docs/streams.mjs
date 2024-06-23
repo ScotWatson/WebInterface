@@ -180,7 +180,7 @@ export class SinkNode {
   #validCallback;
   constructor(args) {
     if (typeof args === "function") {
-      this.#internalCallback = getSinkCallback(args);
+      this.#internalCallback = args;
     } else if (isNamedArguments(args)) {
       // args is a named arguments object
       if (!(sink in args)) {
@@ -444,7 +444,7 @@ export function syncEvaluate(transform, source, sink) {
   if (typeof transformCallback !== "function") {
     throw Error("transform is not a valid transform.");
   }
-  const sinkCallback = getSinkFunction(sink);
+  const sinkCallback = sink;
   if (typeof sinkCallback !== "function") {
     throw Error("sink is not a valid sink.");
   }
