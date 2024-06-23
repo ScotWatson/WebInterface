@@ -257,6 +257,7 @@ export class Pipe {
       throw Error("sink must be an object.");
     }
     if ("callback" in sink) {
+      console.error(sink);
       throw Error("sink must provide a callback.");
     }
     const connection = source[Symbol.asyncIterator]();
