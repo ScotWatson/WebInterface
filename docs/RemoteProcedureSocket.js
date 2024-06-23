@@ -21,7 +21,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       this.input = new Sink((data) => {
         if (!data || !data.packetId) {
           // This is not a packet message
-          continue;
+          return;
         }
         switch (data.action) {
           case "request": {
