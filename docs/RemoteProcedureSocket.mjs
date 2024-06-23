@@ -22,15 +22,15 @@ export default class RemoteProcedureSocket {
       }
       switch (data.action) {
         case "request": {
-          requestHandler(data);
+          this.#requestHandler(data);
         }
           break;
         case "response": {
-          responseHandler(data);
+          this.#responseHandler(data);
         }
           break;
         case "error": {
-          errorHandler(data);
+          this.#errorHandler(data);
         }
           break;
         default: {
@@ -60,90 +60,90 @@ export default class RemoteProcedureSocket {
   }) {
     this.#responseFunctions.delete(functionName);
   }
-    // returns a promise, so acts as an async function
-    this.call = ({
-      functionName,
-      args,
-      transferable,
-    }) => {
-      const packetId = self.crypto.randomUUID();
-      const requesting = new Promise(function (resolve, reject) {
-        packetIds.set(packetId, { resolve, reject });
-        if (timeout) {
-          self.setTimeout(rejectOnTimeout, timeout);
-          function rejectOnTimeout() {
-            reject("Request Timed Out: " + packetId);
-          }
-        }
-        this.#resolve({
-          data: {
-            packetId: packetId,
-            action: "request",
-            functionName: functionName,
-            args: args,
-            timeout: Date.now() + timeout,
-          },
-          transferable: transferable,
-        });
-      });
-      requesting.packetId = packetId;
-      return requesting;
-    };
-    async function requestHandler(data) {
-      const thisFunction = responseFunctions.get(data.functionName);
-      if (data.timeout) {
-        if (Date.now() > data.timeout) {
-          // ignore packet if expired
-          return;
+  // returns a promise, so acts as an async function
+  call({
+    functionName,
+    args,
+    transferable,
+  }) {
+    const packetId = self.crypto.randomUUID();
+    const requesting = new Promise(function (resolve, reject) {
+      packetIds.set(packetId, { resolve, reject });
+      if (timeout) {
+        self.setTimeout(rejectOnTimeout, timeout);
+        function rejectOnTimeout() {
+          reject("Request Timed Out: " + packetId);
         }
       }
-      if (typeof thisFunction !== "function") {
-        this.#resolve({
-          data: {
-            packetId: data.packetId,
-            action: "error",
-            reason: "Unregistered function: " + data.functionName,
-          },
-        });
+      this.#resolve({
+        data: {
+          packetId: packetId,
+          action: "request",
+          functionName: functionName,
+          args: args,
+          timeout: Date.now() + timeout,
+        },
+        transferable: transferable,
+      });
+    });
+    requesting.packetId = packetId;
+    return requesting;
+  };
+  async #requestHandler(data) {
+    const thisFunction = responseFunctions.get(data.functionName);
+    if (data.timeout) {
+      if (Date.now() > data.timeout) {
+        // ignore packet if expired
         return;
       }
-      try {
-        if (typeof data.args !== "object") {
-          data.args = { default: data.args };
-        }
-        data.args.transferable = [];
-        const ret = await thisFunction(data.args);
-        this.#resolve({
-          data: {
-            packetId: data.packetId,
-            action: "response",
-            value: ret,
-          },
-          transferable: data.args.transferable,
-        });
-      } catch (e) {
-        this.#resolve({
-          data: {
-            packetId: data.packetId,
-            action: "error",
-            error: e.message,
-          },
-        });
-      }
     }
-    function responseHandler(data) {
-      const functions = packetIds.get(data.packetId);
-      if (functions !== undefined) {
-        functions.resolve(data.value);
-        packetIds.delete(data.packetId);
+    if (typeof thisFunction !== "function") {
+      this.#resolve({
+        data: {
+          packetId: data.packetId,
+          action: "error",
+          reason: "Unregistered function: " + data.functionName,
+        },
+      });
+      return;
+    }
+    try {
+      if (typeof data.args !== "object") {
+        data.args = { default: data.args };
       }
-    };
-    function errorHandler(data) {
-      const functions = packetIds.get(data.packetId);
-      if (functions !== undefined) {
-        functions.reject(data.reason);
-        packetIds.delete(data.packetId);
-      }
-    };
+      data.args.transferable = [];
+      const ret = await thisFunction(data.args);
+      this.#resolve({
+        data: {
+          packetId: data.packetId,
+          action: "response",
+          value: ret,
+        },
+        transferable: data.args.transferable,
+      });
+    } catch (e) {
+      this.#resolve({
+        data: {
+          packetId: data.packetId,
+          action: "error",
+          error: e.message,
+        },
+      });
+    }
   }
+  #responseHandler(data) {
+    const functions = packetIds.get(data.packetId);
+    if (functions !== undefined) {
+      functions.resolve(data.value);
+      packetIds.delete(data.packetId);
+    }
+  };
+  #errorHandler(data) {
+    const functions = packetIds.get(data.packetId);
+    if (functions !== undefined) {
+      functions.reject(data.reason);
+      packetIds.delete(data.packetId);
+    }
+  };
+}
 }
