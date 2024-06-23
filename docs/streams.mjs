@@ -127,6 +127,9 @@ export class SourceNode {
     );
   }
   async *[Symbol.asyncIterator](options) {
+    if (!options) {
+      options = {};
+    }
     try {
       let value;
       let done = false;
