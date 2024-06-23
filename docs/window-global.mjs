@@ -48,11 +48,11 @@ export function isTrustedOrigin(origin) {
   return trustedOrigins.has(origin);
 }
 let trustedOriginHandler;
-export const trustedOrigin = new Streams.SourceNode((resolve, reject) => {
+export const trustedOrigin = new Common.Streams.SourceNode((resolve, reject) => {
   trustedOriginHandler = resolve;
 });
 let untrustedOriginHandler;
-export const untrustedOrigin = new Streams.SourceNode((resolve, reject) => {
+export const untrustedOrigin = new Common.Streams.SourceNode((resolve, reject) => {
   untrustedOriginHandler = resolve;
 });
 
@@ -90,14 +90,14 @@ export function forWindowOrigin({
   origin,
 }) {
   return {
-    output: new Streams.SourceNode(async (resolve, reject) => {
+    output: new Common.Streams.SourceNode(async (resolve, reject) => {
       for await (const info of trustedOrigin) {
         if ((info.source === window) && (info.origin === origin)) {
           resolve(info.data);
         }
       }
     }),
-    input: new Streams.SinkNode((data) => {
+    input: new Common.Streams.SinkNode((data) => {
       postMessage(window, origin, data);
     }),
   };
@@ -107,12 +107,12 @@ export function MessageSocketforServiceWorker({
   serviceWorker,
 }) {
   return {
-    output: new Streams.SourceNode((resolve, reject) => {
+    output: new Common.Streams.SourceNode((resolve, reject) => {
       // Messages cannot be received directly from ServiceWorkers
       reject();
     }),
-    input: new Streams.SinkNode((data) => {
-      MessageSocket.postMessage(serviceWorker, data);
+    input: new Common.Streams.SinkNode((data) => {
+      Common.MessageNode.postMessage(serviceWorker, data);
     }),
   };
 }
@@ -137,7 +137,7 @@ export function setServiceWorkerHeartbeat({
 
 export let controller = null;
 
-const controllerSource = new Streams.SourceNode((resolve, reject) => {
+const controllerSource = new Common.Streams.SourceNode((resolve, reject) => {
   window.navigator.serviceWorker.addEventListener("message", function (evt) {
     resolve(evt.data);
   });
@@ -146,7 +146,7 @@ const controllerSource = new Streams.SourceNode((resolve, reject) => {
   });
 });
 
-export const controllerchange = new Streams.SourceNode((resolve, reject) => {
+export const controllerchange = new Common.Streams.SourceNode((resolve, reject) => {
   window.navigator.serviceWorker.addEventListener("controllerchange", (evt) => {
     newController();
     resolve();
@@ -160,7 +160,7 @@ export const controllerchange = new Streams.SourceNode((resolve, reject) => {
       serviceWorker: window.navigator.serviceWorker.controller,
       output: controllerSource,
       input: new Streams.SinkNode((data) => {
-        MessageSocket.postMessage(window.navigator.serviceWorker.controller, data);
+        Common.MessageNode.postMessage(window.navigator.serviceWorker.controller, data);
       }),
     };
   }
