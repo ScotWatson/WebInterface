@@ -15,7 +15,7 @@ export default class RemoteProcedureSocket {
   }) {
     this.#packetIds = new Map();
     this.#responseFunctions = new Map();
-    this.input = new Sink((data) => {
+    this.input = new Streams.SinkNode((data) => {
       if (!data || !data.packetId) {
         // This is not a packet message
         return;
@@ -44,7 +44,7 @@ export default class RemoteProcedureSocket {
         }
       }
     });
-    this.output = new ActiveSource((resolve, reject) => {
+    this.output = new Streams.SourceNode((resolve, reject) => {
       this.#resolve = resolve;
       this.#reject = reject;
     });
