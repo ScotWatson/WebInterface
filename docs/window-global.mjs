@@ -12,6 +12,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 // Together, on Firefox, this makes it impossible for service workers to message each other (& themselves). Therefore, they cannot keeps themselves from terminating.
 // However, message events received from a Window do prevent the service worker from terminating.
 
+import * as Common from "https://scotwatson.github.io/WebInterface/common.mjs";
+
 export * as Common from "https://scotwatson.github.io/WebInterface/common.mjs";
 export { default as SiteStorage } from "https://scotwatson.github.io/WebInterface/SiteStorage.mjs";
 
