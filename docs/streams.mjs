@@ -281,6 +281,10 @@ export class Pipe {
       });
     }
     const sendData = sink.callback;
+    if (typeof sendData !== "function") {
+      console.error(sendData);
+      throw "sink.callback must be invocable.";
+    }
     const process = (async () => {
       let data;
       do {
