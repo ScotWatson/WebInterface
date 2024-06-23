@@ -414,7 +414,7 @@ export class TransformNode {
     }
     this.#buffer = [];
     const dequeue = getSourceCallback(() => {
-      if (this.#data.length === 0) {
+      if (this.#buffer.length === 0) {
         // Just because the queue is empty at the moment, does not indicate that it will never have data.
         return null;
       } else {
