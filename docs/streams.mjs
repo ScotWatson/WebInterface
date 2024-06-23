@@ -308,8 +308,8 @@ export class Pipe {
       } while (data !== undefined);
     })();
     // These two functions make the pipe act as a promise
-    this.then = process.then;
-    this.catch = process.catch;
+    this.then = process.then.bind(process);
+    this.catch = process.catch.bind(process);
     // These two functions make the promise abortable
     this.return = () => {
       abort_return({ done: true });
