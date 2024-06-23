@@ -18,7 +18,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     }) {
       this.#packetIds = new Map();
       this.#responseFunctions = new Map();
-      this.input = new Sink((data) => {
+      this.input = new Streams.SinkNode((data) => {
         if (!data || !data.packetId) {
           // This is not a packet message
           return;
@@ -47,7 +47,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
           }
         }
       });
-      this.output = new ActiveSource((resolve, reject) => {
+      this.output = new Streams.SourceNode((resolve, reject) => {
         this.#resolve = resolve;
         this.#reject = reject;
       });
