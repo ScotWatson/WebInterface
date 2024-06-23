@@ -213,6 +213,7 @@ export class SinkNode {
       // The sink always returns undefined.
     };
     this.#validCallback = thisCallback;
+    return thisCallback;
   }
   get locked() {
     return !!this.#validCallback;
