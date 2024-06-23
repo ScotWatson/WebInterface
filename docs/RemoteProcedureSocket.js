@@ -25,15 +25,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         }
         switch (data.action) {
           case "request": {
-            requestHandler(data);
+            this.#requestHandler(data);
           }
             break;
           case "response": {
-            responseHandler(data);
+            this.#responseHandler(data);
           }
             break;
           case "error": {
-            errorHandler(data);
+            this.#errorHandler(data);
           }
             break;
           default: {
@@ -64,11 +64,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       this.#responseFunctions.delete(functionName);
     }
     // returns a promise, so acts as an async function
-    this.call = ({
+    call({
       functionName,
       args,
       transferable,
-    }) => {
+    }) {
       const packetId = self.crypto.randomUUID();
       const requesting = new Promise(function (resolve, reject) {
         packetIds.set(packetId, { resolve, reject });
@@ -92,7 +92,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       requesting.packetId = packetId;
       return requesting;
     };
-    async function requestHandler(data) {
+    async #requestHandler(data) {
       const thisFunction = responseFunctions.get(data.functionName);
       if (data.timeout) {
         if (Date.now() > data.timeout) {
@@ -134,20 +134,20 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         });
       }
     }
-    function responseHandler(data) {
+    #responseHandler(data) {
       const functions = packetIds.get(data.packetId);
       if (functions !== undefined) {
         functions.resolve(data.value);
         packetIds.delete(data.packetId);
       }
-    };
-    function errorHandler(data) {
+    }
+    #errorHandler(data) {
       const functions = packetIds.get(data.packetId);
       if (functions !== undefined) {
         functions.reject(data.reason);
         packetIds.delete(data.packetId);
       }
-    };
+    }
   };
   return exports;
 })();
