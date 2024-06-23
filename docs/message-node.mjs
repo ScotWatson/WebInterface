@@ -7,10 +7,10 @@ import * as Streams from "https://scotwatson.github.io/WebInterface/streams.mjs"
 
 export function forMessagePort(messagePort) {
   return {
-    output: new Streams.SourceNode(function (resolve, reject) {
+    output: new Streams.SourceNode((resolve, reject) => {
       messagePort.addEventListener("message", (evt) => resolve(evt.data) );
     }),
-    input: new Streams.SinkNode((data) {
+    input: new Streams.SinkNode((data) => {
       postMessage(messagePort, data);
     }),
   };
