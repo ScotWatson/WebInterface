@@ -70,7 +70,7 @@ export default class RemoteProcedureSocket {
   }) {
     const packetId = self.crypto.randomUUID();
     const requesting = new Promise(function (resolve, reject) {
-      packetIds.set(packetId, { resolve, reject });
+      this.#packetIds.set(packetId, { resolve, reject });
       if (this.#timeout) {
         self.setTimeout(rejectOnTimeout, this.#timeout);
         function rejectOnTimeout() {
