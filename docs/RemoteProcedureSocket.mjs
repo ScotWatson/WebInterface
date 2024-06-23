@@ -18,7 +18,7 @@ export default class RemoteProcedureSocket {
     this.input = new Sink((data) => {
       if (!data || !data.packetId) {
         // This is not a packet message
-        continue;
+        return;
       }
       switch (data.action) {
         case "request": {
