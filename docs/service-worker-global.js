@@ -6,7 +6,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 self.currentScript.exports = (function () {
   const exports = {};
   const Common = self.importScript("https://scotwatson.github.io/WebInterface/common.js");
-  const MessageNode = self.importScript("https://scotwatson.github.io/WebInterface/messaging-socket.js");
+  const MessageNode = self.importScript("https://scotwatson.github.io/WebInterface/message-node.js");
   const RemoteProcedureSocket = self.importScript("https://scotwatson.github.io/WebInterface/RemoteProcedureSocket.js").default;
   exports.Common = Common;
   exports.MessageNode = MessageNode;
