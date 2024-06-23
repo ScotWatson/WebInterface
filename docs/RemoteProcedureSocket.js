@@ -86,9 +86,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             action: "request",
             functionName: functionName,
             args: args,
-            timeout: Date.now() + timeout,
+            timeout: Date.now() + this.#timeout,
+            _transfer: transferable,
           },
-          transferable: transferable,
         });
       });
       requesting.packetId = packetId;
