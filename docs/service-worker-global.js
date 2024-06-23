@@ -6,9 +6,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 self.currentScript.exports = (function () {
   const exports = {};
   const Common = self.importScript("https://scotwatson.github.io/WebInterface/common.js");
-  const MessagingCommon = self.importScript("https://scotwatson.github.io/WebInterface/messaging-common.js");
-  Object.assign(exports, MessagingCommon);
-  exports.createRemoteProcedureSocket = MessagingCommon.createRemoteProcedureSocket;
+  const MessageNode = self.importScript("https://scotwatson.github.io/WebInterface/messaging-socket.js");
+  const RemoteProcedureSocket = self.importScript("https://scotwatson.github.io/WebInterface/RemoteProcedureSocket.js").default;
+  exports.Common = Common;
+  exports.MessageNode = MessageNode;
+  exports.RemoteProcedureSocket = RemoteProcedureSocket;
   const registeredClients = new Map();
   let unregisteredClientHandler;
   self.addEventListener("message", function (evt) {
@@ -43,14 +45,14 @@ self.currentScript.exports = (function () {
   };
   exports.enqueueMessage = enqueueMessage;
   self.addEventListener("messageerror", console.error);
-  exports.newClientMessage = Common.createSignal(function (resolve, reject) {
+  exports.newClientMessage = new Common.Streams.ActiveSource((resolve, reject) => {
     unregisteredClientHandler = resolve;
   });
-  exports.createClientSource = function createClientSource({
+  exports.createClientNode = function createClientNode({
     client,
   }) {
     return {
-      message: Common.createSignal(function (resolve, reject) {
+      output: new Common.Streams.SourceNode((resolve, reject) => {
         thisClient = registeredClients.get(client.id);
         if (!thisClient) {
           thisClient = {
@@ -60,19 +62,10 @@ self.currentScript.exports = (function () {
         }
         thisClient.sources.add(resolve);
       }),
+      input: new Common.Streams.SinkNode((data) => {
+        Common.MessageSocket.postMessage(client, data);
+      }),
     };
-  };
-  exports.createClientSink = function createClientSink({
-    client,
-  }) {
-    return {
-      send: function ({
-        data,
-        transfer,
-      }) {
-        client.postMessage(data, transfer);
-      },
-    }
   };
   return exports;
 })();
