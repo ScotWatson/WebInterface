@@ -7,7 +7,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 (self.document === undefined ? self : self.document).currentScript.exports = (function () {
   const exports = {};
-  const Streams = self.importScript("https://scotwatson.github.io/WebInterface/streams.mjs");
+  const Streams = self.importScript("https://scotwatson.github.io/WebInterface/streams.js");
   exports.default = class RemoteProcedureSocket {
     #packetIds;
     #responseFunctions;
