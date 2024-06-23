@@ -413,7 +413,7 @@ export class TransformNode {
       throw Error("transform must be a valid transform.");
     }
     this.#buffer = [];
-    const dequeue = getSourceCallback(() {
+    const dequeue = getSourceCallback(() => {
       if (this.#data.length === 0) {
         // Just because the queue is empty at the moment, does not indicate that it will never have data.
         return null;
