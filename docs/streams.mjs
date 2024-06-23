@@ -126,14 +126,18 @@ export class SourceNode {
       },
     );
   }
-  async *[Symbol.asyncIterator]() {
+  async *[Symbol.asyncIterator](options) {
     try {
       let value;
       let done = false;
       ({ value, done } = await this.#nextInput);
       while (!done) {
         if (value !== null) {
-          yield self.structuredClone(value);
+          if (!options.noCopy) {
+            yield self.structuredClone(value);
+          } else {
+            yield value;
+          }
         }
         ({ value, done } = await this.#nextInput);
       }
@@ -225,7 +229,7 @@ export class SinkNode {
 
 export class Pipe {
   constructor(args, arg2) {
-    const { source, sink } = (() => {
+    const { source, sink, noCopy } = (() => {
       if (isNamedArguments(args)) {
         // args is a named arguments object
         if (!(source in args)) {
@@ -237,6 +241,7 @@ export class Pipe {
         return {
           source: args.source,
           sink: args.sink,
+          noCopy: !!args.noCopy,
         };
       } else {
         if (arg2 === "undefined") {
@@ -245,6 +250,7 @@ export class Pipe {
         return {
           source: args,
           sink: arg2,
+          noCopy: !!args.noCopy,
         };
       }
     })();
@@ -261,7 +267,9 @@ export class Pipe {
       console.error(sink);
       throw Error("sink must provide a callback.");
     }
-    const connection = source[Symbol.asyncIterator]();
+    const connection = source[Symbol.asyncIterator]({
+      noCopy,
+    });
     let abort_return;
     let abort_throw;
     const abort = new Promise((resolve, reject) => {
