@@ -261,9 +261,11 @@ export class Pipe {
       throw Error("sink must provide a callback.");
     }
     const connection = source[Symbol.asyncIterator]();
+    let abort_return;
+    let abort_throw;
     const abort = new Promise((resolve, reject) => {
-      abort.return = resolve;
-      abort.throw = reject;
+      abort_return = resolve;
+      abort_throw = reject;
     })
     function fetchData() {
       return Promise.race([ connection.next(), abort ]).then(({ value, done }) => {
@@ -293,10 +295,10 @@ export class Pipe {
     this.catch = process.catch;
     // These two functions make the promise abortable
     this.return = () => {
-      abort.return({ done: true });
+      abort_return({ done: true });
     };
     this.throw = (error) => {
-      abort.throw(error);
+      abort_throw(error);
     };
   }
 }
