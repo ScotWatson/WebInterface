@@ -334,7 +334,7 @@ class Transform {
     }
     const initialize = () => {
       const state = {};
-      let currentCallback = (source) => ( return source(); );
+      let currentCallback = (source) => { return source(); };
       for (const transform of transforms) {
         currentCallback = createCallback(currentCallback, transform.callback);
       }
