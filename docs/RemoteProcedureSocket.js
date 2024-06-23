@@ -72,8 +72,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       transferable,
     }) {
       const packetId = self.crypto.randomUUID();
-      const requesting = new Promise(function (resolve, reject) {
-        packetIds.set(packetId, { resolve, reject });
+      const requesting = new Promise((resolve, reject) => {
+        this.#packetIds.set(packetId, { resolve, reject });
         if (this.#timeout) {
           self.setTimeout(rejectOnTimeout, this.#timeout);
           function rejectOnTimeout() {
