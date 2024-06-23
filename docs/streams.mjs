@@ -256,7 +256,7 @@ export class Pipe {
     if (typeof sink !== "object") {
       throw Error("sink must be an object.");
     }
-    if ("callback" in sink) {
+    if (!("callback" in sink)) {
       console.error(sink);
       throw Error("sink must provide a callback.");
     }
