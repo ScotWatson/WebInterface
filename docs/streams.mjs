@@ -232,10 +232,10 @@ export class Pipe {
     const { source, sink, noCopy } = (() => {
       if (isNamedArguments(args)) {
         // args is a named arguments object
-        if (!(source in args)) {
+        if (!("source" in args)) {
           throw Error("source is a required parameter.");
         }
-        if (!(sink in args)) {
+        if (!("sink" in args)) {
           throw Error("sink is a required parameter.");
         }
         return {
