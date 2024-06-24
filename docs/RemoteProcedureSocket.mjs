@@ -89,7 +89,7 @@ export default class RemoteProcedureSocket {
   };
   async #requestHandler(data) {
     console.log(data);
-    const thisFunction = responseFunctions.get(data.functionName);
+    const thisFunction = this.#responseFunctions.get(data.functionName);
     if (data.timeout) {
       if (Date.now() > data.timeout) {
         // ignore packet if expired
