@@ -7,6 +7,7 @@ self.currentScript.exports = (function () {
   const exports = {};
   const Common = self.importScript("https://scotwatson.github.io/WebInterface/common.js");
   exports.Common = Common;
+  console.log(Common);
   const registeredClients = new Map();
   let unregisteredClientHandler;
   self.addEventListener("message", function (evt) {
