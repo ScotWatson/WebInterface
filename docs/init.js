@@ -139,19 +139,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   });
   // Obtain initialization info
   exports.selfUrl = self.location;
-  // Async function: Register the service worker.
-  function registerServiceWorker({
-    url,
-    scope,
-  }) {
-    const registering = self.navigator.serviceWorker.register(url, { scope });
-    return registering.then((registration) => {
-      return {
-        registration,
-        serviceWorker: registration.installing,
-      };
-    });
-  }
-  exports.registerServiceWorker = registerServiceWorker;
+  
   return exports;
 })();
