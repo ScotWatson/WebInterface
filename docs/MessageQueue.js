@@ -52,7 +52,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       this.#messagePort.addEventListener("messageerror", routeMessageErrorEvent);
     }
     postMessage(...args) {
-      this.#messagePort.postMessage.call(messagePort, ...args);
+      this.#messagePort.postMessage.call(this.#messagePort, ...args);
     }
     start() {
       this.#enabled = true;
