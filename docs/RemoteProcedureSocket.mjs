@@ -19,6 +19,9 @@ export default class RemoteProcedureSocket {
     this.#responseFunctions = new Map();
     this.input = new Streams.SinkNode((data) => {
       console.log(data);
+      console.log(!data);
+      console.log(!data.packetId);
+      console.log(!data || !data.packetId);
       if (!data || !data.packetId) {
         // This is not a packet message
         return;
