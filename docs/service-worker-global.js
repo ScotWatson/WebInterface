@@ -7,7 +7,6 @@ self.currentScript.exports = (function () {
   const exports = {};
   const Common = self.importScript("https://scotwatson.github.io/WebInterface/common.js");
   exports.Common = Common;
-  console.log(Common);
   const registeredClients = new Map();
   let unregisteredClientHandler;
   self.addEventListener("message", function (evt) {
@@ -42,7 +41,7 @@ self.currentScript.exports = (function () {
   };
   exports.enqueueMessage = enqueueMessage;
   self.addEventListener("messageerror", console.error);
-  exports.newClientMessage = new Common.Streams.ActiveSource((resolve, reject) => {
+  exports.newClientMessage = new Common.Streams.SourceNode((resolve, reject) => {
     unregisteredClientHandler = resolve;
   });
   exports.createClientNode = function createClientNode({
