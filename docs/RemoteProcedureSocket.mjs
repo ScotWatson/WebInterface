@@ -18,18 +18,12 @@ export default class RemoteProcedureSocket {
     this.#packetIds = new Map();
     this.#responseFunctions = new Map();
     this.input = new Streams.SinkNode((data) => {
-      console.log(data);
-      console.log(!data);
-      console.log(!data.packetId);
-      console.log(!data || !data.packetId);
       if (!data || !data.packetId) {
         // This is not a packet message
         return;
       }
-      console.log(data.action);
       switch (data.action) {
         case "request": {
-          console.log("requestHandler");
           this.#requestHandler(data);
         }
           break;
@@ -43,11 +37,9 @@ export default class RemoteProcedureSocket {
           break;
         default: {
           this.#resolve({
-            data: {
-              packetId: data.packetId,
-              action: "error",
-              error: "Invalid Packet",
-            },
+            packetId: data.packetId,
+            action: "error",
+            error: "Invalid Packet",
           });
         }
       }
@@ -84,14 +76,12 @@ export default class RemoteProcedureSocket {
         }
       }
       this.#resolve({
-        data: {
-          packetId: packetId,
-          action: "request",
-          functionName: functionName,
-          args: args,
-          timeout: Date.now() + this.#timeout,
-          _transfer: transferable,
-        },
+        packetId: packetId,
+        action: "request",
+        functionName: functionName,
+        args: args,
+        timeout: Date.now() + this.#timeout,
+        _transfer: transferable,
       });
     });
     requesting.packetId = packetId;
@@ -108,11 +98,9 @@ export default class RemoteProcedureSocket {
     }
     if (typeof thisFunction !== "function") {
       this.#resolve({
-        data: {
-          packetId: data.packetId,
-          action: "error",
-          reason: "Unregistered function: " + data.functionName,
-        },
+        packetId: data.packetId,
+        action: "error",
+        reason: "Unregistered function: " + data.functionName,
       });
       return;
     }
@@ -123,20 +111,16 @@ export default class RemoteProcedureSocket {
       data.args.transferable = [];
       const ret = await thisFunction(data.args);
       this.#resolve({
-        data: {
-          packetId: data.packetId,
-          action: "response",
-          value: ret,
-          _transfer: data.args.transferable,
-        },
+        packetId: data.packetId,
+        action: "response",
+        value: ret,
+        _transfer: data.args.transferable,
       });
     } catch (e) {
       this.#resolve({
-        data: {
-          packetId: data.packetId,
-          action: "error",
-          error: e.message,
-        },
+        packetId: data.packetId,
+        action: "error",
+        error: e.message,
       });
     }
   }
