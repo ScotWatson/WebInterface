@@ -105,7 +105,7 @@ export function forWindowOrigin({
   };
 }
 
-export function MessageSocketforServiceWorker({
+export function MessageNodeforServiceWorker({
   serviceWorker,
 }) {
   return {
