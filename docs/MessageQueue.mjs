@@ -48,7 +48,7 @@ export default class MessageQueue extends EventTarget {
     this.#messagePort.addEventListener("messageerror", routeMessageErrorEvent);
   }
   postMessage(...args) {
-    messagePort.postMessage.call(messagePort, ...args);
+    this.#messagePort.postMessage.call(messagePort, ...args);
   }
   start() {
     this.#enabled = true;
