@@ -54,7 +54,7 @@ export default class MessageQueue extends EventTarget {
     this.#enabled = true;
     for (const messageEvt of this.#messageEvts) {
       // Using setTimeout to place each event on its own task in the event loop to prevent blocking
-      setTimeout(() => this.dispatchEvent(messageEvt), 0);
+      setTimeout(() => { this.dispatchEvent(messageEvt); }, 0);
     }
     this.#messageEvts = [];
   }
