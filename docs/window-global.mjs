@@ -93,7 +93,7 @@ export function forWindowOrigin({
 }) {
   return {
     output: new Common.Streams.SourceNode(async (resolve, reject) => {
-      for await (const info of trustedOrigin) {
+      for await (const info of trustedOrigin[Symbol.asyncIterator]({ noCopy: true })) {
         if ((info.source === window) && (info.origin === origin)) {
           resolve(info.data);
         }
