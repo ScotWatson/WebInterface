@@ -23,8 +23,10 @@ export default class RemoteProcedureSocket {
         // This is not a packet message
         return;
       }
+      console.log(data.action);
       switch (data.action) {
         case "request": {
+          console.log("requestHandler");
           this.#requestHandler(data);
         }
           break;
