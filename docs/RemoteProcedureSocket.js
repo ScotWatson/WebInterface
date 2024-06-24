@@ -40,11 +40,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             break;
           default: {
             this.#resolve({
-              data: {
-                packetId: data.packetId,
-                action: "error",
-                error: "Invalid Packet",
-              },
+              packetId: data.packetId,
+              action: "error",
+              error: "Invalid Packet",
             });
           }
         }
@@ -81,21 +79,19 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
           }
         }
         this.#resolve({
-          data: {
-            packetId: packetId,
-            action: "request",
-            functionName: functionName,
-            args: args,
-            timeout: Date.now() + this.#timeout,
-            _transfer: transferable,
-          },
+          packetId: packetId,
+          action: "request",
+          functionName: functionName,
+          args: args,
+          timeout: Date.now() + this.#timeout,
+          _transfer: transferable,
         });
       });
       requesting.packetId = packetId;
       return requesting;
     };
     async #requestHandler(data) {
-      const thisFunction = responseFunctions.get(data.functionName);
+      const thisFunction = this.#responseFunctions.get(data.functionName);
       if (data.timeout) {
         if (Date.now() > data.timeout) {
           // ignore packet if expired
@@ -104,11 +100,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       }
       if (typeof thisFunction !== "function") {
         this.#resolve({
-          data: {
-            packetId: data.packetId,
-            action: "error",
-            reason: "Unregistered function: " + data.functionName,
-          },
+          packetId: data.packetId,
+          action: "error",
+          reason: "Unregistered function: " + data.functionName,
         });
         return;
       }
@@ -119,20 +113,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         data.args.transferable = [];
         const ret = await thisFunction(data.args);
         this.#resolve({
-          data: {
-            packetId: data.packetId,
-            action: "response",
-            value: ret,
-          },
-          transferable: data.args.transferable,
+          packetId: data.packetId,
+          action: "response",
+          value: ret,
+          _transfer: data.args.transferable,
         });
       } catch (e) {
         this.#resolve({
-          data: {
-            packetId: data.packetId,
-            action: "error",
-            error: e.message,
-          },
+          packetId: data.packetId,
+          action: "error",
+          error: e.message,
         });
       }
     }
