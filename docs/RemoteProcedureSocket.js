@@ -127,17 +127,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       }
     }
     #responseHandler(data) {
-      const functions = packetIds.get(data.packetId);
+      const functions = this.#packetIds.get(data.packetId);
       if (functions !== undefined) {
         functions.resolve(data.value);
-        packetIds.delete(data.packetId);
+        this.#packetIds.delete(data.packetId);
       }
     }
     #errorHandler(data) {
-      const functions = packetIds.get(data.packetId);
+      const functions = this.#packetIds.get(data.packetId);
       if (functions !== undefined) {
         functions.reject(data.reason);
-        packetIds.delete(data.packetId);
+        this.#packetIds.delete(data.packetId);
       }
     }
   };
