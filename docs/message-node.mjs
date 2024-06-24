@@ -25,7 +25,7 @@ export function postMessage(messagePort, data) {
       if (Object.hasOwn(data, "_transfer") && (typeof data._transfer === "object") && (data._transfer !== null) && Object.hasOwn(data._transfer, Symbol.iterator)) {
         transfer.push(...data._transfer);
       }
-      for (const prop of data) {
+      for (const prop in data) {
         transfer.push(...getTransfer(data[prop]));
       }
     }
