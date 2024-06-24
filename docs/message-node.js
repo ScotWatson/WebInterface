@@ -23,7 +23,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     messagePort.postMessage(data, transfer);
     function getTransfer(data) {
       const transfer = [];
-      if ((typeof data === "object") && Object.has(data, "_transfer") && Object.has(data._transfer, Symbol.iterator)) {
+      if ((typeof data === "object") && (data !== null) && Object.has(data, "_transfer") && Object.has(data._transfer, Symbol.iterator)) {
         transfer.push(...data._transfer);
         delete data._transfer;
         for (const prop of data) {
