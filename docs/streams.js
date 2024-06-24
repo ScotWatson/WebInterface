@@ -23,7 +23,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 // If next() is called, and is not the first call to next, all future input via next(input) must be ignored.
 // If next(input) returns undefined, all future invocations of next must return undefined.
 
-"use strict"
+"use strict";
 
 (self.document === undefined ? self : self.document).currentScript.exports = (function () {
   const exports = {};
