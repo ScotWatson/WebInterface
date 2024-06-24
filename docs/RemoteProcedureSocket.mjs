@@ -92,6 +92,7 @@ export default class RemoteProcedureSocket {
     return requesting;
   };
   async #requestHandler(data) {
+    console.log(data);
     const thisFunction = responseFunctions.get(data.functionName);
     if (data.timeout) {
       if (Date.now() > data.timeout) {
@@ -120,8 +121,8 @@ export default class RemoteProcedureSocket {
           packetId: data.packetId,
           action: "response",
           value: ret,
+          _transfer: data.args.transferable,
         },
-        transferable: data.args.transferable,
       });
     } catch (e) {
       this.#resolve({
