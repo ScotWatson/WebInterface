@@ -323,7 +323,7 @@ export class Pipe {
 // If it is intended to be a source, use Source to create a passive source.
 // If it is intended to be a transform, use LazyTransform or EagerTransform to create a stream node.
 // Transforms are not to have side effects, therefore there is no TransformSink
-class Transform {
+export class Transform {
   #initialize;
   #execute;
   constructor(args) {
