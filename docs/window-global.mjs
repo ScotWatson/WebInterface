@@ -105,20 +105,6 @@ export function forWindowOrigin({
   };
 }
 
-export function MessageNodeforServiceWorker({
-  serviceWorker,
-}) {
-  return {
-    output: new Common.Streams.SourceNode((resolve, reject) => {
-      // Messages cannot be received directly from ServiceWorkers
-      reject();
-    }),
-    input: new Common.Streams.SinkNode((data) => {
-      Common.MessageNode.postMessage(serviceWorker, data);
-    }),
-  };
-}
-
 const serviceWorkerHeartbeats = new Map();
 export function setServiceWorkerHeartbeat({
   serviceWorker,
