@@ -3,13 +3,21 @@
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-// Intended to be included as the first script tag in an HTML file
+// Must be included as a classic script tag in an HTML file
 // Provides functions useful for initializing a web page
 
 "use strict";
 
-(self.document === undefined ? self : self.document).currentScript.exports = (function () {
+window.document.currentScript.exports = (function () {
   const exports = {};
+  importScripts("https://scotwatson.github.io/WebInterface/worker-import-script.js");
+
+  const MessageQueue = importScript("https://scotwatson.github.io/WebInterface/MessageQueue.js").exports.default;
+  // Create MessageQueue for self to capture messages until ready
+  exports.windowMessages = new MessageQueue(self);
+  exports.controllerMessages = new MessageQueue(self.navigator.serviceWorker);
+  self.navigator.serviceWorker.startMessages();
+
   // Resolves once the DOM is fully parsed and all scripts have finish execution
   exports.contentLoaded = new Promise(function (resolve, reject) {
     if ((document.readyState === "loaded") || (document.readyState === "complete")) {
