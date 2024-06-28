@@ -44,7 +44,7 @@ self.currentScript.exports = (function () {
   exports.newClientMessage = new Common.Streams.SourceNode((resolve, reject) => {
     unregisteredClientHandler = resolve;
   });
-  exports.createClientNode = function createClientNode({
+  function ClientNode({
     client,
   }) {
     return {
@@ -63,5 +63,6 @@ self.currentScript.exports = (function () {
       }),
     };
   };
+  exports.ClientNode = ClientNode;
   return exports;
 })();
