@@ -3,7 +3,7 @@
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-import * as Common from "https://scotwatson.github.io/WebInterface/common.mjs";
+import * as MessageNode from "https://scotwatson.github.io/WebInterface/message-node.mjs";
 
 // Async function: Register the service worker.
 export async function installNew({
@@ -108,7 +108,7 @@ class ServiceWorker {
     scope,
   }) {
     this.input = new Common.Streams.SinkNode((data) => {
-      Common.MessageNode.postMessage(serviceWorker, data);
+      MessageNode.postMessage(serviceWorker, data);
     });
     serviceWorker.addEventListener("statechange", () => { this.#state = serviceWorker.state; });
     this.#scriptURL = serviceWorker.scriptURL;
@@ -125,31 +125,9 @@ class ServiceWorker {
   }
 }
 
-export class ServiceWorkerCommands extends Global.Common.Streams.SourceNode {
-  #resolve;
-  #reject;
-  constructor() {
-    let thisResolve;
-    let thisReject;
-    super((resolve, reject) => {
-      thisResolve = resolve;
-      thisReject = reject;
-    });
-    this.#resolve = thisResolve;
-    this.#reject = thisReject;
-  }
-  openPort() {
-    const messageChannel = new MessageChannel();
-    messageChannel.port1._transfer = messageChannel.port1;
-    const messageNode = Global.Common.MessageNode.forMessagePort(messageChannel.port2);
-    messageChannel.port2.start();
-    this.#resolve(messageChannel.port1);
-    return messageNode;
-  }
-  skipWaiting() {
-    this.#resolve("skipWaiting");
-  }
-  claimClients() {
-    this.#resolve("claimClients");
-  }
-}
+const controllerSource = new Streams.SourceNode((resolve, reject) => {
+  self.navigator.serviceWorker.addEventListener("message", resolve);
+});
+const controllerSink = new Streams.SinkNode((data) => {
+  MessageNode.postMessage(self.navigator.serviceWorker.controller, data);
+});
