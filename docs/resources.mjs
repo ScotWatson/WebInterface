@@ -82,13 +82,13 @@ export function addScript({
   };
 }
 // Resolves once the DOM is fully parsed
-export const interactive = new Promise(function (resolve, reject) {
+export const interactive = new Promise((resolve, reject) => {
   if ((document.readyState === "interactive") || (document.readyState === "complete")) {
-    resolve(evt);
+    resolve();
   }
   document.addEventListener("readystatechange", function (evt) {
     if (document.readyState === "interactive") {
-      resolve(evt);
+      resolve();
     }
   });
 });
