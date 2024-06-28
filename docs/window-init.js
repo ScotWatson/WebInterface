@@ -12,11 +12,12 @@ window.document.currentScript.exports = (function () {
   const exports = {};
 
   // Create MessageQueue for self to capture messages until ready
-  exports.createQueues(MessageQueue) {
+  function createQueues(MessageQueue) {
     exports.windowMessages = exports.windowMessages || new MessageQueue(self);
     exports.controllerMessages = exports.controllerMessages || new MessageQueue(self.navigator.serviceWorker);
     self.navigator.serviceWorker.startMessages();
   }
+  exports.createQueues = createQueues;
 
   // Resolves once the DOM is fully parsed and all scripts have finish execution
   exports.contentLoaded = new Promise(function (resolve, reject) {
