@@ -10,13 +10,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 window.document.currentScript.exports = (function () {
   const exports = {};
-  importScripts("https://scotwatson.github.io/WebInterface/worker-import-script.js");
 
-  const MessageQueue = importScript("https://scotwatson.github.io/WebInterface/MessageQueue.js").exports.default;
   // Create MessageQueue for self to capture messages until ready
-  exports.windowMessages = new MessageQueue(self);
-  exports.controllerMessages = new MessageQueue(self.navigator.serviceWorker);
-  self.navigator.serviceWorker.startMessages();
+  exports.createQueues(MessageQueue) {
+    exports.windowMessages = exports.windowMessages || new MessageQueue(self);
+    exports.controllerMessages = exports.controllerMessages || new MessageQueue(self.navigator.serviceWorker);
+    self.navigator.serviceWorker.startMessages();
+  }
 
   // Resolves once the DOM is fully parsed and all scripts have finish execution
   exports.contentLoaded = new Promise(function (resolve, reject) {
