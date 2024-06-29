@@ -5,7 +5,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 export * as MessageNode from "https://scotwatson.github.io/WebInterface/message-node.mjs";
 export * as Streams from "https://scotwatson.github.io/WebInterface/streams.mjs";
-export { default as RemoteProcedureSocket } from "https://scotwatson.github.io/WebInterface/RemoteProcedureSocket.mjs";
+export { default as RPCNode } from "https://scotwatson.github.io/WebInterface/RPCNode.mjs";
 
 export async function base64Decode(str) {
   return await (new self.Blob([ self.atob(str) ])).arrayBuffer();
