@@ -108,7 +108,7 @@ class ServiceWorker {
     serviceWorker,
     scope,
   }) {
-    this.input = new Common.Streams.SinkNode((data) => {
+    this.input = new Streams.SinkNode((data) => {
       MessageNode.postMessage(serviceWorker, data);
     });
     this.installed = new Promise((resolve, reject) => {
