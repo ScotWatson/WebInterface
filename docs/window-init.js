@@ -53,7 +53,7 @@ window.document.currentScript.exports = (function () {
     });
   });
   // Obtain initialization info
-  exports.selfUrl = self.location;
+  exports.selfUrl = new URL(self.location);
   
   return exports;
 })();
