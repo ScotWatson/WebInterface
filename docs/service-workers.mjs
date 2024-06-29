@@ -31,19 +31,19 @@ export async function hasRegistration(scope) {
 }
 
 // Async function: Returns boolean
-export async function hasInstallingWorker(scope) {
+export async function hasInstalling(scope) {
   const registration = await self.navigator.serviceWorker.getRegistration(scope);
   return (registration && registration.installing);
 }
 
 // Async function: Returns boolean
-export async function hasWaitingWorker(scope) {
+export async function hasWaiting(scope) {
   const registration = await self.navigator.serviceWorker.getRegistration(scope);
   return (registration && registration.waiting);
 }
 
 // Async function: Returns boolean
-export async function hasActiveWorker(scope) {
+export async function hasActive(scope) {
   const registration = await self.navigator.serviceWorker.getRegistration(scope);
   return (registration && registration.active);
 }
@@ -75,7 +75,7 @@ export async function getWaiting(scope) {
 }
 
 // Async function: Returns Service Worker (use only if not obtainable via "installNew")
-export async function getActiveWorker(scope) {
+export async function getActive(scope) {
   const registration = await self.navigator.serviceWorker.getRegistration(scope);
   if (registration && registration.active) {
     return new ServiceWorker({
@@ -112,7 +112,58 @@ class ServiceWorker extends EventSource {
     this.input = new Common.Streams.SinkNode((data) => {
       MessageNode.postMessage(serviceWorker, data);
     });
-    serviceWorker.addEventListener("statechange", (evt) => { this.dispatchEvent(evt); });
+    this.installed = new Promise((resolve, reject) => {
+      function watchForInstalled() {
+        if (serviceWorker.state === "installed") {
+          serviceWorker.removeEventListener("statechange", watchForInstalled);
+          resolve();
+        }
+      }
+      if (serviceWorker.state === "installed") {
+        resolve();
+      } else {
+        serviceWorker.addEventListener("statechange", watchForInstalled);
+      }
+    });
+    this.activating = new Promise((resolve, reject) => {
+      function watchForActivating() {
+        if (serviceWorker.state === "activating") {
+          serviceWorker.removeEventListener("statechange", watchForActivating);
+          resolve();
+        }
+      }
+      if (serviceWorker.state === "activating") {
+        resolve();
+      } else {
+        serviceWorker.addEventListener("statechange", watchForActivating);
+      }
+    });
+    this.activated = new Promise((resolve, reject) => {
+      function watchForActivated() {
+        if (serviceWorker.state === "activated") {
+          serviceWorker.removeEventListener("statechange", watchForActivated);
+          resolve();
+        }
+      }
+      if (serviceWorker.state === "activated") {
+        resolve();
+      } else {
+        serviceWorker.addEventListener("statechange", watchForActivated);
+      }
+    });
+    this.redundant = new Promise((resolve, reject) => {
+      function watchForRedundant() {
+        if (serviceWorker.state === "redundant") {
+          serviceWorker.removeEventListener("statechange", watchForRedundant);
+          resolve();
+        }
+      }
+      if (serviceWorker.state === "redundant") {
+        resolve();
+      } else {
+        serviceWorker.addEventListener("statechange", watchForRedundant);
+      }
+    });
     this.#scriptURL = serviceWorker.scriptURL;
     this.#scope = serviceWorker.scope;
   }
