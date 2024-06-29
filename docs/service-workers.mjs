@@ -100,7 +100,7 @@ export function hasController() {
   return !!self.navigator.serviceWorker.controller;
 }
 
-class ServiceWorker extends EventSource {
+class ServiceWorker {
   #scriptURL;
   #state;
   #scope;
@@ -108,7 +108,6 @@ class ServiceWorker extends EventSource {
     serviceWorker,
     scope,
   }) {
-    super();
     this.input = new Common.Streams.SinkNode((data) => {
       MessageNode.postMessage(serviceWorker, data);
     });
