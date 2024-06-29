@@ -33,6 +33,8 @@ self.currentScript.exports = (function () {
     const thisClient = registeredClients.get(evt.source.id);
     if (thisClient) {
       for (const source of thisClient.sources) {
+        console.log(evt);
+        console.log(evt.data);
         source(evt.data);
       }
     } else {
