@@ -59,7 +59,7 @@ self.currentScript.exports = (function () {
         thisClient.sources.add(resolve);
       }),
       input: new Common.Streams.SinkNode((data) => {
-        Common.MessageSocket.postMessage(client, data);
+        Common.MessageNode.postMessage(client, data);
       }),
     };
   };
