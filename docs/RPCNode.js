@@ -26,6 +26,45 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         this.#outputResolve = resolve;
         this.#outputReject = reject;
       });
+      const requestHandler = async (data) => {
+        const thisFunction = this.#verbFunctions.get(data.verb);
+        if (typeof thisFunction !== "function") {
+          this.#outputResolve({
+            callId: data.callId,
+            response: "error",
+            reason: "Unregistered verb: " + data.verb,
+          });
+          return;
+        }
+        try {
+          const ret = await thisFunction(data.args);
+          this.#outputResolve({
+            callId: data.callId,
+            response: "ok",
+            value: ret,
+          });
+        } catch (e) {
+          this.#outputResolve({
+            callId: data.callId,
+            response: "error",
+            reason: e.message,
+          });
+        }
+      }
+      const responseOkHandler = (data) => {
+        const functions = this.#callIds.get(data.callId);
+        if (functions !== undefined) {
+          functions.resolve(data.value);
+          this.#callIds.delete(data.callId);
+        }
+      }
+      const responseErrorHandler = (data) => {
+        const functions = this.#callIds.get(data.callId);
+        if (functions !== undefined) {
+          functions.reject(data.reason);
+          this.#callIds.delete(data.callId);
+        }
+      }
       function parseInput(data) {
         if ((typeof data !== "object") || (data === null) || !("callId" in data)) {
           nonCallResolve(data);
@@ -57,45 +96,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             response: "error",
             reason: "Invalid Message",
           });
-        }
-      }
-      async function requestHandler(data) {
-        const thisFunction = this.#verbFunctions.get(data.verb);
-        if (typeof thisFunction !== "function") {
-          this.#outputResolve({
-            callId: data.callId,
-            response: "error",
-            reason: "Unregistered verb: " + data.verb,
-          });
-          return;
-        }
-        try {
-          const ret = await thisFunction(data.args);
-          this.#outputResolve({
-            callId: data.callId,
-            response: "ok",
-            value: ret,
-          });
-        } catch (e) {
-          this.#outputResolve({
-            callId: data.callId,
-            response: "error",
-            reason: e.message,
-          });
-        }
-      }
-      function responseOkHandler(data) {
-        const functions = this.#callIds.get(data.callId);
-        if (functions !== undefined) {
-          functions.resolve(data.value);
-          this.#callIds.delete(data.callId);
-        }
-      }
-      function responseErrorHandler(data) {
-        const functions = this.#callIds.get(data.callId);
-        if (functions !== undefined) {
-          functions.reject(data.reason);
-          this.#callIds.delete(data.callId);
         }
       }
     }
