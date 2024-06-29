@@ -9,7 +9,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   const exports = {};
   exports.MessageNode = self.importScript("https://scotwatson.github.io/WebInterface/message-node.js");
   exports.Streams = self.importScript("https://scotwatson.github.io/WebInterface/streams.js");
-  exports.RemoteProcedureSocket = self.importScript("https://scotwatson.github.io/WebInterface/RemoteProcedureSocket.js").default;
+  exports.RPCNode = self.importScript("https://scotwatson.github.io/WebInterface/RPCNode.js").default;
   exports.base64Decode =  async function base64Decode(str) {
     return await (new self.Blob([ self.atob(str) ])).arrayBuffer();
   };
