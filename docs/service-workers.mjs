@@ -100,7 +100,7 @@ export function hasController() {
   return !!self.navigator.serviceWorker.controller;
 }
 
-class ServiceWorker {
+class ServiceWorker extends EventSource {
   #scriptURL;
   #state;
   #scope;
@@ -108,10 +108,11 @@ class ServiceWorker {
     serviceWorker,
     scope,
   }) {
+    super();
     this.input = new Common.Streams.SinkNode((data) => {
       MessageNode.postMessage(serviceWorker, data);
     });
-    serviceWorker.addEventListener("statechange", () => { this.#state = serviceWorker.state; });
+    serviceWorker.addEventListener("statechange", (evt) => { this.dispatchEvent(evt); });
     this.#scriptURL = serviceWorker.scriptURL;
     this.#scope = serviceWorker.scope;
   }
