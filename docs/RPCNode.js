@@ -58,7 +58,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
             reason: "Invalid Message",
           });
         }
-      });
+      }
       async function requestHandler(data) {
         const thisFunction = this.#verbFunctions.get(data.verb);
         if (typeof thisFunction !== "function") {
