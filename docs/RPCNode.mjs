@@ -55,7 +55,7 @@ export default class RPCNode {
           reason: "Invalid Message",
         });
       }
-    });
+    }
     async function requestHandler(data) {
       const thisFunction = this.#verbFunctions.get(data.verb);
       if (typeof thisFunction !== "function") {
