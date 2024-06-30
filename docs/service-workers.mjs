@@ -162,7 +162,8 @@ class ServiceWorker {
         serviceWorker.addEventListener("statechange", watchForRedundant);
       }
     });
-    this.#scope = serviceWorker.scope;
+    this.#serviceWorker = serviceWorker;
+    this.#scope = scope;
   }
   get scriptURL() {
     return this.#serviceWorker.scriptURL;
