@@ -116,6 +116,9 @@ export default class RPCNode {
       verb,
       args,
     });
+    if (!verb) {
+      throw "Invalid Verb";
+    }
     const callId = self.crypto.randomUUID();
     const requesting = new Promise((resolve, reject) => {
       this.#callIds.set(callId, { resolve, reject });
