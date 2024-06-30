@@ -90,7 +90,7 @@ export default class RPCNode {
         this.#outputResolve({
           callId: data.callId,
           response: "error",
-          reason: "Invalid Message",
+          reason: "Invalid Message: " + JSON.stringify(data),
         });
       }
     }
