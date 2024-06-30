@@ -178,7 +178,7 @@ class ServiceWorker {
 }
 
 export const controllerSource = new Streams.SourceNode((resolve, reject) => {
-  self.navigator.serviceWorker.addEventListener("message", resolve);
+  self.navigator.serviceWorker.addEventListener("message", (x) => { console.log(x); resolve(x); });
 });
 export const controllerSink = new Streams.SinkNode((data) => {
   MessageNode.postMessage(self.navigator.serviceWorker.controller, data);
