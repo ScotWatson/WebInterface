@@ -13,7 +13,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 // However, message events received from a Window do prevent the service worker from terminating.
 
 import * as Common from "https://scotwatson.github.io/WebInterface/common.mjs";
-import * as Resources from "https://sctwatson.github.io/WebInterface/resources.mjs"
+import * as Resources from "https://scotwatson.github.io/WebInterface/resources.mjs"
 
 export * as Common from "https://scotwatson.github.io/WebInterface/common.mjs";
 export { default as SiteStorage } from "https://scotwatson.github.io/WebInterface/SiteStorage.mjs";
