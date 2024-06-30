@@ -18,7 +18,6 @@ export default class RPCNode {
     this.nonCall = new Streams.SourceNode((resolve, reject) => {
       nonCallResolve = resolve;
     });
-    this.input = new Streams.SinkNode(parseInput);
     this.output = new Streams.SourceNode((resolve, reject) => {
       this.#outputResolve = resolve;
       this.#outputReject = reject;
@@ -62,7 +61,7 @@ export default class RPCNode {
         this.#callIds.delete(data.callId);
       }
     }
-    function parseInput(data) {
+    const parseInput = (data) => {
       if ((typeof data !== "object") || (data === null) || !("callId" in data)) {
         nonCallResolve(data);
         return;
@@ -95,6 +94,7 @@ export default class RPCNode {
         });
       }
     }
+    this.input = new Streams.SinkNode(parseInput);
   }
   register({
     verb,
