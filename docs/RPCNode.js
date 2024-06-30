@@ -93,7 +93,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
           this.#outputResolve({
             callId: data.callId,
             response: "error",
-            reason: "Invalid Message",
+            reason: "Invalid Message: " + JSON.stringify(data),
           });
         }
       }
