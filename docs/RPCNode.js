@@ -115,6 +115,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       verb,
       args,
     }) {
+      console.log({
+        verb,
+        args,
+      });
       const callId = self.crypto.randomUUID();
       const requesting = new Promise((resolve, reject) => {
         this.#callIds.set(callId, { resolve, reject });
