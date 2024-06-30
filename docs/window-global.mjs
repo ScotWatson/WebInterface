@@ -89,7 +89,7 @@ export function enqueueMessage(info) {
   }
 }
 
-export function forWindowOrigin({
+export function MessageNodeforWindowOrigin({
   window,
   origin,
 }) {
