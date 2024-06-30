@@ -4,3 +4,4 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 export * as Common from "https://scotwatson.github.io/WebInterface/common.mjs";
+export * as ServiceWorkers from "https://scotwatson.github.io/WebInterface/service-workers.mjs"
