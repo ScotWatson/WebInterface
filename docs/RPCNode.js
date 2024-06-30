@@ -21,7 +21,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       this.nonCall = new Streams.SourceNode((resolve, reject) => {
         nonCallResolve = resolve;
       });
-      this.input = new Streams.SinkNode(parseInput);
       this.output = new Streams.SourceNode((resolve, reject) => {
         this.#outputResolve = resolve;
         this.#outputReject = reject;
@@ -65,7 +64,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
           this.#callIds.delete(data.callId);
         }
       }
-      function parseInput(data) {
+      const parseInput = (data) => {
         if ((typeof data !== "object") || (data === null) || !("callId" in data)) {
           nonCallResolve(data);
           return;
@@ -98,6 +97,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
           });
         }
       }
+      this.input = new Streams.SinkNode(parseInput);
     }
     register({
       verb,
