@@ -101,8 +101,7 @@ export function hasController() {
 }
 
 class ServiceWorker {
-  #scriptURL;
-  #state;
+  #serviceWorker;
   #scope;
   constructor({
     serviceWorker,
@@ -163,14 +162,13 @@ class ServiceWorker {
         serviceWorker.addEventListener("statechange", watchForRedundant);
       }
     });
-    this.#scriptURL = serviceWorker.scriptURL;
     this.#scope = serviceWorker.scope;
   }
   get scriptURL() {
-    return this.#scriptURL;
+    return this.#serviceWorker.scriptURL;
   }
   get state() {
-    return this.#state;
+    return this.#serviceWorker.state;
   }
   get scope() {
     return this.#scope;
