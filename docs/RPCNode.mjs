@@ -112,10 +112,6 @@ export default class RPCNode {
     verb,
     args,
   }) {
-    console.log({
-      verb,
-      args,
-    });
     if (!verb) {
       throw "Invalid Verb";
     }
