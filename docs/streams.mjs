@@ -290,7 +290,7 @@ export class Pipe {
             return value;
           }
         }
-      }, console.error);
+      });
     }
     const sendData = sink.callback;
     if (typeof sendData !== "function") {
