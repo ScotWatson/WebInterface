@@ -112,6 +112,10 @@ export default class RPCNode {
     verb,
     args,
   }) {
+    console.log({
+      verb,
+      args,
+    });
     const callId = self.crypto.randomUUID();
     const requesting = new Promise((resolve, reject) => {
       this.#callIds.set(callId, { resolve, reject });
