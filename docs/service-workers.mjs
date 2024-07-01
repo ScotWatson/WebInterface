@@ -125,7 +125,7 @@ class ServiceWorker {
           resolve();
         }
       }
-      if (serviceWorker.state === "installed") {
+      if ((serviceWorker.state === "installed") || (serviceWorker.state === "activating") || (serviceWorker.state === "activated")) {
         resolve();
       } else {
         serviceWorker.addEventListener("statechange", watchForInstalled);
@@ -138,7 +138,7 @@ class ServiceWorker {
           resolve();
         }
       }
-      if (serviceWorker.state === "activating") {
+      if ((serviceWorker.state === "activating") || (serviceWorker.state === "activated")) {
         resolve();
       } else {
         serviceWorker.addEventListener("statechange", watchForActivating);
