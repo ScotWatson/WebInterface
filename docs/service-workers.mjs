@@ -89,9 +89,17 @@ export async function getActive(scope) {
 
 // Async function: Returns undefined
 export async function unregister(scope) {
-  const registration = self.navigator.serviceWorker.getRegistration(scope);
+  const registration = await self.navigator.serviceWorker.getRegistration(scope);
   if (registration) {
     registration.unregister();
+  }
+}
+
+// Async function: Returns undefined
+export async function update(scope) {
+  const registration = await self.navigator.serviceWorker.getRegistration(scope);
+  if (registration) {
+    registration.update();
   }
 }
 
