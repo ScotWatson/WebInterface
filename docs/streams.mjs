@@ -86,7 +86,7 @@ function getSourceCallback(obj) {
 }
 
 // Conforms to the async iterable protocol, therefore it is an active source
-export class SourceNode {
+export class Signal {
   // Accepts an asynchronous function "source":
   //   Accepts one argument object "output":
   //     put: a function that takes one argument "value"
@@ -94,6 +94,7 @@ export class SourceNode {
   // Errors thrown from source results in rejection of SourceNode[Symbol.asyncIterator](options).next
   constructor(args) {
     let source;
+    let nextOutput;
     if (isNamedArguments(args)) {
       if (!(source in args)) {
         throw "source is a required argument.";
@@ -104,17 +105,72 @@ export class SourceNode {
     } else {
       throw "Invalid args";
     }
-    let cycleResolve;
-    let cycleReject;
-    function nextCycle() {
-      return new Promise((resolve, reject) => {
-        cycleResolve = resolve;
-        cycleReject = reject;
-      });
-    };
     let outputResolve;
     let outputReject;
-    function nextOutput() {
+    function getNextOutput() {
+      return new Promise((resolve, reject) => {
+        outputResolve = resolve;
+        outputReject = reject;
+      });
+    };
+    const output = {
+      put() {
+        outputResolve(val);
+        nextOutput = getNextOutput();
+      },
+    };
+    this[Symbol.asyncIterator] = async function*(options) {
+      if (!options) {
+        options = {};
+      }
+      let value;
+      await nextOutput;
+      while (value !== undefined) {
+        yield;
+        await nextOutput;
+      }
+    };
+    const process = (async () => {
+      try {
+        await source(output);
+      } catch (e) {
+        outputReject(e);
+      }
+    })();
+    this.then = process.then;
+    this.catch = process.catch;
+  }
+};
+
+class Wire {
+  constructor() {
+    
+  }
+}
+
+// Conforms to the async iterable protocol, therefore it is an active source
+export class SourceNode {
+  // Accepts an asynchronous function "source":
+  //   Accepts one argument object "output":
+  //     put: a function that takes one argument "value"
+  // Each time output.put is called, every iterator instance resolves with (a structured clone of) the value passed (therefore, the value must be clonable).
+  // Errors thrown from source results in rejection of SourceNode[Symbol.asyncIterator](options).next
+  constructor(args) {
+    let source;
+    let nextOutput;
+    if (isNamedArguments(args)) {
+      if (!(source in args)) {
+        throw "source is a required argument.";
+      }
+      source = args.source;
+    } else if (typeof args == "function") {
+      source = args;
+    } else {
+      throw "Invalid args";
+    }
+    let outputResolve;
+    let outputReject;
+    function getNextOutput() {
       return new Promise((resolve, reject) => {
         outputResolve = resolve;
         outputReject = reject;
@@ -125,49 +181,71 @@ export class SourceNode {
         if (val !== undefined) {
           outputResolve(val);
         }
-//        await nextCycle();
+        nextOutput = getNextOutput();
       },
     };
-    try {
-      await source(output);
-      outputResolve(undefined);
-    } catch (e) {
-      outputReject(e);
-    }
-  }
-  async *[Symbol.asyncIterator](options) {
-    if (!options) {
-      options = {};
-    }
-    try {
-      let value;
-      value = await nextOutput();
-      if (!options.noCopy) {
-        while (value !== undefined) {
-          yield self.structuredClone(value);
-          value = await nextOutput();
-        }
-      } else {
-        while (value !== undefined) {
-          yield value;
-          value = await nextOutput();
-        }
+    this[Symbol.asyncIterator] = async function*(options) {
+      if (!options) {
+        options = {};
       }
-      return value;
-    } catch (e) {
-      // Error has been thrown
-      throw e;
-    } finally {
-      // Perform any cleanup
+      try {
+        let value;
+        value = await nextOutput;
+        if (!options.noCopy) {
+          while (value !== undefined) {
+            yield self.structuredClone(value);
+            value = await nextOutput;
+          }
+        } else {
+          while (value !== undefined) {
+            yield value;
+            value = await nextOutput;
+          }
+        }
+        return;
+      } catch (e) {
+        // Error has been thrown
+        throw e;
+      } finally {
+        // Perform any cleanup
+      }
     }
+    (async () => {
+      try {
+        await source(output);
+        outputResolve(undefined);
+      } catch (e) {
+        outputReject(e);
+      }
+    })();
   }
 };
 
 class ManualSourceNode extends SourceNode {
   constructor() {
+    let cycleResolve;
+    let cycleReject;
     super(async (output) => {
-      this.cycle = output.put;
+      let processing = true;
+      while (processing) {
+        await (new Promise((resolve, reject) => {
+          cycleResolve = resolve;
+          cycleReject = reject;
+        })).then((val) => {
+          if (val === undefined) {
+            processing = false;
+          } else {
+            output.put(x);
+          }
+        }, Promise.reject);
+      }
     });
+    this.cycle = (val) => {
+      cycleResolve(val);
+    }
+    this.throw = (e) => {
+      cycleReject(e);
+    }
   }
 }
 
