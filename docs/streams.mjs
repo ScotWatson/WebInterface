@@ -87,44 +87,53 @@ function getSourceCallback(obj) {
 
 // Conforms to the async iterable protocol, therefore it is an active source
 export class SourceNode {
-  // function init is expected to be a function that takes two arguments (resolve, reject), which each are functions that take a single argument.
-  // Each time resolve is called, every iterator instance resolves with a structured clone of the value passed (therefore, the value must be clonable).
-  // Each time reject is called, every iterator instance resolves with the error passed.
-  #inputResolve;
-  #inputReject;
-  #nextInput;
+  // Accepts an asynchronous function "source":
+  //   Accepts one argument object "output":
+  //     put: a function that takes one argument "value"
+  // Each time output.put is called, every iterator instance resolves with (a structured clone of) the value passed (therefore, the value must be clonable).
+  // Errors thrown from source results in rejection of SourceNode[Symbol.asyncIterator](options).next
   constructor(args) {
-    let init;
+    let source;
     if (isNamedArguments(args)) {
-      if (!(init in args)) {
+      if (!(source in args)) {
         throw "source is a required argument.";
       }
-      init = args.init;
+      source = args.source;
     } else if (typeof args == "function") {
-      init = args;
+      source = args;
     } else {
       throw "Invalid args";
     }
-    const nextInput = () => {
-      this.#nextInput = new Promise((resolve, reject) => {
-        this.#inputResolve = resolve;
-        this.#inputReject = reject;
+    let cycleResolve;
+    let cycleReject;
+    function nextCycle() {
+      return new Promise((resolve, reject) => {
+        cycleResolve = resolve;
+        cycleReject = reject;
       });
     };
-    nextInput();
-    init(
-      /* resolve */(value) => {
-        this.#inputResolve({
-          value: value,
-          done: (value === undefined),
-        });
-        nextInput();
+    let outputResolve;
+    let outputReject;
+    function nextOutput() {
+      return new Promise((resolve, reject) => {
+        outputResolve = resolve;
+        outputReject = reject;
+      });
+    };
+    const output = {
+      put(val) {
+        if (val !== undefined) {
+          outputResolve(val);
+        }
+//        await nextCycle();
       },
-      /* reject */(error) => {
-        this.#inputReject(error);
-        nextInput();
-      },
-    );
+    };
+    try {
+      await source(output);
+      outputResolve(undefined);
+    } catch (e) {
+      outputReject(e);
+    }
   }
   async *[Symbol.asyncIterator](options) {
     if (!options) {
@@ -132,17 +141,17 @@ export class SourceNode {
     }
     try {
       let value;
-      let done = false;
-      ({ value, done } = await this.#nextInput);
-      while (!done) {
-        if (value !== null) {
-          if (!options.noCopy) {
-            yield self.structuredClone(value);
-          } else {
-            yield value;
-          }
+      value = await nextOutput();
+      if (!options.noCopy) {
+        while (value !== undefined) {
+          yield self.structuredClone(value);
+          value = await nextOutput();
         }
-        ({ value, done } = await this.#nextInput);
+      } else {
+        while (value !== undefined) {
+          yield value;
+          value = await nextOutput();
+        }
       }
       return value;
     } catch (e) {
@@ -153,6 +162,14 @@ export class SourceNode {
     }
   }
 };
+
+class ManualSourceNode extends SourceNode {
+  constructor() {
+    super(async (output) => {
+      this.cycle = output.put;
+    });
+  }
+}
 
 export function sourceFunctionToNode(args) {
   let source;
@@ -418,6 +435,55 @@ export class Transform {
   }
 }
 
+const transform = async (input, output) => {
+  output.put(1);
+  output.put(2);
+  const inputVal = input.get();
+  output.put(inputVal * 2);
+  return;
+}
+  async () => {
+    try {
+      await transform(input, output);
+      outputResolve(undefined);
+    } catch (e) {
+      outputReject(e);
+    }
+  }
+  const input = {
+    async get() => {
+      if (inputAllowed) {
+        inputAllowed = false;
+        return this.#buffer.shift();
+      } else {
+        // output = null
+        await nextCycle();
+        return this.#buffer.shift();
+      }
+    },
+  };
+  const output = {
+    async put(val) => {
+      // output = val;
+      await nextCycle();
+    },
+  };
+  let cycleResolve;
+  let cycleReject;
+  const nextCycle = new Promise((resolve, reject) => {
+    cycleResolve = resolve;
+    cycleReject = reject;
+  });
+  this.cycle() {
+    cycleResolve();
+  }
+  let outputResolve;
+  let outputReject;
+  this.source = new SourceNode(async (output) => {
+    outputResolve = output.put;
+    await new Promise();
+  });
+
 export class TransformNode {
   #buffer;
   #source;
@@ -426,10 +492,16 @@ export class TransformNode {
       throw Error("Invalid arguments");
     }
     if (!(transform in args)) {
-      throw Error("transform is a required parameter.");
-    }
-    if (typeof args.transform.callback !== "function") {
-      throw Error("transform must be a valid transform.");
+      // Use identity transform
+      args.transform = async (input, output) => {
+        while (true) {
+          await output.put(await input.get());
+        }
+      };
+    } else {
+      if (typeof args.transform !== "function") {
+        throw Error("transform must be a valid transform.");
+      }
     }
     this.#buffer = [];
     const dequeue = getSourceCallback(() => {
