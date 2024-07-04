@@ -95,6 +95,8 @@ export class Signal {
   constructor(args) {
     let source;
     let nextOutput;
+    let outputResolve;
+    let outputReject;
     if (isNamedArguments(args)) {
       if (!(source in args)) {
         throw "source is a required argument.";
@@ -105,18 +107,13 @@ export class Signal {
     } else {
       throw "Invalid args";
     }
-    let outputResolve;
-    let outputReject;
-    function getNextOutput() {
-      return new Promise((resolve, reject) => {
-        outputResolve = resolve;
-        outputReject = reject;
-      });
-    };
     const output = {
-      put() {
-        outputResolve(val);
-        nextOutput = getNextOutput();
+      trigger() {
+        outputResolve();
+        nextOutput = new Promise((resolve, reject) => {
+          outputResolve = resolve;
+          outputReject = reject;
+        });
       },
     };
     this[Symbol.asyncIterator] = async function*(options) {
@@ -142,9 +139,101 @@ export class Signal {
   }
 };
 
-class Wire {
+class ManualSignal extends Signal {
   constructor() {
-    
+    let cycleResolve;
+    let cycleReject;
+    super(async (output) => {
+      let processing = true;
+      while (processing) {
+        await (new Promise((resolve, reject) => {
+          cycleResolve = resolve;
+          cycleReject = reject;
+        })).then(() => {
+          output.trigger();
+        }, Promise.reject);
+      }
+    });
+    this.trigger = () => {
+      cycleResolve(val);
+    }
+    this.throw = (e) => {
+      cycleReject(e);
+    }
+  }
+}
+
+class Wire {
+  constructor(args, arg2) {
+    const { signal, func } = (() => {
+      if (isNamedArguments(args)) {
+        // args is a named arguments object
+        if (!("signal" in args)) {
+          throw Error("signal is a required parameter.");
+        }
+        if (!("func" in args)) {
+          throw Error("func is a required parameter.");
+        }
+        return {
+          signal: args.signal,
+          func: args.func,
+        };
+      } else {
+        if (arg2 === "undefined") {
+          throw Error("func is a required parameter.");
+        }
+        return {
+          signal: args,
+          func: arg2,
+        };
+      }
+    })();
+    if (typeof signal !== "object") {
+      throw Error("signal must be an object.");
+    }
+    if (typeof func !== "function") {
+      throw Error("func must be an object.");
+    }
+    const connection = signal[Symbol.asyncIterator]();
+    let abort_return;
+    let abort_throw;
+    const abort = new Promise((resolve, reject) => {
+      abort_return = resolve;
+      abort_throw = reject;
+    })
+    function fetchData() {
+      return Promise.race([ connection.next(), abort ]).then(({ value, done }) => {
+        if (!!done) {
+          return value;
+        } else {
+          if (value === undefined) {
+            return null;
+          } else {
+            return value;
+          }
+        }
+      });
+    }
+    const process = (async () => {
+      let data;
+      do {
+        data = await fetchData();
+        if (data !== null) {
+          func(data);
+        }
+      } while (data !== undefined);
+    })();
+    // These two functions make the pipe act as a promise
+    this.then = process.then.bind(process);
+    this.catch = process.catch.bind(process);
+    // These two functions make the promise abortable
+    this.return = () => {
+      abort_return({ done: true });
+    };
+    this.throw = (error) => {
+      abort_throw(error);
+    };
+  }
   }
 }
 
@@ -247,34 +336,6 @@ class ManualSourceNode extends SourceNode {
       cycleReject(e);
     }
   }
-}
-
-export function sourceFunctionToNode(args) {
-  let source;
-  if (isNamedArguments(args)) {
-    if (!(source in args)) {
-      throw "source is a required argument.";
-    }
-    source = args.source;
-  } else if (typeof args == "function") {
-    source = args;
-  } else {
-    throw "Invalid args";
-  }
-  const ret = new SourceNode((resolve, reject) => {
-    thisResolve = resolve;
-    thisReject = reject;
-  });
-  // This function must be called repeatedly to drive the source
-  ret.cycle = () => {
-    try {
-      const value = source();
-      thisResolve(value);
-    } catch (e) {
-      thisReject(e);
-    }
-  };
-  return ret;
 }
 
 export class SinkNode {
@@ -520,86 +581,59 @@ const transform = async (input, output) => {
   output.put(inputVal * 2);
   return;
 }
-  async () => {
-    try {
-      await transform(input, output);
-      outputResolve(undefined);
-    } catch (e) {
-      outputReject(e);
-    }
-  }
-  const input = {
-    async get() => {
-      if (inputAllowed) {
-        inputAllowed = false;
-        return this.#buffer.shift();
-      } else {
-        // output = null
-        await nextCycle();
-        return this.#buffer.shift();
-      }
-    },
-  };
-  const output = {
-    async put(val) => {
-      // output = val;
-      await nextCycle();
-    },
-  };
-  let cycleResolve;
-  let cycleReject;
-  const nextCycle = new Promise((resolve, reject) => {
-    cycleResolve = resolve;
-    cycleReject = reject;
-  });
-  this.cycle() {
-    cycleResolve();
-  }
-  let outputResolve;
-  let outputReject;
-  this.source = new SourceNode(async (output) => {
-    outputResolve = output.put;
-    await new Promise();
-  });
 
 export class TransformNode {
-  #buffer;
-  #source;
   constructor(args) {
+    const buffer = [];
     if (!isNamedArguments(args)) {
       throw Error("Invalid arguments");
     }
-    if (!(transform in args)) {
-      // Use identity transform
-      args.transform = async (input, output) => {
-        while (true) {
-          await output.put(await input.get());
-        }
-      };
-    } else {
-      if (typeof args.transform !== "function") {
-        throw Error("transform must be a valid transform.");
-      }
-    }
-    this.#buffer = [];
-    const dequeue = getSourceCallback(() => {
-      if (this.#buffer.length === 0) {
-        // Just because the queue is empty at the moment, does not indicate that it will never have data.
-        return null;
+    const transform = (() => {
+      if (!(transform in args)) {
+        // Use identity transform
+        return async (input, output) => {
+          while (true) {
+            await output.put(await input.get());
+          }
+        };
       } else {
-        return this.#buffer.shift();
+        if (typeof args.transform !== "function") {
+          throw Error("transform must be a valid transform.");
+        }
+        return args.transform;
       }
-    });
+    })();
+    const input = {
+      async get() => {
+        do {
+          await nextCycle();
+        } while (buffer.length === 0);
+        return buffer.shift();
+      },
+    };
+    let cycleResolve;
+    let cycleReject;
+    function nextCycle() {
+      return new Promise((resolve, reject) => {
+        cycleResolve = resolve;
+        cycleReject = reject;
+      });
+    }
+    // This function must be called repeatedly to drive the transform
+    this.cycle = () => {
+      cycleResolve();
+    }
     // (obj !== undefined) && (obj !== null) guaranteed
-    this.input = new SinkNode((obj) => { this.#buffer.push(obj); });
-    this.output = new SourceNode(() => { return args.transform.callback(dequeue); });
-  }
-  // This function must be called repeatedly to drive the transform
-  cycle() {
-    return this.output.cycle();
-  }
-  get used() {
-    return this.#buffer.length;
+    this.input = new SinkNode((obj) => { buffer.push(obj); });
+    this.output = new SourceNode(async (output) => { return await transform(input, output); });
+    this.throw = () => {
+      cycleReject();
+    };
+    Object.defineProperty(this, used, {
+      get() {
+        return buffer.length;
+      },
+    });
   }
 }
 
