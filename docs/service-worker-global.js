@@ -41,23 +41,25 @@ self.currentScript.exports = (function () {
   };
   exports.enqueueMessage = enqueueMessage;
   self.addEventListener("messageerror", console.error);
-  exports.newClientMessage = new Common.Streams.SourceNode((resolve, reject) => {
-    unregisteredClientHandler = resolve;
-  });
+  const newClientMessageSource = async (output) => {
+    unregisteredClientHandler = output.put;
+  };
+  exports.newClientMessage = new Common.Streams.SourceNode(newClientMessageSource);
   function ClientNode({
     client,
   }) {
+    const outputSource = async (output) => {
+      thisClient = registeredClients.get(client.id);
+      if (!thisClient) {
+        thisClient = {
+          sources: new Set(),
+        };
+        registeredClients.set(client.id, thisClient);
+      }
+      thisClient.sources.add(resolve);
+    };
     return {
-      output: new Common.Streams.SourceNode((resolve, reject) => {
-        thisClient = registeredClients.get(client.id);
-        if (!thisClient) {
-          thisClient = {
-            sources: new Set(),
-          };
-          registeredClients.set(client.id, thisClient);
-        }
-        thisClient.sources.add(resolve);
-      }),
+      output: new Common.Streams.SourceNode(outputSource),
       input: new Common.Streams.SinkNode((data) => {
         Common.MessageNode.postMessage(client, data);
       }),
