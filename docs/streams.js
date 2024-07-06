@@ -358,10 +358,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
           return thisCallback;
         },
       });
-      get locked() {
-        return !!this.#validCallback;
-      }
-      unlock() {
+      Object.defineProperty(this, "locked", {
+        get() {
+          return !!this.#validCallback;
+        },
+      });
+      this.unlock = () => {
         this.#validCallback = undefined;
       }
     }
