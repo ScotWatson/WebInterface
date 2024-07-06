@@ -36,13 +36,23 @@ export class Signal {
     const source = (() => {
       if (isNamedArguments(args)) {
         if (!(source in args)) {
-          throw "source is a required argument.";
+          throw Error("source is a required argument.", {
+            cause: {
+              functionName: "Signal.constructor",
+              args,
+            },
+          });
         }
         return args.source;
       } else if (typeof args === "function") {
         return args;
       } else {
-        throw "Invalid args";
+        throw Error("Invalid Args", {
+          cause: {
+            functionName: "Signal.constructor",
+            args,
+          },
+        });
       }
     })();
     this.#nextOutput = new Promise((resolve, reject) => {
