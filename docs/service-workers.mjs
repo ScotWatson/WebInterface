@@ -189,7 +189,7 @@ export function createControllerSource(controllerQueue) {
     await new Promise((resolve, reject) => {
       controllerQueue.addEventListener("message", (evt) => {
         console.log("controller message", evt.data);
-        output.get(evt.data);
+        output.put(evt.data);
       });
     });
   });
