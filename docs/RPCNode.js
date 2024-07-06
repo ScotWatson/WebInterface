@@ -28,7 +28,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         await new Promise((resolve, reject) => {
           this.#outputResolve = output.put;
           this.#outputReject = reject;
-        };
+        });
       };
       this.output = new Streams.SourceNode(outputSource);
       const requestHandler = async (data) => {
