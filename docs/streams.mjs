@@ -344,10 +344,12 @@ export class SinkNode {
         return thisCallback;
       },
     });
-    get locked() {
-      return !!this.#validCallback;
-    }
-    unlock() {
+    Object.defineProperty(this, "locked", {
+      get() {
+        return !!this.#validCallback;
+      },
+    });
+    this.unlock = () => {
       this.#validCallback = undefined;
     }
   }
