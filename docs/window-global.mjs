@@ -171,5 +171,5 @@ const controllerchangeSource = async (output) => {
       };
     }
   });
-});
+};
 export const controllerchange = new Common.Streams.SourceNode(controllerchangeSource);
