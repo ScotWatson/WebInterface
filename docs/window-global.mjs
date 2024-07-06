@@ -55,12 +55,16 @@ export function isTrustedOrigin(origin) {
 }
 let trustedOriginHandler;
 const trustedOriginSource = async (output) => {
-  trustedOriginHandler = output.put;
+  await new Promise((resolve, reject) => {
+    trustedOriginHandler = output.put;
+  });
 }
 export const trustedOrigin = new Common.Streams.SourceNode(trustedOriginSource);
 let untrustedOriginHandler;
 const untrustedOriginSource = async (output) => {
-  untrustedOriginHandler = output.put;
+  await new Promise((resolve, reject) => {
+    untrustedOriginHandler = output.put;
+  });
 }
 export const untrustedOrigin = new Common.Streams.SourceNode(untrustedOriginSource);
 
@@ -132,41 +136,40 @@ export function setServiceWorkerHeartbeat({
 export let controller = null;
 
 const controllerSource = async (output) => {
-  const { portClose, portCloseResolve, portCloseReject } = new Promise((resolve, reject) => {
-    portCloseResolve = resolve;
-    portCloseReject = reject;
+  await new Promise((resolve, reject) => {
+    window.navigator.serviceWorker.addEventListener("message", function (evt) {
+      if (evt.data === undefined) {
+        resolve();
+      } else {
+        output.put(evt.data);
+      }
+    });
+    window.navigator.serviceWorker.addEventListener("messageerror", function (evt) {
+      reject(evt);
+    });
   });
-  window.navigator.serviceWorker.addEventListener("message", function (evt) {
-    if (evt.data === undefined) {
-      portCloseResolve();
-    } else {
-      output.put(evt.data);
-    }
-  });
-  window.navigator.serviceWorker.addEventListener("messageerror", function (evt) {
-    portCloseReject(evt);
-  });
-  await portClose;
 });
 export const controllerSourceNode = new Common.Streams.SourceNode(controllerSource);
 
 const controllerchangeSource = async (output) => {
-  window.navigator.serviceWorker.addEventListener("controllerchange", (evt) => {
-    newController();
-    output.put();
+  await new Promise((resolve, reject) => {
+    window.navigator.serviceWorker.addEventListener("controllerchange", (evt) => {
+      newController();
+      output.put();
+    });
+    if (window.navigator.serviceWorker.controller !== null) {
+      newController();
+      output.put();
+    }
+    function newController() {
+      controller = {
+        serviceWorker: window.navigator.serviceWorker.controller,
+        output: controllerSourceNode,
+        input: new Common.Streams.SinkNode((data) => {
+          Common.MessageNode.postMessage(window.navigator.serviceWorker.controller, data);
+        }),
+      };
+    }
   });
-  if (window.navigator.serviceWorker.controller !== null) {
-    newController();
-    output.put();
-  }
-  function newController() {
-    controller = {
-      serviceWorker: window.navigator.serviceWorker.controller,
-      output: controllerSourceNode,
-      input: new Common.Streams.SinkNode((data) => {
-        Common.MessageNode.postMessage(window.navigator.serviceWorker.controller, data);
-      }),
-    };
-  }
 });
 export const controllerchange = new Common.Streams.SourceNode(controllerchangeSource);
