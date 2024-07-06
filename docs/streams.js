@@ -41,10 +41,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     #outputReject;
     #nextOutput;
     constructor(args) {
-      this.#nextOutput = new Promise((resolve, reject) => {
-        this.#outputResolve = resolve;
-        this.#outputReject = reject;
-      });
       const source = (() => {
         if (isNamedArguments(args)) {
           if (!(source in args)) {
@@ -57,6 +53,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
           throw "Invalid args";
         }
       })();
+      this.#nextOutput = new Promise((resolve, reject) => {
+        this.#outputResolve = resolve;
+        this.#outputReject = reject;
+      });
       const output = {
         trigger: () => {
           const thisResolve = this.#outputResolve;
@@ -186,10 +186,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     #nextOutput;
     #processing;
     constructor(args) {
-      this.#nextOutput = new Promise((resolve, reject) => {
-        this.#outputResolve = resolve;
-        this.#outputReject = reject;
-      });
       const source = (() => {
         if (isNamedArguments(args)) {
           if (!(source in args)) {
@@ -202,8 +198,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
           throw "Invalid args";
         }
       })();
+      this.#nextOutput = new Promise((resolve, reject) => {
+        this.#outputResolve = resolve;
+        this.#outputReject = reject;
+      });
       const output = {
-        put(val) {
+        put: (val) => {
           const thisResolve = this.#outputResolve;
           this.#nextOutput = new Promise((resolve, reject) => {
             this.#outputResolve = resolve;
@@ -474,14 +474,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       return async (input, output) => {
         let cycleResolve;
         const output1 = {
-          async put(val) {
+          put: async (val) => {
             if (val !== undefined) {
               cycleResolve(val);
             }
           },
         };
         const input2 = {
-          async get() {
+          get: async () => {
             return await new Promise((resolve, _) => {
               cycleResolve = resolve;
             });
@@ -518,7 +518,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         }
       })();
       const input = {
-        async get() {
+        get: async () => {
           do {
             await new Promise((resolve, reject) => {
               this.#cycleResolve = resolve;
