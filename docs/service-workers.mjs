@@ -188,11 +188,13 @@ export function createControllerSource(controllerQueue) {
   return new Streams.SourceNode(async (output) => {
     await new Promise((resolve, reject) => {
       controllerQueue.addEventListener("message", (evt) => {
+        console.log("controller message", evt.data);
         resolve(evt.data);
       });
     });
   });
 }
 export const controllerSink = new Streams.SinkNode((data) => {
+  console.log("controllerSink", data);
   MessageNode.postMessage(self.navigator.serviceWorker.controller, data);
 });
