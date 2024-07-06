@@ -550,7 +550,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       let outputResolve;
       let outputReject;
       const sourceOutput = {
-        put: (value) => {
+        put: async (value) => {
           const nextCycle = new Promise((resolve, reject) => {
             cycleResolve = resolve;
             cycleReject = reject;
@@ -560,7 +560,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         },
       };
       const input = {
-        get: () => {
+        get: async () => {
           const nextOutput = new Promise((resolve, reject) => {
             outputResolve = resolve;
             outputReject = reject;
