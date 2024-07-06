@@ -8,27 +8,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 // Use ActiveSource when the values are arriving via callback (e.g. event listeners)
 // Use SourceNode when the source is a function.
 
-// null = information not available at the moment
-// undefined = no more information available, will return undefined indefinately
-// An operation is a generator. The operation is initialized by parameters passed to the generator when obtaining its iterator.
-// Each iterator returned by the generator has its own state. The iterator takes its input via the parameter of the next function.
-// The first input to next(input) must be ignored, even if it is undefined.
-// If the iterator is used in a for...of loop, the input is always undefined, which puts the iterator in a flushing state after the first pass.
-// Operation iterators have two types of states: waiting & flushing.
-// If the operation iterator is in a waiting state, next(null) must return null.
-// If next(null) returns null, the operation iterator is in a waiting state.
-// If next(null) returns null, next(input) must return null until input !== null.
-// If the operation iterator is in a waiting state, next(null) must return null.
-// If the operation iterator is in a flushing state, next(input), where (input !== null) && (input !== undefined), must throw.
-// If next() is called, and is not the first call to next, all future input via next(input) must be ignored.
-// If next(input) returns undefined, all future invocations of next must return undefined.
-
-// Guaranteed by Note of Section 27.1.2 of ECMAScript 14.0
-const __IteratorPrototype__ = Object.getPrototypeOf(Object.getPrototypeOf([][Symbol.iterator]()));
-
 function conformsToIteratorInterface(obj) {
   return (typeof obj === "object" && obj !== null && typeof obj.next === "function");
 }
+
 function isIterator(obj) {
   return obj instanceof __IteratorPrototype__.constructor;
 }
@@ -37,128 +20,89 @@ function isNamedArguments(obj) {
   return (typeof obj === "object" && obj !== null && obj.constructor.name === "Object");
 }
 
-function getSourceCallback(obj) {
-  if (typeof obj === "object" && obj !== null) {
-    if (typeof obj[Symbol.iterator] === "function") {
-      // obj conforms to the iterable interface
-      const iterator = obj[Symbol.iterator]();
-      if (isIterator(iterator)) {
-        return iteratorCallback(iterator.next);
-      } else {
-        throw Error("[Symbol.iterator]() did not return an iterator.");
-      }
-    } else if (typeof obj.next === "function") {
-      // obj conforms to the iterator interface
-      return iteratorCallback(iterator.next);
-    } else {
-      return null;
-    }
-  } else if (typeof obj === "function") {
-    // obj is to be treated as a callback function
-    return callbackWrapper(obj);
-  } else {
-    return null;
-  }
-  function iteratorCallback(iterator) {
-    return () => {
-      let item = iterator.next();
-      while (!item.done) {
-        if (item.value !== undefined) {
-          return item.value;
-        }
-        // iterator returned undefined, but did not set the done flag
-        // attempt to get the next item
-        item = iterator.next();
-      }
-      // iterator has set the done flag, return undefined forever
-      return undefined;
-    };
-  }
-  function callbackWrapper(callback) {
-    return () => {
-      const value = callback();
-      if (value !== undefined) {
-        callback = () => {};
-      }
-      return value;
-    };
-  }
-}
-
-// Conforms to the async iterable protocol, therefore it is an active source
+// Conforms to the async iterable protocol
+// Takes an async function to provide the signal. An output object is provided. The output object has a trigger function.
+// No abort functions are provided (return, throw), as it is impossible to stop the underlying signal
 export class Signal {
   // Accepts an asynchronous function "source":
   //   Accepts one argument object "output":
   //     put: a function that takes one argument "value"
   // Each time output.put is called, every iterator instance resolves with (a structured clone of) the value passed (therefore, the value must be clonable).
   // Errors thrown from source results in rejection of SourceNode[Symbol.asyncIterator](options).next
+  #outputResolve;
+  #outputReject;
+  #nextOutput;
   constructor(args) {
-    let source;
-    let nextOutput;
-    let outputResolve;
-    let outputReject;
-    if (isNamedArguments(args)) {
-      if (!(source in args)) {
-        throw "source is a required argument.";
+    const source = (() => {
+      if (isNamedArguments(args)) {
+        if (!(source in args)) {
+          throw "source is a required argument.";
+        }
+        return args.source;
+      } else if (typeof args === "function") {
+        return args;
+      } else {
+        throw "Invalid args";
       }
-      source = args.source;
-    } else if (typeof args == "function") {
-      source = args;
-    } else {
-      throw "Invalid args";
-    }
+    })();
     const output = {
-      trigger() {
-        outputResolve();
-        nextOutput = new Promise((resolve, reject) => {
-          outputResolve = resolve;
-          outputReject = reject;
+      trigger: () => {
+        const thisResolve = this.#outputResolve;
+        this.#nextOutput = new Promise((resolve, reject) => {
+          this.#outputResolve = resolve;
+          this.#outputReject = reject;
         });
+        thisResolve();
       },
     };
     this[Symbol.asyncIterator] = async function*(options) {
       if (!options) {
         options = {};
       }
-      let value;
-      await nextOutput;
-      while (value !== undefined) {
+      await this.#nextOutput;
+      while (true) {
         yield;
-        await nextOutput;
+        await this.#nextOutput;
       }
     };
     const process = (async () => {
       try {
         await source(output);
       } catch (e) {
-        outputReject(e);
+        this.#outputReject(e);
+        throw e;
       }
     })();
-    this.then = process.then;
-    this.catch = process.catch;
+    this.then = process.then.bind(process);
+    this.catch = process.catch.bind(process);
   }
 };
 
+// A signal that can be externally triggered
 class ManualSignal extends Signal {
+  #cycleResolve;
+  #cycleReject;
   constructor() {
-    let cycleResolve;
-    let cycleReject;
+    let processing = true;
     super(async (output) => {
-      let processing = true;
       while (processing) {
         await (new Promise((resolve, reject) => {
-          cycleResolve = resolve;
-          cycleReject = reject;
+          this.#cycleResolve = resolve;
+          this.#cycleReject = reject;
         })).then(() => {
           output.trigger();
-        }, Promise.reject);
+        });
       }
     });
     this.trigger = () => {
-      cycleResolve(val);
+      this.#cycleResolve();
     }
-    this.throw = (e) => {
-      cycleReject(e);
+    this.return = () => {
+      processing = false;
+      this.#cycleResolve();
+    }
+    this.throw = () => {
+      this.#cycleReject();
     }
   }
 }
@@ -191,198 +135,221 @@ class Wire {
     if (typeof signal !== "object") {
       throw Error("signal must be an object.");
     }
+    if (Symbol.asyncIterator in signal) {
+      throw Error("signal must be an async iterable.");
+    }
     if (typeof func !== "function") {
       throw Error("func must be an object.");
     }
     const connection = signal[Symbol.asyncIterator]();
-    let abort_return;
-    let abort_throw;
-    const abort = new Promise((resolve, reject) => {
-      abort_return = resolve;
-      abort_throw = reject;
-    })
-    function fetchData() {
-      return Promise.race([ connection.next(), abort ]).then(({ value, done }) => {
-        if (!!done) {
-          return value;
-        } else {
-          if (value === undefined) {
-            return null;
-          } else {
-            return value;
-          }
-        }
-      });
-    }
     const process = (async () => {
       let data;
       do {
-        data = await fetchData();
-        if (data !== null) {
-          func(data);
-        }
-      } while (data !== undefined);
+        result = await connection.next();
+        func();
+      } while (!result.done);
     })();
     // These two functions make the pipe act as a promise
     this.then = process.then.bind(process);
     this.catch = process.catch.bind(process);
     // These two functions make the promise abortable
-    this.return = () => {
-      abort_return({ done: true });
-    };
-    this.throw = (error) => {
-      abort_throw(error);
-    };
-  }
+    this.return = connection.return.bind(connection);
+    this.throw = connection.throw.bind(connection);
   }
 }
 
 // Conforms to the async iterable protocol, therefore it is an active source
+// No abort functions (return, throw) provided, as it is not possible to stop the underlying source
 export class SourceNode {
   // Accepts an asynchronous function "source":
   //   Accepts one argument object "output":
   //     put: a function that takes one argument "value"
   // Each time output.put is called, every iterator instance resolves with (a structured clone of) the value passed (therefore, the value must be clonable).
   // Errors thrown from source results in rejection of SourceNode[Symbol.asyncIterator](options).next
+  #outputResolve;
+  #outputReject;
+  #nextOutput;
   constructor(args) {
-    let source;
-    let nextOutput;
-    if (isNamedArguments(args)) {
-      if (!(source in args)) {
-        throw "source is a required argument.";
+    const source = (() => {
+      if (isNamedArguments(args)) {
+        if (!(source in args)) {
+          throw "source is a required argument.";
+        }
+        return args.source;
+      } else if (typeof args == "function") {
+        return args;
+      } else {
+        throw "Invalid args";
       }
-      source = args.source;
-    } else if (typeof args == "function") {
-      source = args;
-    } else {
-      throw "Invalid args";
-    }
-    let outputResolve;
-    let outputReject;
-    function getNextOutput() {
-      return new Promise((resolve, reject) => {
-        outputResolve = resolve;
-        outputReject = reject;
-      });
-    };
+    })();
     const output = {
       put(val) {
-        if (val !== undefined) {
-          outputResolve(val);
-        }
-        nextOutput = getNextOutput();
+        const thisResolve = this.#outputResolve;
+        this.#nextOutput = new Promise((resolve, reject) => {
+          this.#outputResolve = resolve;
+          this.#outputReject = reject;
+        });
+        thisResolve(val);
       },
     };
     this[Symbol.asyncIterator] = async function*(options) {
       if (!options) {
         options = {};
       }
-      try {
-        let value;
-        value = await nextOutput;
-        if (!options.noCopy) {
-          while (value !== undefined) {
-            yield self.structuredClone(value);
-            value = await nextOutput;
-          }
-        } else {
-          while (value !== undefined) {
-            yield value;
-            value = await nextOutput;
-          }
+      let value = await this.#nextOutput;
+      if (!options.noCopy) {
+        while (processing) {
+          yield self.structuredClone(value);
+          value = await this.#nextOutput;
         }
-        return;
-      } catch (e) {
-        // Error has been thrown
-        throw e;
-      } finally {
-        // Perform any cleanup
+      } else {
+        while (processing) {
+          yield value;
+          value = await this.#nextOutput;
+        }
       }
+      return;
     }
-    (async () => {
+    const process = (async () => {
       try {
-        await source(output);
-        outputResolve(undefined);
+        const ret = await source(output);
+        processing = false;
+        this.#outputResolve(undefined);
+        return ret;
       } catch (e) {
-        outputReject(e);
+        this.#outputReject(e);
+        throw e;
       }
     })();
+    this.then = process.then.bind(process);
+    this.catch = process.catch.bind(process);
   }
 };
 
-class ManualSourceNode extends SourceNode {
-  constructor() {
-    let cycleResolve;
-    let cycleReject;
+class FunctionSourceNode extends SourceNode {
+  #cycleResolve;
+  #cycleReject;
+  constructor(args) {
+    if (typeof args !== "function") {
+      throw Error("func must be a function.");
+    }
+    const sourceFunc = args;
     super(async (output) => {
       let processing = true;
       while (processing) {
         await (new Promise((resolve, reject) => {
-          cycleResolve = resolve;
-          cycleReject = reject;
+          this.#cycleResolve = resolve;
+          this.#cycleReject = reject;
         })).then((val) => {
           if (val === undefined) {
             processing = false;
           } else {
-            output.put(x);
+            output.put(val);
+          }
+        });
+      }
+    });
+    this.cycle = () => {
+      const val = sourceFunc();
+      this.#cycleResolve(val);
+    }
+    this.return = () => {
+      this.#cycleResolve(undefined);
+    };
+    this.throw = (e) => {
+      this.#cycleReject(e);
+    }
+  }
+}
+
+class IteratorSourceNode extends SourceNode {
+  #cycleResolve;
+  #cycleReject;
+  constructor(args) {
+    if (typeof args.next !== "function") {
+      throw Error("args must be an iterator.");
+    }
+    const sourceIter = args;
+    super(async (output) => {
+      let processing = true;
+      while (processing) {
+        await (new Promise((resolve, reject) => {
+          this.#cycleResolve = resolve;
+          this.#cycleReject = reject;
+        })).then((value) => {
+          if (value === undefined) {
+            processing = false;
+          } else {
+            output.put(value);
           }
         }, Promise.reject);
       }
     });
-    this.cycle = (val) => {
-      cycleResolve(val);
+    this.cycle = () => {
+      const result = sourceIter();
+      if (result.done) {
+        this.#cycleResolve(undefined);
+      } else {
+        this.#cycleResolve(result.value);
+      }
     }
+    this.return = () => {
+      this.#cycleResolve(undefined);
+    };
     this.throw = (e) => {
-      cycleReject(e);
+      this.#cycleReject(e);
     }
   }
 }
 
 export class SinkNode {
-  #internalCallback;
   #validCallback;
   constructor(args) {
-    if (typeof args === "function") {
-      this.#internalCallback = args;
-    } else if (isNamedArguments(args)) {
-      // args is a named arguments object
-      if (!(sink in args)) {
-        throw Error("sink is a required argument.");
+    const internalCallback = (() => {
+      if (typeof args === "function") {
+        return args;
+      } else if (isNamedArguments(args)) {
+        // args is a named arguments object
+        if (!(sink in args)) {
+          throw Error("sink is a required argument.");
+        }
+        if (typeof args.sink !== "function") {
+          throw Error("sink is not a valid sink.");
+        }
+        return args.sink;
+      } else {
+        throw Error("Invalid Args");
       }
-      if (typeof args.sink !== "function") {
-        throw Error("sink is not a valid sink.");
-      }
-      this.#internalCallback = args.sink;
-    } else {
-      throw Error("Invalid Args");
+    })();
+    Object.defineProperty(this, "callback", {
+      get() {
+        if (this.locked) {
+          throw "sink is locked";
+        }
+        const thisCallback = (obj) => {
+          // Check to ensure the callback has not been invalidated
+          if (thisCallback !== this.#validCallback) {
+            throw "Attempt to send data to invalidated callback.";
+          }
+          // The return value from the internal callback is ignored.
+          if (obj === undefined) {
+            // If undefined is received, there is no more input
+            this.unlock();
+          } else if (obj !== null) {
+            internalCallback(obj);
+          }
+          // The sink always returns undefined.
+        };
+        this.#validCallback = thisCallback;
+        return thisCallback;
+      },
+    });
+    get locked() {
+      return !!this.#validCallback;
     }
-  }
-  get callback() {
-    if (this.locked) {
-      throw "sink is locked";
+    unlock() {
+      this.#validCallback = undefined;
     }
-    const thisCallback = (obj) => {
-      // Check to ensure the callback has not been invalidated
-      if (thisCallback !== this.#validCallback) {
-        throw "Attempt to send data to invalidated callback.";
-      }
-      // The return value from the internal callback is ignored.
-      if (obj === undefined) {
-        // If undefined is received, there is no more input
-        this.unlock();
-      } else if (obj !== null) {
-        this.#internalCallback(obj);
-      }
-      // The sink always returns undefined.
-    };
-    this.#validCallback = thisCallback;
-    return thisCallback;
-  }
-  get locked() {
-    return !!this.#validCallback;
-  }
-  unlock() {
-    this.#validCallback = undefined;
   }
 }
 
@@ -429,14 +396,8 @@ export class Pipe {
     const connection = source[Symbol.asyncIterator]({
       noCopy,
     });
-    let abort_return;
-    let abort_throw;
-    const abort = new Promise((resolve, reject) => {
-      abort_return = resolve;
-      abort_throw = reject;
-    })
     function fetchData() {
-      return Promise.race([ connection.next(), abort ]).then(({ value, done }) => {
+      return connection.next().then(({ value, done }) => {
         if (!!done) {
           return value;
         } else {
@@ -466,136 +427,59 @@ export class Pipe {
     this.then = process.then.bind(process);
     this.catch = process.catch.bind(process);
     // These two functions make the promise abortable
-    this.return = () => {
-      abort_return({ done: true });
-    };
-    this.throw = (error) => {
-      abort_throw(error);
-    };
+    this.return = connection.return.bind(connection);
+    this.throw = connection.throw.bind(connection);
   }
 }
 
-// Conforms to the iterator interface
-// If it is intended to be a source, use Source to create a passive source.
-// If it is intended to be a transform, use LazyTransform or EagerTransform to create a stream node.
-// Transforms are not to have side effects, therefore there is no TransformSink
-export class Transform {
-  #initialize;
-  #execute;
-  constructor(args) {
-    if (!isNamedArguments(args)) {
-      throw "Invalid arguments";
-    }
-    if (initialize in args) {
-      if (typeof args.initialize !== "function") {
-        throw Error("initialize must be a function.");
-      }
-      this.#initialize = args.initialize;
-    } else {
-      this.#initialize = () => ({});
-    }
-    if (execute in args) {
-      if (typeof args.execute !== "function") {
-        throw Error("execute must be a function.");
-      }
-      this.#execute = args.execute;
-    } else {
-      this.#execute = () => { return; };
-    }
+function combineTransforms(transforms) {
+  if (!(Symbol.iterator in transforms)) {
+    throw Error("transforms must be iterable");
   }
-  static fromTransforms(transforms) {
-    if (!(Symbol.iterator in transforms)) {
-      throw Error("transforms must be iterable");
-    }
-    const initialize = () => {
-      const state = {};
-      let currentCallback = (source) => { return source(); };
-      for (const transform of transforms) {
-        currentCallback = createCallback(currentCallback, transform.callback);
-      }
-      state.callback = currentCallback;
-      return state;
-    };
-    const execute = (state, input) => {
-      return state.callback(input);
-    };
-    return new Transform({
-      initialize,
-      execute,
-    });
-    function createCallback(transform1Callback, transform2Callback) {
-      return (source) => {
-        transform2Callback(() => {
-          transform1Callback(source);
-        });
+  let ret = identityTransform;
+  for (const transform of transforms) {
+    ret = combinePair(ret, transform);
+  }
+  return ret;
+  function combinePair(transform1, transform2) {
+    return async (input, output) => {
+      let cycleResolve;
+      const output1 = {
+        async put(val) {
+          if (val !== undefined) {
+            cycleResolve(val);
+          }
+        },
       };
-    }
-  }
-  *[Symbol.iterator]() {
-    let state = this.#initialize();
-    if (!(typeof state === "object" && state !== null)) {
-      throw Error("state must be an object");
-    }
-    // The first input provided to the execute function is always null, to allow any initial outputs to be generated.
-    let input = null;
-    let output = null;
-    while (true) {
-      output = this.#execute(state, input);
-      if (output === undefined) {
-        return;
-      }
-      input = yield output;
-    }
-  }
-  get callback() {
-    const state = this.#initialize();
-    let waitingState = false;
-    let finishedState = false;
-    return (source) => {
-      if (finishedState) {
-        return;
-      }
-      if (waitingState) {
-        const input = source();
-        output = this.#execute(state, input);
-      } else {
-        let output = this.#execute(state, null);
-        if (output === null) {
-          // operation is in a waiting state
-          // needs input
-          const input = source();
-          output = this.#execute(state, input);
-        }
-      }
-      waitingState = (output === null);
-      finishedState = (output === undefined);
-      return output;
+      const input2 = {
+        async get() {
+          return await new Promise((resolve, _) => {
+            cycleResolve = resolve;
+          });
+        },
+      };
+      await Promise.all([ transform1(input, output1).then(() => { cycleResolve(undefined); }), transform2(input2, output) ]);
     };
   }
 }
 
-const transform = async (input, output) => {
-  output.put(1);
-  output.put(2);
-  const inputVal = input.get();
-  output.put(inputVal * 2);
-  return;
-}
+const identityTransform = async (input, output) => {
+  while (true) {
+    await output.put(await input.get());
+  }
+};
 
 export class TransformNode {
+  #cycleResolve;
+  #cycleReject;
   constructor(args) {
-    const buffer = [];
     if (!isNamedArguments(args)) {
       throw Error("Invalid arguments");
     }
+    const buffer = [];
     const transform = (() => {
       if (!(transform in args)) {
-        // Use identity transform
-        return async (input, output) => {
-          while (true) {
-            await output.put(await input.get());
-          }
-        };
+        return identityTransform;
       } else {
         if (typeof args.transform !== "function") {
           throw Error("transform must be a valid transform.");
@@ -606,30 +490,25 @@ export class TransformNode {
     const input = {
       async get() => {
         do {
-          await nextCycle();
+          await new Promise((resolve, reject) => {
+            this.#cycleResolve = resolve;
+            this.#cycleReject = reject;
+          });
         } while (buffer.length === 0);
         return buffer.shift();
       },
     };
-    let cycleResolve;
-    let cycleReject;
-    function nextCycle() {
-      return new Promise((resolve, reject) => {
-        cycleResolve = resolve;
-        cycleReject = reject;
-      });
-    }
     // This function must be called repeatedly to drive the transform
     this.cycle = () => {
-      cycleResolve();
+      this.#cycleResolve();
     }
     // (obj !== undefined) && (obj !== null) guaranteed
     this.input = new SinkNode((obj) => { buffer.push(obj); });
     this.output = new SourceNode(async (output) => { return await transform(input, output); });
     this.throw = () => {
-      cycleReject();
+      this.#cycleReject();
     };
-    Object.defineProperty(this, used, {
+    Object.defineProperty(this, "used", {
       get() {
         return buffer.length;
       },
@@ -638,27 +517,139 @@ export class TransformNode {
 }
 
 // synchronously evaluates a transform, taking values from a source and sending the output to a sink
-export function syncEvaluate(transform, source, sink) {
-  const sourceCallback = getSourceFunction(source);
-  if (typeof sourceCallback !== "function") {
-    throw Error("source is not a valid source.");
+export function transformSource(source, transform) {
+  if (typeof source !== "function") {
+    throw Error("source must be a function.");
   }
-  const transformCallback = transform.callback;
-  if (typeof transformCallback !== "function") {
-    throw Error("transform is not a valid transform.");
+  if (typeof transform !== "function") {
+    throw Error("transform must be a function.");
   }
-  const sinkCallback = sink;
-  if (typeof sinkCallback !== "function") {
-    throw Error("sink is not a valid sink.");
+  return async (output) => {
+    let cycleResolve;
+    let cycleReject;
+    let outputResolve;
+    let outputReject;
+    const sourceOutput = {
+      put: (value) => {
+        const nextCycle = new Promise((resolve, reject) => {
+          cycleResolve = resolve;
+          cycleReject = reject;
+        });
+        outputResolve(value);
+        await nextCycle;
+      },
+    };
+    const input = {
+      get: () => {
+        const nextOutput = new Promise((resolve, reject) => {
+          outputResolve = resolve;
+          outputReject = reject;
+        });
+        cycleResolve(value);
+        await nextOutput;
+      },
+    };
+    return Promise.all([ source(sourceOutput), transform(input, output) ]);
+  };
+}
+
+// synchronously evaluates a transform, taking values from a source and sending the output to a sink
+export function syncEvaluate(source, transform, sink) {
+  if (typeof source !== "function") {
+    throw Error("source must be a function.");
   }
-  let input = null;
-  let output;
-  while (true) {
-    output = transformCallback(source);
-    if (output === undefined) {
-      // end of output, end of function
-      return;
-    }
-    sinkCallback(output);
+  if (typeof transform !== "function") {
+    throw Error("transform must be a function.");
+  }
+  if (typeof sink !== "function") {
+    throw Error("sink must be a function.");
+  }
+  const input = {
+    get: () => {
+      return source();
+    },
+  };
+  const output = {
+    put: (value) => {
+      sink(value);
+    },
+  };
+  transform(input, output);
+}
+
+class BinaryTransform {
+  constructor() {
+    this.trigger = () => {
+      
+    };
+  }
+}
+
+class BinarySplitter {
+  #buffer;
+  #head;
+  constructor(maxByteLength) {
+    this.#buffer = null;
+    this.#head = 0;
+    this.setCapacity = (byteLength) => {
+      this.#buffer = new ArrayBuffer(byteLength);
+    };
+    this.getBuffer = (byteLength) => {
+      if (this.#buffer) {
+        if (this.#head + byteLength > this.#buffer.byteLength) {
+          
+        }
+      } else {
+        this.#buffer = new ArrayBuffer(byteLength);
+        this.#head = 0;
+      }
+      return new Uint8Array(this.#buffer, this.#head, byteLength);
+    };
+    this[Symbol.asyncIterator] = async function*() {
+      
+    };
+  }
+}
+
+class BinaryBuffer {
+  #buffer;
+  #head;
+  #tail;
+  #reserve;
+  constructor() {
+    this.#buffer = new ArrayBuffer(1);
+    this.#head = 0;
+    this.#tail = 0;
+    this.#reserve = 0;
+    this.enqueue = (byteLength) => {
+      this.#head += this.#reserve;
+      this.#reserve = byteLength;
+      if (this.#head + byteLength > this.#buffer.byteLength) {
+        let newLength = this.#buffer.byteLength * 2;
+        while (this.#head + byteLength > newLength) {
+          newLength *= 2;
+        }
+        const oldBuffer = this.#buffer;
+        this.#buffer = new ArrayBuffer(newLength);
+        (new Uint8Array(this.#buffer)).set(new Uint8Array(oldBuffer));
+      }
+      return new Uint8Array(this.#head, byteLength);
+    };
+    this.dequeue = (byteLength) => {
+      if (this.#tail + byteLength > this.#head) {
+        throw Error("Insufficient buffer");
+      }
+      if (2 * this.#tail > this.#buffer.byteLength) {
+        const newLength = 2 * (this.#buffer.byteLength - this.#tail);
+        const oldBuffer = this.#buffer;
+        this.#buffer = new ArrayBuffer(newLength);
+        (new Uint8Array(this.#buffer)).set(new Uint8Array(oldBuffer, this.#tail));
+        this.#head -= this.#tail;
+        this.#tail = 0;
+      }
+      const start = this.#tail;
+      this.#tail += byteLength;
+      return new Uint8Array(start, byteLength);
+    };
   }
 }
