@@ -180,6 +180,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     #outputResolve;
     #outputReject;
     #nextOutput;
+    #processing;
     constructor(args) {
       const source = (() => {
         if (isNamedArguments(args)) {
@@ -209,12 +210,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         }
         let value = await this.#nextOutput;
         if (!options.noCopy) {
-          while (processing) {
+          while (this.#processing) {
             yield self.structuredClone(value);
             value = await this.#nextOutput;
           }
         } else {
-          while (processing) {
+          while (this.#processing) {
             yield value;
             value = await this.#nextOutput;
           }
@@ -223,15 +224,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       }
       const process = (async () => {
         try {
-          const ret = await source(output);
-          processing = false;
-          this.#outputResolve(undefined);
-          return ret;
+          this.#processing = true;
+          return await source(output);
         } catch (e) {
           this.#outputReject(e);
           throw e;
         }
       })();
+      process.then(() => {
+        this.#processing = false;
+        this.#outputResolve();
+      });
       this.then = process.then.bind(process);
       this.catch = process.catch.bind(process);
     }
