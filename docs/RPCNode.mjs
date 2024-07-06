@@ -25,7 +25,7 @@ export default class RPCNode {
       await new Promise((resolve, reject) => {
         this.#outputResolve = output.put;
         this.#outputReject = reject;
-      };
+      });
     };
     this.output = new Streams.SourceNode(outputSource);
     const requestHandler = async (data) => {
