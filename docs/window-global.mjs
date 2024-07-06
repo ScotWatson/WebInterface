@@ -54,13 +54,15 @@ export function isTrustedOrigin(origin) {
   return trustedOrigins.has(origin);
 }
 let trustedOriginHandler;
-export const trustedOrigin = new Common.Streams.SourceNode((resolve, reject) => {
-  trustedOriginHandler = resolve;
-});
+const trustedOriginSource = async (output) => {
+  trustedOriginHandler = output.put;
+}
+export const trustedOrigin = new Common.Streams.SourceNode(trustedOriginSource);
 let untrustedOriginHandler;
-export const untrustedOrigin = new Common.Streams.SourceNode((resolve, reject) => {
-  untrustedOriginHandler = resolve;
-});
+const untrustedOriginSource = async (output) => {
+  untrustedOriginHandler = output.put;
+}
+export const untrustedOrigin = new Common.Streams.SourceNode(untrustedOriginSource);
 
 export function messageHandler(evt) {
   if (evt.source === null) {
@@ -94,14 +96,15 @@ export function MessageNodeforWindowOrigin({
   window,
   origin,
 }) {
-  return {
-    output: new Common.Streams.SourceNode(async (resolve, reject) => {
-      for await (const info of trustedOrigin[Symbol.asyncIterator]({ noCopy: true })) {
-        if ((info.source === window) && (info.origin === origin)) {
-          resolve(info.data);
-        }
+  const outputSource = async (output) => {
+    for await (const info of trustedOrigin[Symbol.asyncIterator]({ noCopy: true })) {
+      if ((info.source === window) && (info.origin === origin)) {
+        output.put(info.data);
       }
-    }),
+    }
+  };
+  return {
+    output: new Common.Streams.SourceNode(),
     input: new Common.Streams.SinkNode((data) => {
       postMessage(window, origin, data);
     }),
@@ -128,31 +131,42 @@ export function setServiceWorkerHeartbeat({
 
 export let controller = null;
 
-const controllerSource = new Common.Streams.SourceNode((resolve, reject) => {
+const controllerSource = async (output) => {
+  const { portClose, portCloseResolve, portCloseReject } = new Promise((resolve, reject) => {
+    portCloseResolve = resolve;
+    portCloseReject = reject;
+  });
   window.navigator.serviceWorker.addEventListener("message", function (evt) {
-    resolve(evt.data);
+    if (evt.data === undefined) {
+      portCloseResolve();
+    } else {
+      output.put(evt.data);
+    }
   });
   window.navigator.serviceWorker.addEventListener("messageerror", function (evt) {
-    reject(evt);
+    portCloseReject(evt);
   });
+  await portClose;
 });
+export const controllerSourceNode = new Common.Streams.SourceNode(controllerSource);
 
-export const controllerchange = new Common.Streams.SourceNode((resolve, reject) => {
+const controllerchangeSource = async (output) => {
   window.navigator.serviceWorker.addEventListener("controllerchange", (evt) => {
     newController();
-    resolve();
+    output.put();
   });
   if (window.navigator.serviceWorker.controller !== null) {
     newController();
-    resolve();
+    output.put();
   }
   function newController() {
     controller = {
       serviceWorker: window.navigator.serviceWorker.controller,
-      output: controllerSource,
+      output: controllerSourceNode,
       input: new Common.Streams.SinkNode((data) => {
         Common.MessageNode.postMessage(window.navigator.serviceWorker.controller, data);
       }),
     };
   }
 });
+export const controllerchange = new Common.Streams.SourceNode(controllerchangeSource);
