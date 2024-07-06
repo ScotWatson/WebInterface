@@ -57,7 +57,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         }
       }
       const responseOkHandler = (data) => {
-        console.log("responseOk", data);
         const functions = this.#callIds.get(data.callId);
         if (functions !== undefined) {
           functions.resolve(data.value);
@@ -65,7 +64,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         }
       }
       const responseErrorHandler = (data) => {
-        console.log("responseError", data);
         const functions = this.#callIds.get(data.callId);
         if (functions !== undefined) {
           functions.reject(data.reason);
@@ -111,7 +109,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       verb,
       handlerFunc,
     }) {
-      console.log("register", verb);
       this.#verbFunctions.set(verb, handlerFunc);
     }
     unregister({
@@ -124,7 +121,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
       verb,
       args,
     }) {
-      console.log("call", verb);
       if (!verb) {
         throw "Invalid Verb";
       }
