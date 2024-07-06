@@ -15,13 +15,19 @@ export default class RPCNode {
     this.#callIds = new Map();
     this.#verbFunctions = new Map();
     let nonCallResolve;
-    this.nonCall = new Streams.SourceNode((resolve, reject) => {
-      nonCallResolve = resolve;
-    });
-    this.output = new Streams.SourceNode((resolve, reject) => {
-      this.#outputResolve = resolve;
-      this.#outputReject = reject;
-    });
+    const nonCallSource = async (output) => {
+      await new Promise((resolve, reject) => {
+        nonCallResolve = output.put;
+      });
+    };
+    this.nonCall = new Streams.SourceNode(nonCallSource);
+    const outputSource = async (output) => {
+      await new Promise((resolve, reject) => {
+        this.#outputResolve = output.put;
+        this.#outputReject = reject;
+      };
+    };
+    this.output = new Streams.SourceNode(outputSource);
     const requestHandler = async (data) => {
       const thisFunction = this.#verbFunctions.get(data.verb);
       if (typeof thisFunction !== "function") {
