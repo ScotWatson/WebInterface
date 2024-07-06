@@ -532,7 +532,7 @@ export function transformSource(source, transform) {
     let outputResolve;
     let outputReject;
     const sourceOutput = {
-      put: (value) => {
+      put: async (value) => {
         const nextCycle = new Promise((resolve, reject) => {
           cycleResolve = resolve;
           cycleReject = reject;
@@ -542,7 +542,7 @@ export function transformSource(source, transform) {
       },
     };
     const input = {
-      get: () => {
+      get: async () => {
         const nextOutput = new Promise((resolve, reject) => {
           outputResolve = resolve;
           outputReject = reject;
