@@ -108,7 +108,7 @@ export function MessageNodeforWindowOrigin({
     }
   };
   return {
-    output: new Common.Streams.SourceNode(),
+    output: new Common.Streams.SourceNode(outputSource),
     input: new Common.Streams.SinkNode((data) => {
       postMessage(window, origin, data);
     }),
