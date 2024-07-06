@@ -185,8 +185,12 @@ class ServiceWorker {
 }
 
 export function createControllerSource(controllerQueue) {
-  return new Streams.SourceNode((resolve, reject) => {
-    controllerQueue.addEventListener("message", (evt) => { resolve(evt.data); });
+  return new Streams.SourceNode(async (output) => {
+    await new Promise((resolve, reject) => {
+      controllerQueue.addEventListener("message", (evt) => {
+        resolve(evt.data);
+      });
+    });
   });
 }
 export const controllerSink = new Streams.SinkNode((data) => {
