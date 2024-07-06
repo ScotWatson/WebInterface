@@ -33,6 +33,10 @@ export class Signal {
   #outputReject;
   #nextOutput;
   constructor(args) {
+    this.#nextOutput = new Promise((resolve, reject) => {
+      this.#outputResolve = resolve;
+      this.#outputReject = reject;
+    });
     const source = (() => {
       if (isNamedArguments(args)) {
         if (!(source in args)) {
