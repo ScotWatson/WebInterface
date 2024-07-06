@@ -6,10 +6,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 import * as Streams from "https://scotwatson.github.io/WebInterface/streams.mjs";
 
 export function forMessagePort(messagePort) {
+  const outputSource = async (output) => {
+    messagePort.addEventListener("message", (evt) => {
+      output.put(evt.data);
+    });
+  };
   return {
-    output: new Streams.SourceNode((resolve, reject) => {
-      messagePort.addEventListener("message", (evt) => resolve(evt.data) );
-    }),
+    output: new Streams.SourceNode(outputSource),
     input: new Streams.SinkNode((data) => {
       postMessage(messagePort, data);
     }),
