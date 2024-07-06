@@ -148,7 +148,7 @@ const controllerSource = async (output) => {
       reject(evt);
     });
   });
-});
+};
 export const controllerSourceNode = new Common.Streams.SourceNode(controllerSource);
 
 const controllerchangeSource = async (output) => {
