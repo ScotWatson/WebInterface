@@ -33,10 +33,6 @@ export class Signal {
   #outputReject;
   #nextOutput;
   constructor(args) {
-    this.#nextOutput = new Promise((resolve, reject) => {
-      this.#outputResolve = resolve;
-      this.#outputReject = reject;
-    });
     const source = (() => {
       if (isNamedArguments(args)) {
         if (!(source in args)) {
@@ -49,6 +45,10 @@ export class Signal {
         throw "Invalid args";
       }
     })();
+    this.#nextOutput = new Promise((resolve, reject) => {
+      this.#outputResolve = resolve;
+      this.#outputReject = reject;
+    });
     const output = {
       trigger: () => {
         const thisResolve = this.#outputResolve;
@@ -175,10 +175,6 @@ export class SourceNode {
   #nextOutput;
   #processing;
   constructor(args) {
-    this.#nextOutput = new Promise((resolve, reject) => {
-      this.#outputResolve = resolve;
-      this.#outputReject = reject;
-    });
     const source = (() => {
       if (isNamedArguments(args)) {
         if (!(source in args)) {
@@ -191,8 +187,12 @@ export class SourceNode {
         throw "Invalid args";
       }
     })();
+    this.#nextOutput = new Promise((resolve, reject) => {
+      this.#outputResolve = resolve;
+      this.#outputReject = reject;
+    });
     const output = {
-      put(val) {
+      put: (val) => {
         const thisResolve = this.#outputResolve;
         this.#nextOutput = new Promise((resolve, reject) => {
           this.#outputResolve = resolve;
