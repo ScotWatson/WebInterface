@@ -53,7 +53,7 @@ self.currentScript.exports = (function () {
     }) {
       const outputSource = async (output) => {
         await new Promise((resolve, reject) => {
-          thisClient = registeredClients.get(client.id);
+          let thisClient = registeredClients.get(client.id);
           if (!thisClient) {
             thisClient = {
               sources: new Set(),
