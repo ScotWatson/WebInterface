@@ -3,6 +3,8 @@
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+import * as Errors from "https://scotwatson.github.io/WebInterface/errors.mjs";
+
 // A source is an iterable, an iterator, or a function; it takes no parameters and returns the next value.
 // A sink is a function; it takes one parameter and returns undefined.
 // Use ActiveSource when the values are arriving via callback (e.g. event listeners)
@@ -36,22 +38,20 @@ export class Signal {
     const source = (() => {
       if (isNamedArguments(args)) {
         if (!(source in args)) {
-          throw Error("source is a required argument.", {
-            cause: {
-              functionName: "Signal.constructor",
-              args,
-            },
+          throw Errors.createError({
+            message: "source is a required argument.",
+            functionName: "Signal.constructor",
+            inputArgs: args,
           });
         }
         return args.source;
       } else if (typeof args === "function") {
         return args;
       } else {
-        throw Error("Invalid Args", {
-          cause: {
-            functionName: "Signal.constructor",
-            args,
-          },
+        throw Errors.createError({
+          message: "Invalid args",
+          functionName: "Signal.constructor",
+          inputArgs: args,
         });
       }
     })();
@@ -127,10 +127,18 @@ export class Wire {
       if (isNamedArguments(args)) {
         // args is a named arguments object
         if (!("signal" in args)) {
-          throw Error("signal is a required parameter.");
+          throw Errors.createError({
+            message: "source is a required argument.",
+            functionName: "Wire.constructor",
+            inputArgs: args,
+          });
         }
         if (!("func" in args)) {
-          throw Error("func is a required parameter.");
+          throw Errors.createError({
+            message: "func is a required argument.",
+            functionName: "Wire.constructor",
+            inputArgs: args,
+          });
         }
         return {
           signal: args.signal,
@@ -138,7 +146,11 @@ export class Wire {
         };
       } else {
         if (arg2 === "undefined") {
-          throw Error("func is a required parameter.");
+          throw Errors.createError({
+            message: "func is a required argument.",
+            functionName: "Wire.constructor",
+            inputArgs: args,
+          });
         }
         return {
           signal: args,
@@ -147,13 +159,25 @@ export class Wire {
       }
     })();
     if (typeof signal !== "object") {
-      throw Error("signal must be an object.");
+      throw Errors.createError({
+        message: "signal must be an object.",
+        functionName: "Wire.constructor",
+        inputArgs: args,
+      });
     }
     if (Symbol.asyncIterator in signal) {
-      throw Error("signal must be an async iterable.");
+      throw Errors.createError({
+        message: "signal must be an async iterable.",
+        functionName: "Wire.constructor",
+        inputArgs: args,
+      });
     }
     if (typeof func !== "function") {
-      throw Error("func must be an object.");
+      throw Errors.createError({
+        message: "func must be an object.",
+        functionName: "Wire.constructor",
+        inputArgs: args,
+      });
     }
     const connection = signal[Symbol.asyncIterator]();
     const process = (async () => {
@@ -188,13 +212,21 @@ export class SourceNode {
     const source = (() => {
       if (isNamedArguments(args)) {
         if (!(source in args)) {
-          throw "source is a required argument.";
+          throw Errors.createError({
+            message: "source is a required argument.",
+            functionName: "SourceNode.constructor",
+            inputArgs: args,
+          });
         }
         return args.source;
       } else if (typeof args == "function") {
         return args;
       } else {
-        throw "Invalid args";
+        throw Errors.createError({
+          message: "Invalid args",
+          functionName: "SourceNode.constructor",
+          inputArgs: args,
+        });
       }
     })();
     this.#nextOutput = new Promise((resolve, reject) => {
@@ -252,7 +284,11 @@ export class FunctionSourceNode extends SourceNode {
   #cycleReject;
   constructor(args) {
     if (typeof args !== "function") {
-      throw Error("func must be a function.");
+      throw Errors.createError({
+        message: "func must be a function.",
+        functionName: "FunctionSourceNode.constructor",
+        inputArgs: args,
+      });
     }
     const sourceFunc = args;
     super(async (output) => {
@@ -288,7 +324,11 @@ export class IteratorSourceNode extends SourceNode {
   #cycleReject;
   constructor(args) {
     if (typeof args.next !== "function") {
-      throw Error("args must be an iterator.");
+      throw Errors.createError({
+        message: "args must be an iterator.",
+        functionName: "IteratorSourceNode.constructor",
+        inputArgs: args,
+      });
     }
     const sourceIter = args;
     super(async (output) => {
@@ -332,25 +372,45 @@ export class SinkNode {
       } else if (isNamedArguments(args)) {
         // args is a named arguments object
         if (!(sink in args)) {
-          throw Error("sink is a required argument.");
+          throw Errors.createError({
+            message: "sink is a required argument.",
+            functionName: "SinkNode.constructor",
+            inputArgs: args,
+          });
         }
         if (typeof args.sink !== "function") {
-          throw Error("sink is not a valid sink.");
+          throw Errors.createError({
+            message: "sink is not a valid sink.",
+            functionName: "SinkNode.constructor",
+            inputArgs: args,
+          });
         }
         return args.sink;
       } else {
-        throw Error("Invalid Args");
+        throw Errors.createError({
+          message: "Invalid Args",
+          functionName: "SinkNode.constructor",
+          inputArgs: args,
+        });
       }
     })();
     Object.defineProperty(this, "callback", {
       get() {
         if (this.locked) {
-          throw "sink is locked";
+          throw Errors.createError({
+            message: "sink is locked",
+            functionName: "SinkNode.constructor",
+            inputArgs: args,
+          });
         }
         const thisCallback = (obj) => {
           // Check to ensure the callback has not been invalidated
           if (thisCallback !== this.#validCallback) {
-            throw "Attempt to send data to invalidated callback.";
+            throw Errors.createError({
+              message: "Attempt to send data to invalidated callback.",
+              functionName: "SinkNode.constructor",
+              inputArgs: args,
+            });
           }
           // The return value from the internal callback is ignored.
           if (obj === undefined) {
@@ -382,10 +442,18 @@ export class Pipe {
       if (isNamedArguments(args)) {
         // args is a named arguments object
         if (!("source" in args)) {
-          throw Error("source is a required parameter.");
+          throw Errors.createError({
+            message: "source is a required parameter.",
+            functionName: "Pipe.constructor",
+            inputArgs: args,
+          });
         }
         if (!("sink" in args)) {
-          throw Error("sink is a required parameter.");
+          throw Errors.createError({
+            message: "sink is a required parameter.",
+            functionName: "Pipe.constructor",
+            inputArgs: args,
+          });
         }
         return {
           source: args.source,
@@ -394,7 +462,11 @@ export class Pipe {
         };
       } else {
         if (arg2 === "undefined") {
-          throw Error("sink is a required parameter.");
+          throw Errors.createError({
+            message: "sink is a required parameter.",
+            functionName: "Pipe.constructor",
+            inputArgs: args,
+          });
         }
         return {
           source: args,
@@ -404,17 +476,32 @@ export class Pipe {
       }
     })();
     if (typeof source !== "object") {
-      throw Error("source must be an object.");
+      throw Errors.createError({
+        message: "source must be an object.",
+        functionName: "Pipe.constructor",
+        inputArgs: args,
+      });
     }
     if (!(Symbol.asyncIterator in source)) {
-      throw Error("source must be an async iterable.");
+      throw Errors.createError({
+        message: "source must be an async iterable.",
+        functionName: "Pipe.constructor",
+        inputArgs: args,
+      });
     }
     if (typeof sink !== "object") {
-      throw Error("sink must be an object.");
+      throw Errors.createError({
+        message: "sink must be an object.",
+        functionName: "Pipe.constructor",
+        inputArgs: args,
+      });
     }
     if (!("callback" in sink)) {
-      console.error(sink);
-      throw Error("sink must provide a callback.");
+      throw Errors.createError({
+        message: "sink must provide a callback.",
+        functionName: "Pipe.constructor",
+        inputArgs: args,
+      });
     }
     const connection = source[Symbol.asyncIterator]({
       noCopy,
@@ -434,8 +521,11 @@ export class Pipe {
     }
     const sendData = sink.callback;
     if (typeof sendData !== "function") {
-      console.error(sendData);
-      throw "sink.callback must be invocable.";
+      throw Errors.createError({
+        message: "sink.callback must be invocable.",
+        functionName: "Pipe.constructor",
+        inputArgs: args,
+      });
     }
     const process = (async () => {
       let data;
@@ -457,7 +547,11 @@ export class Pipe {
 
 export function combineTransforms(transforms) {
   if (!(Symbol.iterator in transforms)) {
-    throw Error("transforms must be iterable");
+    throw Errors.createError({
+      message: "transforms must be iterable",
+      functionName: "combineTransforms",
+      inputArgs: transforms,
+    });
   }
   let ret = identityTransform;
   for (const transform of transforms) {
@@ -497,7 +591,11 @@ export class TransformNode {
   #cycleReject;
   constructor(args) {
     if (!isNamedArguments(args)) {
-      throw Error("Invalid arguments");
+      throw Errors.createError({
+        message: "Invalid arguments",
+        functionName: "TransformNode.constructor",
+        inputArgs: transforms,
+      });
     }
     const buffer = [];
     const transform = (() => {
@@ -505,7 +603,11 @@ export class TransformNode {
         return identityTransform;
       } else {
         if (typeof args.transform !== "function") {
-          throw Error("transform must be a valid transform.");
+          throw Errors.createError({
+            message: "transform must be a valid transform.",
+            functionName: "TransformNode.constructor",
+            inputArgs: transforms,
+          });
         }
         return args.transform;
       }
@@ -542,10 +644,18 @@ export class TransformNode {
 // synchronously evaluates a transform, taking values from a source and sending the output to a sink
 export function transformSource(source, transform) {
   if (typeof source !== "function") {
-    throw Error("source must be a function.");
+    throw Errors.createError({
+      message: "source must be a function.",
+      functionName: "transformSource",
+      inputArgs: transforms,
+    });
   }
   if (typeof transform !== "function") {
-    throw Error("transform must be a function.");
+    throw Errors.createError({
+      message: "transform must be a function.",
+      functionName: "transformSource",
+      inputArgs: transforms,
+    });
   }
   return async (output) => {
     let cycleResolve;
@@ -579,13 +689,25 @@ export function transformSource(source, transform) {
 // synchronously evaluates a transform, taking values from a source and sending the output to a sink
 export function syncEvaluate(source, transform, sink) {
   if (typeof source !== "function") {
-    throw Error("source must be a function.");
+    throw Errors.createError({
+      message: "source must be a function.",
+      functionName: "syncEvaluate",
+      inputArgs: transforms,
+    });
   }
   if (typeof transform !== "function") {
-    throw Error("transform must be a function.");
+    throw Errors.createError({
+      message: "transform must be a function.",
+      functionName: "syncEvaluate",
+      inputArgs: transforms,
+    });
   }
   if (typeof sink !== "function") {
-    throw Error("sink must be a function.");
+    throw Errors.createError({
+      message: "sink must be a function.",
+      functionName: "syncEvaluate",
+      inputArgs: transforms,
+    });
   }
   const input = {
     get: () => {
