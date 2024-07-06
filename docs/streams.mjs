@@ -79,7 +79,7 @@ export class Signal {
 };
 
 // A signal that can be externally triggered
-class ManualSignal extends Signal {
+export class ManualSignal extends Signal {
   #cycleResolve;
   #cycleReject;
   constructor() {
@@ -107,7 +107,7 @@ class ManualSignal extends Signal {
   }
 }
 
-class Wire {
+export class Wire {
   constructor(args, arg2) {
     const { signal, func } = (() => {
       if (isNamedArguments(args)) {
@@ -226,7 +226,7 @@ export class SourceNode {
   }
 };
 
-class FunctionSourceNode extends SourceNode {
+export class FunctionSourceNode extends SourceNode {
   #cycleResolve;
   #cycleReject;
   constructor(args) {
@@ -262,7 +262,7 @@ class FunctionSourceNode extends SourceNode {
   }
 }
 
-class IteratorSourceNode extends SourceNode {
+export class IteratorSourceNode extends SourceNode {
   #cycleResolve;
   #cycleReject;
   constructor(args) {
@@ -432,7 +432,7 @@ export class Pipe {
   }
 }
 
-function combineTransforms(transforms) {
+export function combineTransforms(transforms) {
   if (!(Symbol.iterator in transforms)) {
     throw Error("transforms must be iterable");
   }
@@ -461,9 +461,9 @@ function combineTransforms(transforms) {
       await Promise.all([ transform1(input, output1).then(() => { cycleResolve(undefined); }), transform2(input2, output) ]);
     };
   }
-}
+};
 
-const identityTransform = async (input, output) => {
+export const identityTransform = async (input, output) => {
   while (true) {
     await output.put(await input.get());
   }
@@ -577,7 +577,7 @@ export function syncEvaluate(source, transform, sink) {
   transform(input, output);
 }
 
-class BinaryTransform {
+export class BinaryTransform {
   constructor() {
     this.trigger = () => {
       
@@ -585,7 +585,7 @@ class BinaryTransform {
   }
 }
 
-class BinarySplitter {
+export class BinarySplitter {
   #buffer;
   #head;
   constructor(maxByteLength) {
@@ -611,7 +611,7 @@ class BinarySplitter {
   }
 }
 
-class BinaryBuffer {
+export class BinaryBuffer {
   #buffer;
   #head;
   #tail;
