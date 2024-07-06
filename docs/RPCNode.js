@@ -17,20 +17,20 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     }) {
       this.#callIds = new Map();
       this.#verbFunctions = new Map();
-    let nonCallResolve;
-    const nonCallSource = async (output) => {
-      await new Promise((resolve, reject) => {
-        nonCallResolve = output.put;
-      });
-    };
-    this.nonCall = new Streams.SourceNode(nonCallSource);
-    const outputSource = async (output) => {
-      await new Promise((resolve, reject) => {
-        this.#outputResolve = output.put;
-        this.#outputReject = reject;
+      let nonCallResolve;
+      const nonCallSource = async (output) => {
+        await new Promise((resolve, reject) => {
+          nonCallResolve = output.put;
+        });
       };
-    };
-    this.output = new Streams.SourceNode(outputSource);
+      this.nonCall = new Streams.SourceNode(nonCallSource);
+      const outputSource = async (output) => {
+        await new Promise((resolve, reject) => {
+          this.#outputResolve = output.put;
+          this.#outputReject = reject;
+        };
+      };
+      this.output = new Streams.SourceNode(outputSource);
       const requestHandler = async (data) => {
         const thisFunction = this.#verbFunctions.get(data.verb);
         if (typeof thisFunction !== "function") {
