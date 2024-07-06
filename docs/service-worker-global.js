@@ -42,7 +42,9 @@ self.currentScript.exports = (function () {
   exports.enqueueMessage = enqueueMessage;
   self.addEventListener("messageerror", console.error);
   const newClientMessageSource = async (output) => {
-    unregisteredClientHandler = output.put;
+    await new Promise((resolve, reject) => {
+      unregisteredClientHandler = output.put;
+    });
   };
   exports.newClientMessage = new Common.Streams.SourceNode(newClientMessageSource);
   function ClientNode({
