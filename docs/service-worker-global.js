@@ -47,26 +47,28 @@ self.currentScript.exports = (function () {
     });
   };
   exports.newClientMessage = new Common.Streams.SourceNode(newClientMessageSource);
-  function ClientNode({
-    client,
-  }) {
-    const outputSource = async (output) => {
-      thisClient = registeredClients.get(client.id);
-      if (!thisClient) {
-        thisClient = {
-          sources: new Set(),
-        };
-        registeredClients.set(client.id, thisClient);
-      }
-      thisClient.sources.add(resolve);
-    };
-    return {
-      output: new Common.Streams.SourceNode(outputSource),
-      input: new Common.Streams.SinkNode((data) => {
+  class ClientNode {
+    constructor({
+      client,
+    }) {
+      const outputSource = async (output) => {
+        await new Promise((resolve, reject) => {
+          thisClient = registeredClients.get(client.id);
+          if (!thisClient) {
+            thisClient = {
+              sources: new Set(),
+            };
+            registeredClients.set(client.id, thisClient);
+          }
+          thisClient.sources.add(output.put);
+        });
+      };
+      this.output: new Common.Streams.SourceNode(outputSource);
+      this.input: new Common.Streams.SinkNode((data) => {
         Common.MessageNode.postMessage(client, data);
-      }),
-    };
-  };
+      });
+    }
+  }
   exports.ClientNode = ClientNode;
   return exports;
 })();
