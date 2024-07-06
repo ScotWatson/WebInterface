@@ -54,6 +54,7 @@ export default class RPCNode {
       }
     }
     const responseOkHandler = (data) => {
+      console.log("responseOk", data);
       const functions = this.#callIds.get(data.callId);
       if (functions !== undefined) {
         functions.resolve(data.value);
@@ -61,6 +62,7 @@ export default class RPCNode {
       }
     }
     const responseErrorHandler = (data) => {
+      console.log("responseError", data);
       const functions = this.#callIds.get(data.callId);
       if (functions !== undefined) {
         functions.reject(data.reason);
@@ -106,6 +108,7 @@ export default class RPCNode {
     verb,
     handlerFunc,
   }) {
+    console.log("register", verb);
     this.#verbFunctions.set(verb, handlerFunc);
   }
   unregister({
@@ -118,6 +121,7 @@ export default class RPCNode {
     verb,
     args,
   }) {
+    console.log("call", verb);
     if (!verb) {
       throw "Invalid Verb";
     }
