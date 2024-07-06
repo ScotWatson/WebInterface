@@ -9,10 +9,22 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   const exports = {};
   const Streams = self.importScript("https://scotwatson.github.io/WebInterface/streams.js");
   exports.forMessagePort = function forMessagePort(messagePort) {
+    const outputSource = async (output) => {
+      await new Promise((resolve, reject) => {
+        messagePort.addEventListener("message", (evt) => {
+          if (evt.data === undefined) {
+            resolve();
+          } else {
+            output.put(evt.data);
+          }
+        });
+        messagePort.addEventListener("messageerror", (evt) => {
+          reject(evt);
+        });
+      });
+    };
     return {
-      output: new Streams.SourceNode((resolve, reject) => {
-        messagePort.addEventListener("message", (evt) => resolve(evt.data) );
-      }),
+      output: new Streams.SourceNode(outputSource),
       input: new Streams.SinkNode((data) => {
         postMessage(messagePort, data);
       }),
