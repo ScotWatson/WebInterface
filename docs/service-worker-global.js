@@ -63,8 +63,8 @@ self.currentScript.exports = (function () {
           thisClient.sources.add(output.put);
         });
       };
-      this.output: new Common.Streams.SourceNode(outputSource);
-      this.input: new Common.Streams.SinkNode((data) => {
+      this.output = new Common.Streams.SourceNode(outputSource);
+      this.input = new Common.Streams.SinkNode((data) => {
         Common.MessageNode.postMessage(client, data);
       });
     }
