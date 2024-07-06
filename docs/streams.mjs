@@ -458,14 +458,14 @@ export function combineTransforms(transforms) {
     return async (input, output) => {
       let cycleResolve;
       const output1 = {
-        async put(val) {
+        put: async (val) => {
           if (val !== undefined) {
             cycleResolve(val);
           }
         },
       };
       const input2 = {
-        async get() {
+        get: async () => {
           return await new Promise((resolve, _) => {
             cycleResolve = resolve;
           });
@@ -501,7 +501,7 @@ export class TransformNode {
       }
     })();
     const input = {
-      async get() {
+      get: async () => {
         do {
           await new Promise((resolve, reject) => {
             this.#cycleResolve = resolve;
