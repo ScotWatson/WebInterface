@@ -7,8 +7,17 @@ import * as Streams from "https://scotwatson.github.io/WebInterface/streams.mjs"
 
 export function forMessagePort(messagePort) {
   const outputSource = async (output) => {
-    messagePort.addEventListener("message", (evt) => {
-      output.put(evt.data);
+    await new Promise((resolve, reject) => {
+      messagePort.addEventListener("message", (evt) => {
+        if (evt.data === undefined) {
+          resolve();
+        } else {
+          output.put(evt.data);
+        }
+      });
+      messagePort.addEventListener("messageerror", (evt) => {
+        reject(evt);
+      });
     });
   };
   return {
