@@ -490,7 +490,7 @@ export class TransformNode {
       }
     })();
     const input = {
-      async get() => {
+      async get() {
         do {
           await new Promise((resolve, reject) => {
             this.#cycleResolve = resolve;
