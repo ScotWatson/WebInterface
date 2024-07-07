@@ -5,19 +5,23 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 import * as Errors from "https://scotwatson.github.io/WebInterface/errors.mjs";
 
-// Any async iterable is a source node
-// A SourceNode is constructed from an underlying source, which is an async function.
-// The underlying source is invoked with a single parameter:
+// Any async iterable is a source node.
+// Any function is a sink node.
+// A SourceNode is a source node. It is constructed from an underlying source, which is an invocation of an async function.
+// The underlying source is created by invoking the async function with a single parameter:
 //   output: an object with the following properties:
 //     put: a function that is to be invoked with a single parameter
-//       Sends the parameter
-// A TransformNode is constructed from an underlying transform, which is an async function.
-// The underlying transform is invoked with a two parameter:
+//       Sends the parameter, resolves when next output is requested
+// A TransformNode is a source node. It has an "input" property that is a sink node. It is constructed from an underlying transform, which is an invocation of an async function.
+// The underlying transform is created by invoking the async function with two parameters:
 //   input: an object with the following properties:
 //     get: a function that is to be invoked with no parameters
-//       
-
-// A Pipe requires 
+//       Returns the next input, resolves when the next input is available
+//   output: an object with the following properties:
+//     put: a function that is to be invoked with a single parameter
+//       Sends the parameter, resolves when next output is requested
+// A SinkNode is constructed from a function. It is used to ensure the function only has at most one source.
+// A Pipe requires a source node and a sink node.
 
 function conformsToIteratorInterface(obj) {
   return (typeof obj === "object" && obj !== null && typeof obj.next === "function");
@@ -35,9 +39,7 @@ function isNamedArguments(obj) {
 // Takes an async function to provide the signal. An output object is provided. The output object has a trigger function.
 // No abort functions are provided (return, throw), as it is impossible to stop the underlying signal
 export class Signal {
-  // Accepts an asynchronous function "source":
-  //   Accepts one argument object "output":
-  //     put: a function that takes one argument "value"
+  // Accepts an asynchronous function "source".
   // Each time output.put is called, every iterator instance resolves with (a structured clone of) the value passed (therefore, the value must be clonable).
   // Errors thrown from source results in rejection of SourceNode[Symbol.asyncIterator](options).next
   #outputResolve;
@@ -208,9 +210,7 @@ export class Wire {
 // Conforms to the async iterable protocol, therefore it is an active source
 // No abort functions (return, throw) provided, as it is not possible to stop the underlying source
 export class SourceNode {
-  // Accepts an asynchronous function "source":
-  //   Accepts one argument object "output":
-  //     put: a function that takes one argument "value"
+  // Accepts an asynchronous function "source".
   // Each time output.put is called, every iterator instance resolves with (a structured clone of) the value passed (therefore, the value must be clonable).
   // Errors thrown from source results in rejection of SourceNode[Symbol.asyncIterator](options).next
   #outputResolve;
