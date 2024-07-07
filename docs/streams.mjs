@@ -5,10 +5,19 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 import * as Errors from "https://scotwatson.github.io/WebInterface/errors.mjs";
 
-// A source is an iterable, an iterator, or a function; it takes no parameters and returns the next value.
-// A sink is a function; it takes one parameter and returns undefined.
-// Use ActiveSource when the values are arriving via callback (e.g. event listeners)
-// Use SourceNode when the source is a function.
+// Any async iterable is a source node
+// A SourceNode is constructed from an underlying source, which is an async function.
+// The underlying source is invoked with a single parameter:
+//   output: an object with the following properties:
+//     put: a function that is to be invoked with a single parameter
+//       Sends the parameter
+// A TransformNode is constructed from an underlying transform, which is an async function.
+// The underlying transform is invoked with a two parameter:
+//   input: an object with the following properties:
+//     get: a function that is to be invoked with no parameters
+//       
+
+// A Pipe requires 
 
 function conformsToIteratorInterface(obj) {
   return (typeof obj === "object" && obj !== null && typeof obj.next === "function");
@@ -259,7 +268,7 @@ export class SourceNode {
           value = await this.#nextOutput;
         }
       }
-      return;
+      return value;
     }
     const process = (async () => {
       try {
@@ -270,9 +279,9 @@ export class SourceNode {
         throw e;
       }
     })();
-    process.then(() => {
+    process.then((value) => {
       this.#processing = false;
-      this.#outputResolve();
+      this.#outputResolve(value);
     });
     this.then = process.then.bind(process);
     this.catch = process.catch.bind(process);
@@ -489,16 +498,9 @@ export class Pipe {
         inputArgs: args,
       });
     }
-    if (typeof sink !== "object") {
+    if (typeof sink !== "function") {
       throw Errors.createError({
         message: "sink must be an object.",
-        functionName: "Pipe.constructor",
-        inputArgs: args,
-      });
-    }
-    if (!("callback" in sink)) {
-      throw Errors.createError({
-        message: "sink must provide a callback.",
         functionName: "Pipe.constructor",
         inputArgs: args,
       });
@@ -506,35 +508,14 @@ export class Pipe {
     const connection = source[Symbol.asyncIterator]({
       noCopy,
     });
-    function fetchData() {
-      return connection.next().then(({ value, done }) => {
-        if (!!done) {
-          return value;
-        } else {
-          if (value === undefined) {
-            return null;
-          } else {
-            return value;
-          }
-        }
-      });
-    }
-    const sendData = sink.callback;
-    if (typeof sendData !== "function") {
-      throw Errors.createError({
-        message: "sink.callback must be invocable.",
-        functionName: "Pipe.constructor",
-        inputArgs: args,
-      });
-    }
     const process = (async () => {
       let data;
-      do {
-        data = await fetchData();
-        if (data !== null) {
-          sendData(data);
-        }
-      } while (data !== undefined);
+      let result = await connection.next();
+      while (!result.done) {
+        sink(result.value);
+        result = await connection.next();
+      };
+      return result.value;
     })();
     // These two functions make the pipe act as a promise
     this.then = process.then.bind(process);
