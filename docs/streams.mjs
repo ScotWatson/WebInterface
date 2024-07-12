@@ -742,8 +742,8 @@ export class BinaryBuffer {
   #head;
   #tail;
   #reserve;
-  constructor() {
-    this.#buffer = new ArrayBuffer(1);
+  constructor(bufferSize) {
+    this.#buffer = new ArrayBuffer(bufferSize);
     this.#head = 0;
     this.#tail = 0;
     this.#reserve = 0;
@@ -751,6 +751,7 @@ export class BinaryBuffer {
       this.#head += this.#reserve;
       this.#reserve = byteLength;
       if (this.#head + byteLength > this.#buffer.byteLength) {
+        // Enlarge buffer
         let newLength = this.#buffer.byteLength * 2;
         while (this.#head + byteLength > newLength) {
           newLength *= 2;
@@ -758,6 +759,7 @@ export class BinaryBuffer {
         const oldBuffer = this.#buffer;
         this.#buffer = new ArrayBuffer(newLength);
         (new Uint8Array(this.#buffer)).set(new Uint8Array(oldBuffer));
+        // Send signal to indicate buffer was enlarged
       }
       return new Uint8Array(this.#head, byteLength);
     };
