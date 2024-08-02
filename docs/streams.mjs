@@ -35,176 +35,56 @@ function isNamedArguments(obj) {
   return (typeof obj === "object" && obj !== null && obj.constructor.name === "Object");
 }
 
-// Conforms to the async iterable protocol
-// Takes an async function to provide the signal. An output object is provided. The output object has a trigger function.
-// No abort functions are provided (return, throw), as it is impossible to stop the underlying signal
 export class Signal {
-  // Accepts an asynchronous function "source".
-  // Each time output.put is called, every iterator instance resolves with (a structured clone of) the value passed (therefore, the value must be clonable).
-  // Errors thrown from source results in rejection of SourceNode[Symbol.asyncIterator](options).next
-  #outputResolve;
-  #outputReject;
-  #nextOutput;
-  constructor(args) {
-    const source = (() => {
-      if (isNamedArguments(args)) {
-        if (!(source in args)) {
-          throw Errors.createError({
-            message: "source is a required argument.",
-            functionName: "Signal.constructor",
-            inputArgs: args,
-          });
-        }
-        return args.source;
-      } else if (typeof args === "function") {
-        return args;
-      } else {
-        throw Errors.createError({
-          message: "Invalid args",
-          functionName: "Signal.constructor",
-          inputArgs: args,
-        });
-      }
-    })();
-    this.#nextOutput = new Promise((resolve, reject) => {
-      this.#outputResolve = resolve;
-      this.#outputReject = reject;
+  #promise;
+  #resolve;
+  constructor(init) {
+    this.#promise = new Promise((resolve, _) => {
+      this.#resolve = resolve;
     });
-    const output = {
-      trigger: () => {
-        const thisResolve = this.#outputResolve;
-        this.#nextOutput = new Promise((resolve, reject) => {
-          this.#outputResolve = resolve;
-          this.#outputReject = reject;
-        });
-        thisResolve();
-      },
-    };
-    this[Symbol.asyncIterator] = async function*(options) {
-      if (!options) {
-        options = {};
-      }
-      await this.#nextOutput;
-      while (true) {
-        yield;
-        await this.#nextOutput;
-      }
-    };
-    const process = (async () => {
-      try {
-        await source(output);
-      } catch (e) {
-        this.#outputReject(e);
-        throw e;
-      }
-    })();
-    this.then = process.then.bind(process);
-    this.catch = process.catch.bind(process);
+    const resolve = () => {
+      this.#resolve();
+      this.#promise = new Promise((resolve, _) => {
+        this.#resolve = resolve;
+      });
+    }
+    init(resolve);
+  }
+  then(onFulfilled, onRejected) {
+    return this.#promise.then(onFulfilled, onRejected);
   }
 };
 
-// A signal that can be externally triggered
-export class ManualSignal extends Signal {
-  #cycleResolve;
-  #cycleReject;
-  constructor() {
-    let processing = true;
-    super(async (output) => {
-      while (processing) {
-        await (new Promise((resolve, reject) => {
-          this.#cycleResolve = resolve;
-          this.#cycleReject = reject;
-        })).then(() => {
-          output.trigger();
-        });
-      }
-    });
-    this.trigger = () => {
-      this.#cycleResolve();
-    }
-    this.return = () => {
-      processing = false;
-      this.#cycleResolve();
-    }
-    this.throw = () => {
-      this.#cycleReject();
-    }
-  }
+function abortablePromise() {
+  let abortResolve;
+  let abortReject;
+  const promise = new Promise((resolve, reject) => {
+    abortResolve = resolve;
+    abortReject = reject;
+  });
+  promise.return = abortResolve;
+  promise.throw = abortReject;
+  return cancel;
 }
 
-export class Wire {
-  constructor(args, arg2) {
-    const { signal, func } = (() => {
-      if (isNamedArguments(args)) {
-        // args is a named arguments object
-        if (!("signal" in args)) {
-          throw Errors.createError({
-            message: "source is a required argument.",
-            functionName: "Wire.constructor",
-            inputArgs: args,
-          });
-        }
-        if (!("func" in args)) {
-          throw Errors.createError({
-            message: "func is a required argument.",
-            functionName: "Wire.constructor",
-            inputArgs: args,
-          });
-        }
-        return {
-          signal: args.signal,
-          func: args.func,
-        };
-      } else {
-        if (arg2 === "undefined") {
-          throw Errors.createError({
-            message: "func is a required argument.",
-            functionName: "Wire.constructor",
-            inputArgs: args,
-          });
-        }
-        return {
-          signal: args,
-          func: arg2,
-        };
-      }
-    })();
-    if (typeof signal !== "object") {
-      throw Errors.createError({
-        message: "signal must be an object.",
-        functionName: "Wire.constructor",
-        inputArgs: args,
-      });
+function wireSignal(signal, func) {
+  const abort = abortablePromise();
+  const ret = (async () => {
+    let value = await Promise.race([ signal, abort ]);
+    while (value === undefined) {
+      func();
+      value = await Promise.race([ signal, abort ]);
     }
-    if (Symbol.asyncIterator in signal) {
-      throw Errors.createError({
-        message: "signal must be an async iterable.",
-        functionName: "Wire.constructor",
-        inputArgs: args,
-      });
+    return value;
+  })();
+  // Do not pass undefined; it will not abort
+  ret.return = (value) => {
+    if (value !== undefined) {
+      cancel.return(value);
     }
-    if (typeof func !== "function") {
-      throw Errors.createError({
-        message: "func must be an object.",
-        functionName: "Wire.constructor",
-        inputArgs: args,
-      });
-    }
-    const connection = signal[Symbol.asyncIterator]();
-    const process = (async () => {
-      let data;
-      do {
-        result = await connection.next();
-        func();
-      } while (!result.done);
-    })();
-    // These two functions make the pipe act as a promise
-    this.then = process.then.bind(process);
-    this.catch = process.catch.bind(process);
-    // These two functions make the promise abortable
-    this.return = connection.return.bind(connection);
-    this.throw = connection.throw.bind(connection);
-  }
+  };
+  ret.throw = cancel.throw;
+  return ret;
 }
 
 // Conforms to the async iterable protocol, therefore it is an active source
