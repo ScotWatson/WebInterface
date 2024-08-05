@@ -38,17 +38,27 @@ function isNamedArguments(obj) {
 export class Signal {
   #promise;
   #resolve;
+  #reject;
   constructor(init) {
-    this.#promise = new Promise((resolve, _) => {
+    this.#promise = new Promise((resolve, reject) => {
       this.#resolve = resolve;
+      this.#reject = reject;
     });
-    const resolve = () => {
-      this.#resolve();
-      this.#promise = new Promise((resolve, _) => {
+    const resolve = (value) => {
+      this.#resolve(value);
+      this.#promise = new Promise((resolve, reject) => {
         this.#resolve = resolve;
+        this.#reject = reject;
       });
-    }
-    init(resolve);
+    };
+    const reject = (reason) => {
+      this.#reject(reason);
+      this.#promise = new Promise((resolve, reject) => {
+        this.#resolve = resolve;
+        this.#reject = reject;
+      });
+    };
+    init(resolve, reject);
   }
   then(onFulfilled, onRejected) {
     return this.#promise.then(onFulfilled, onRejected);
@@ -87,6 +97,18 @@ function wireSignal(signal, func) {
   return ret;
 }
 
+export function task(func) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      try {
+        resolve(func());
+      } catch (e) {
+        reject(e);
+      }
+    }, 0);
+  });
+}
+
 // Conforms to the async iterable protocol, therefore it is an active source
 // No abort functions (return, throw) provided, as it is not possible to stop the underlying source
 export class SourceNode {
@@ -118,34 +140,31 @@ export class SourceNode {
         });
       }
     })();
-    this.#nextOutput = new Promise((resolve, reject) => {
-      this.#outputResolve = resolve;
-      this.#outputReject = reject;
+    let nextOutputResolve;
+    let nextOutputReject;
+    const nextOutput = new Signal((resolve, reject) => {
+      nextOutputResolve = resolve;
+      nextOutputReject = reject;
     });
     const output = {
       put: (val) => {
-        const thisResolve = this.#outputResolve;
-        this.#nextOutput = new Promise((resolve, reject) => {
-          this.#outputResolve = resolve;
-          this.#outputReject = reject;
-        });
-        thisResolve(val);
+        nextOutputResolve(val);
       },
     };
     this[Symbol.asyncIterator] = async function*(options) {
       if (!options) {
         options = {};
       }
-      let value = await this.#nextOutput;
+      let value = await nextOutput;
       if (!options.noCopy) {
         while (this.#processing) {
           yield self.structuredClone(value);
-          value = await this.#nextOutput;
+          value = await nextOutput;
         }
       } else {
         while (this.#processing) {
           yield value;
-          value = await this.#nextOutput;
+          value = await nextOutput;
         }
       }
       return value;
@@ -155,13 +174,13 @@ export class SourceNode {
         this.#processing = true;
         return await source(output);
       } catch (e) {
-        this.#outputReject(e);
+        nextOutputReject(e);
         throw e;
       }
     })();
     process.then((value) => {
       this.#processing = false;
-      this.#outputResolve(value);
+      nextOutputResolve(value);
     });
     this.then = process.then.bind(process);
     this.catch = process.catch.bind(process);
@@ -473,27 +492,35 @@ export class TransformNode {
         return args.transform;
       }
     })();
+    const nextInput = new Signal((resolve, reject) => {
+      this.input = new SinkNode((obj) => {
+        buffer.push(obj);
+        resolve();
+      });
+    };
+    const nextCycle = new Signal((resolve, reject) => {
+      // This function must be called repeatedly to drive the transform
+      // Each call requests one output to be generated
+      this.cycle = resolve;
+      this.throw = reject;
+    });
     const input = {
       get: async () => {
-        do {
-          await new Promise((resolve, reject) => {
-            this.#cycleResolve = resolve;
-            this.#cycleReject = reject;
-          });
-        } while (buffer.length === 0);
+        if (buffer.length === 0) {
+          await nextInput;
+        }
         return buffer.shift();
       },
     };
-    // This function must be called repeatedly to drive the transform
-    this.cycle = () => {
-      this.#cycleResolve();
-    }
-    // (obj !== undefined) && (obj !== null) guaranteed
-    this.input = new SinkNode((obj) => { buffer.push(obj); });
-    this.output = new SourceNode(async (output) => { return await transform(input, output); });
-    this.throw = () => {
-      this.#cycleReject();
-    };
+    this.output = new SourceNode(async (output) => {
+      const thisOutput = {
+        put: async (val) => {
+          output(val);
+          await nextCycle;
+        },
+      };
+      return await transform(input, thisOutput);
+    });
     Object.defineProperty(this, "used", {
       get() {
         return buffer.length;
@@ -584,7 +611,17 @@ export function syncEvaluate(source, transform, sink) {
 }
 
 export class BinaryTransform {
-  constructor() {
+  constructor(inputBuffer, outputBuffer) {
+    const input = {
+      get: (numBytes) => {
+        return inputBuffer.dequeue(numBytes);
+      },
+    };
+    const output = {
+      getBuffer: (numBytes) => {
+        return outputBuffer.enqueue(numBytes);
+      },
+    };
     this.trigger = () => {
       
     };
@@ -622,11 +659,15 @@ export class BinaryBuffer {
   #head;
   #tail;
   #reserve;
-  constructor(bufferSize) {
-    this.#buffer = new ArrayBuffer(bufferSize);
+  constructor(initBufferSize) {
+    this.#buffer = new ArrayBuffer(initBufferSize);
     this.#head = 0;
     this.#tail = 0;
     this.#reserve = 0;
+    let bufferSizeChange;
+    this.bufferSizeChanged = new Signal((resolve) => {
+      bufferSizeChange = resolve;
+    });
     this.enqueue = (byteLength) => {
       this.#head += this.#reserve;
       this.#reserve = byteLength;
@@ -640,6 +681,7 @@ export class BinaryBuffer {
         this.#buffer = new ArrayBuffer(newLength);
         (new Uint8Array(this.#buffer)).set(new Uint8Array(oldBuffer));
         // Send signal to indicate buffer was enlarged
+        bufferSizeChange();
       }
       return new Uint8Array(this.#head, byteLength);
     };
@@ -647,17 +689,12 @@ export class BinaryBuffer {
       if (this.#tail + byteLength > this.#head) {
         throw Error("Insufficient buffer");
       }
-      if (2 * this.#tail > this.#buffer.byteLength) {
-        const newLength = 2 * (this.#buffer.byteLength - this.#tail);
-        const oldBuffer = this.#buffer;
-        this.#buffer = new ArrayBuffer(newLength);
-        (new Uint8Array(this.#buffer)).set(new Uint8Array(oldBuffer, this.#tail));
-        this.#head -= this.#tail;
-        this.#tail = 0;
-      }
       const start = this.#tail;
       this.#tail += byteLength;
-      return new Uint8Array(start, byteLength);
+      return this.#buffer.slice(start, byteLength);
     };
+  }
+  get bufferSize() {
+    return this.#buffer.byteLength;
   }
 }
