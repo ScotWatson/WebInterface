@@ -11,13 +11,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 window.document.currentScript.exports = (function () {
   const exports = {};
 
-  // Create MessageQueue for self to capture messages until ready
-  function createQueues(MessageQueue) {
-    exports.windowMessages = exports.windowMessages || new MessageQueue(self);
-    exports.controllerMessages = exports.controllerMessages || new MessageQueue(self.navigator.serviceWorker);
-    self.navigator.serviceWorker.startMessages();
-  }
-  exports.createQueues = createQueues;
+  // Message Queue for messages sent to the window
+  exports.windowMessages = new MessageQueue(self);
+
+  // Message Queue for messages from controller service worker
+  exports.controllerMessages = new MessageQueue(self.navigator.serviceWorker);
 
   // Resolves once the DOM is fully parsed and all scripts have finish execution
   exports.contentLoaded = new Promise(function (resolve, reject) {
@@ -41,17 +39,25 @@ window.document.currentScript.exports = (function () {
       resolve(evt);
     });
   });
+
   // Resolves once the page is under the control of a ServiceWorker
-  exports.controller = new Promise(function (resolve, reject) {
+  exports.controller = async function *() {
     if (self.navigator.serviceWorker.controller !== null) {
-      resolve();
-      return;
+      yield;
     }
-    self.navigator.serviceWorker.addEventListener("controllerchange", function (evt) {
-      resolve();
-      return;
+    let nextController;
+    self.navigator.serviceWorker.addEventListener("controllerchange", (evt) => {
+      nextController();
     });
-  });
+    while (true) {
+      await new Promise((resolve, _) => {
+        nextController = resolve;
+      });
+      yield;
+    }
+  }
+  exports.controller.first = exports.controller.next();
+
   // Obtain initialization info
   exports.selfUrl = new URL(self.location);
   
