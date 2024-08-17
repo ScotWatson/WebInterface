@@ -87,6 +87,29 @@ export async function getActive(scope) {
   }
 }
 
+// Async function: Returns Service Worker (use only if not obtainable via "installNew")
+export async function getNewest(scope) {
+  const registration = await self.navigator.serviceWorker.getRegistration(scope);
+  if (registration && registration.installing) {
+    return new ServiceWorker({
+      serviceWorker: registration.installing,
+      scope,
+    });
+  if (registration && registration.waiting) {
+    return new ServiceWorker({
+      serviceWorker: registration.waiting,
+      scope,
+    });
+  if (registration && registration.active) {
+    return new ServiceWorker({
+      serviceWorker: registration.active,
+      scope,
+    });
+  } else {
+    return null;
+  }
+}
+
 // Async function: Returns undefined
 export async function unregister(scope) {
   const registration = await self.navigator.serviceWorker.getRegistration(scope);
