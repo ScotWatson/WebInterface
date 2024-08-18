@@ -40,24 +40,6 @@ window.document.currentScript.exports = (function () {
     });
   });
 
-  // Resolves once the page is under the control of a ServiceWorker
-  exports.controller = async function *() {
-    if (self.navigator.serviceWorker.controller !== null) {
-      yield;
-    }
-    let nextController;
-    self.navigator.serviceWorker.addEventListener("controllerchange", (evt) => {
-      nextController();
-    });
-    while (true) {
-      await new Promise((resolve, _) => {
-        nextController = resolve;
-      });
-      yield;
-    }
-  }
-  exports.controller.first = exports.controller.next();
-
   // Obtain initialization info
   exports.selfUrl = new URL(self.location);
   
