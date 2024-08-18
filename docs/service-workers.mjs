@@ -138,9 +138,9 @@ class ServiceWorker {
     serviceWorker,
     scope,
   }) {
-    this.input = new Streams.SinkNode((data) => {
+    this.input = (data) => {
       MessageNode.postMessage(serviceWorker, data);
-    });
+    };
     this.installed = new Promise((resolve, reject) => {
       function watchForInstalled() {
         if (serviceWorker.state === "installed") {
@@ -207,17 +207,47 @@ class ServiceWorker {
   }
 }
 
-export function createControllerSource(controllerQueue) {
-  return new Streams.SourceNode(async (output) => {
-    await new Promise((resolve, reject) => {
-      controllerQueue.addEventListener("message", (evt) => {
-        console.log("controller message", evt.data);
-        output.put(evt.data);
-      });
-    });
-  });
-}
-export const controllerSink = new Streams.SinkNode((data) => {
-  console.log("controllerSink", data);
+export const controllerInput = (data) => {
   MessageNode.postMessage(self.navigator.serviceWorker.controller, data);
-});
+};
+
+// Resolves when under the control of a ServiceWorker
+export const controller = async function *() {
+  if (self.navigator.serviceWorker.controller !== null) {
+    yield;
+  }
+  let nextController;
+  self.navigator.serviceWorker.addEventListener("controllerchange", (evt) => {
+    nextController();
+  });
+  while (true) {
+    await new Promise((resolve, _) => {
+      nextController = resolve;
+    });
+    yield;
+  }
+}
+controller.first = controller.next();
+
+export async function attemptController() {
+  const newestWorker = ServiceWorkers.getNewest();
+  let newestWorkerInstalled = false;
+  newestWorker.installed.then(() => {
+    newestWorkerInstalled = true;
+  });
+  // Once a service worker has started activating, it cannot fail.
+  // Send "claimClients" command to make the active worker the controller.
+  // This overrides the default Ctrl-R behavior.
+  newestWorker.activating.then(() => {
+    newestWorker.input("claimClients");
+  });
+  return await Promise.race([
+    controller.next().then(() => {
+      // controller installed
+    }), newestWorker.redundant.then(() => {
+      if (!newestWorkerInstalled) {
+        throw Error("Failed to install controller.");
+      }
+    })
+  ]);
+}
